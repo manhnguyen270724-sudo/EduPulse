@@ -122,14 +122,14 @@ const forApproval = asyncHandler(async(req,res)=>{
 
     const adminID = req.params.adminID
 
-    if(!adminID){
-        throw new ApiError(400, "not authorized")
+    if(!adminID || String(req.Admin._id) !== String(adminID)){
+        throw new ApiError(403, "Không có quyền quản trị viên")
     }
 
     const loggedAdmin = await admin.findById(adminID)
 
     if(!loggedAdmin){
-        throw new ApiError(400, "admin not found")
+        throw new ApiError(403, "admin not found")
     }
 
 
@@ -157,14 +157,14 @@ const approveStudent = asyncHandler(async(req,res)=>{
 
     const adminID = req.params.adminID
 
-    if(!adminID){
-        throw new ApiError(400, "not authorized")
+    if(!adminID || String(req.Admin._id) !== String(adminID)){
+        throw new ApiError(403, "Không có quyền quản trị viên")
     }
 
     const loggedAdmin = await admin.findById(adminID)
 
     if(!loggedAdmin){
-        throw new ApiError(400, "admin not found")
+        throw new ApiError(403, "admin not found")
     }
 
 

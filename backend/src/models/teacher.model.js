@@ -59,7 +59,28 @@ const teacherSchema = new mongoose.Schema({
 
     Teacherdetails:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Teacherdocs"
+        ref:"teacherdocs"
+    },
+
+    Avatar:{
+        type:String,
+        default:""
+    },
+
+    // === HỒ SƠ CÔNG KHAI GIẢNG VIÊN ===
+    bio: {
+        type: String,
+        default: ''
+    },
+
+    certificates: {
+        type: [mongoose.Schema.Types.Mixed],
+        default: []
+    },
+
+    slug: {
+        type: String,
+        default: ''
     },
 
     Balance: {

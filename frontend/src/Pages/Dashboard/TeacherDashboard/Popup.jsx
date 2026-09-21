@@ -1,248 +1,37 @@
-// import React, { useState } from 'react'
-// import { useParams } from 'react-router-dom';
-
-// function Popup({onClose, subject}) {
-//   const [desc, setDesc] = useState('');
-//   const { ID } = useParams();
-//   const dateGap = 3;
-
-//   const [day, setDay] = useState({
-//       "sun": false,
-//       "mon": false,
-//       "tue": false,
-//       "wed": false,
-//       "thu": false,
-//       "fri": false,
-//       "sat": false,
-//   });
-
-//   const [dayValue, setDayValue] = useState({
-//       "sun": "",
-//       "mon": "",
-//       "tue": "",
-//       "wed": "",
-//       "thu": "",
-//       "fri": "",
-//       "sat": "",
-//   });
-
-//   const dayIndex = {
-//       "sun": 0,
-//       "mon": 1,
-//       "tue": 2,
-//       "wed": 3,
-//       "thu": 4,
-//       "fri": 5,
-//       "sat": 6,
-//   };
-
-//   const handleCheckboxChange = (dayName) => {
-//     setDay(prevDay => ({ ...prevDay, [dayName]: !prevDay[dayName] }));
-//   };
-
-//   const addCourse = async()=>{
-//     const selectedDays = Object.keys(day)
-//         .filter(d => day[d])
-//         .map(d => ({
-//             "Day": dayIndex[d],
-//             "Start Time": dayValue[d] ? dayValue[d] * 60 : null,
-//             "End Time": dayValue[d] ? (parseInt(dayValue[d], 10) + dateGap) * 60 : null,
-//           }));
-
-//     const hasMissingTime = selectedDays.some(d => d["Start Time"] === null);
-
-//     if (hasMissingTime) {
-//       alert("Please fill in the time for all selected days.");
-//       return;
-//     }
-
-//     ///////////////////////
-//     if(desc == ''){
-//       alert('Fill The Description');
-//     }else{
-//       onClose();
-
-//       const data = {
-//         coursename: subject.toLowerCase(),
-//         description: desc,
-//         time: selectedDays,
-//       }
-
-//       //call api 
-
-//       const response = await fetch(`/api/course/${subject}/create/${ID}`, {
-//         method: 'POST',
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(data),
-//       });
-
-//       const responesData = await response.json();
-
-//       console.log(responesData);
-//       alert(responesData.message);
-
-//     }
-//   }
-
-//   return (
-//     <div className='fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center'>
-//         <div className='bg-[#008280] w-[30rem] h-fit py-4 mt-1 rounded-md'>
-//           <div className=' absolute w-9 h-9 bg-white rounded-xl cursor-pointer flex items-center justify-center m-2' onClick={onClose}>✖️</div>
-//           <div className=' text-center my-10 text-white text-3xl font-semibold'>
-//             <p>{subject}</p>
-//           </div>
-//           <div className='m-5 flex flex-col gap-4 text-white text-xl'>
-//             <div>
-//               <label htmlFor="">Coursename : </label>
-//               <input 
-//                 type="text" 
-//                 className="bg-[#32B0AE] p-2 rounded-md w-52 border-0 outline-0"
-//                 value={subject}
-//                 readOnly
-//               />
-//             </div>
-            
-//             <label>Timing : </label>
-//             {Object.keys(day).map((d) => (
-//                 <div key={d} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px"}}>
-//                     <input type="checkbox" checked={day[d]} onChange={() => handleCheckboxChange(d)} />
-//                     <label>{d.charAt(0).toUpperCase() + d.slice(1)}</label>
-//                     <input className='w-[7rem] rounded-sm text-black placeholder:text-gray pl-2' type="time" rounded-sme="text" placeholder='Start Time' value={dayValue[d]} onChange={(e) => setDayValue({ ...dayValue, [d]: e.target.value })} />
-//                     <input className='w-[7rem] rounded-sm text-black placeholder:text-gray pl-2' type="time"  placeholder="End Time" value={(parseInt(dayValue[d], 10) + dateGap)} />
-//                 </div>
-//             ))}
-
-//             <div>
-//               <label htmlFor="">Description : </label>
-//               <input type="text"
-//               value={desc}
-//               onChange={(e) => setDesc(e.target.value)}
-//               className="bg-[#32B0AE] p-2 rounded-md w-52 ml-3 border-0 outline-0" 
-//               />
-//             </div>
-//           </div>
-
-//           <div className='flex items-center justify-center mt-7'>
-//             <span onClick={addCourse} className='bg-[#335699] text-white px-10 py-3 rounded-md text-xl cursor-pointer'>
-//               Create Course
-//             </span>
-//           </div>
-//         </div>
-//     </div>
-//   )
-// }
-
-// export default Popup
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
+import './Popup.css';
 
-function Popup({ onClose, subject }) {
+function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
   const [desc, setDesc] = useState('');
+  const [outcomes, setOutcomes] = useState(['']);
+  const [prerequisites, setPrerequisites] = useState('');
+  const [maxStudents, setMaxStudents] = useState(20);
+  const [startDate, setStartDate] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('');
+
   const { ID } = useParams();
-  const dateGap = 3; // 3 hours
+  const dateGap = 3; // 3 giờ
 
   const [day, setDay] = useState({
-    sun: false,
-    mon: false,
-    tue: false,
-    wed: false,
-    thu: false,
-    fri: false,
-    sat: false,
+    sun: false, mon: false, tue: false,
+    wed: false, thu: false, fri: false, sat: false,
   });
-
   const [dayValue, setDayValue] = useState({
-    sun: '',
-    mon: '',
-    tue: '',
-    wed: '',
-    thu: '',
-    fri: '',
-    sat: '',
+    sun: '', mon: '', tue: '',
+    wed: '', thu: '', fri: '', sat: '',
   });
 
   const dayIndex = {
-    sun: 0,
-    mon: 1,
-    tue: 2,
-    wed: 3,
-    thu: 4,
-    fri: 5,
-    sat: 6,
+    sun: 0, mon: 1, tue: 2,
+    wed: 3, thu: 4, fri: 5, sat: 6,
   };
 
-  const handleCheckboxChange = (dayName) => {
-    setDay((prevDay) => ({ ...prevDay, [dayName]: !prevDay[dayName] }));
-  };
-
-  const addCourse = async () => {
-    const selectedDays = Object.keys(day)
-      .filter((d) => day[d])
-      .map((d) => ({
-        day: dayIndex[d],
-        starttime: dayValue[d] ? convertTimeToMinutes(dayValue[d]) : null,
-        endtime: dayValue[d] ? convertTimeToMinutes(dayValue[d]) + dateGap * 60 : null,
-      }));
-
-    const hasMissingTime = selectedDays.some((d) => d.starttime === null);
-
-    if (hasMissingTime) {
-      alert('Please fill in the time for all selected days.');
-      return;
-    }
-
-    const invalidTimeRange = selectedDays.some((d) => {
-      const startTime = d.starttime;
-      const endTime = d.endtime;
-      if (startTime >= endTime) {
-        alert('Start time must be earlier than end time.');
-        return true;
-      }
-      if ((endTime - startTime) > 3 * 60) {
-        alert('End time should not be more than 3 hours after start time.');
-        return true;
-      }
-      return false;
-    });
-
-    if (invalidTimeRange) {
-      return;
-    }
-
-    if (desc === '') {
-      alert('Fill the description.');
-      return;
-    }
-
-    if(selectedDays.length === 0){
-      alert('pls! select any day and time.');
-      return;
-    }
-
-    onClose();
-
-    const data = {
-      coursename: subject.toLowerCase(),
-      description: desc,
-      schedule: selectedDays,
-    };
-
-    console.log(data);
-
-    // Call API
-    const response = await fetch(`/api/course/${subject}/create/${ID}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    const responseData = await response.json();
-    console.log(responseData);
-    alert(responseData.message);
+  const dayLabelsVI = {
+    sun: 'Chủ Nhật', mon: 'Thứ Hai', tue: 'Thứ Ba',
+    wed: 'Thứ Tư', thu: 'Thứ Năm', fri: 'Thứ Sáu', sat: 'Thứ Bảy',
   };
 
   const convertTimeToMinutes = (time) => {
@@ -256,83 +45,245 @@ function Popup({ onClose, subject }) {
     return `${hours}:${mins}`;
   };
 
+  const handleCheckboxChange = (dayName) => {
+    setDay(prev => ({ ...prev, [dayName]: !prev[dayName] }));
+  };
+
+  const addOutcome = () => setOutcomes(prev => [...prev, '']);
+  const removeOutcome = (i) => setOutcomes(prev => prev.filter((_, idx) => idx !== i));
+  const updateOutcome = (i, val) => setOutcomes(prev => prev.map((o, idx) => idx === i ? val : o));
+
+  const addCourse = async () => {
+    const selectedDays = Object.keys(day)
+      .filter(d => day[d])
+      .map(d => ({
+        day: dayIndex[d],
+        starttime: dayValue[d] ? convertTimeToMinutes(dayValue[d]) : null,
+        endtime: dayValue[d] ? convertTimeToMinutes(dayValue[d]) + dateGap * 60 : null,
+      }));
+
+    // Validations
+    if (selectedDays.length === 0) {
+      setStatusMsg('Vui lòng chọn ít nhất một ngày học và giờ học.');
+      return;
+    }
+    if (selectedDays.some(d => d.starttime === null)) {
+      setStatusMsg('Vui lòng điền giờ bắt đầu cho tất cả các ngày đã chọn.');
+      return;
+    }
+    if (!desc.trim()) {
+      setStatusMsg('Vui lòng nhập mô tả khóa học.');
+      return;
+    }
+
+    setSubmitting(true);
+    setStatusMsg('');
+
+    const data = {
+      coursename: subject.toLowerCase(),
+      description: desc.trim(),
+      schedule: selectedDays,
+      // Các field mới
+      educationLevel: educationLevel || 'university',
+      grade: grade || '',
+      subject: subject,
+      fees: 0,
+      maxStudents: parseInt(maxStudents, 10),
+      startDate: startDate || null,
+      outcomes: outcomes.filter(o => o.trim()),
+      prerequisites: prerequisites.trim(),
+    };
+
+    try {
+      const response = await fetch(`/api/course/${subject}/create/${ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const responseData = await response.json();
+
+      if (response.ok) {
+        setStatusMsg('✅ Tạo khóa học thành công! Đang chờ Admin phê duyệt.');
+        setTimeout(() => onClose(), 2000);
+      } else {
+        setStatusMsg(`❌ Lỗi: ${responseData.message || 'Tạo khóa học thất bại.'}`);
+      }
+    } catch (err) {
+      setStatusMsg('❌ Lỗi kết nối. Vui lòng thử lại.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center'>
-      <div className='bg-[#008280] w-[30rem] h-fit py-4 mt-1 rounded-md'>
-        <div
-          className='absolute w-9 h-9 bg-white rounded-xl cursor-pointer flex items-center justify-center m-2'
-          onClick={onClose}
-        >
-          ✖️
-        </div>
-        <div className='text-center my-10 text-white text-3xl font-semibold'>
-          <p>{subject}</p>
-        </div>
-        <div className='m-5 flex flex-col gap-4 text-white text-xl'>
+    <div className="popup-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="popup-modal">
+        {/* Header */}
+        <div className="popup-header">
           <div>
-            <label htmlFor=''>Coursename: </label>
-            <input
-              type='text'
-              className='bg-[#32B0AE] p-2 rounded-md w-52 border-0 outline-0'
-              value={subject}
-              readOnly
+            <h2 className="popup-title">Tạo Khóa Học Mới</h2>
+            <p className="popup-subtitle">
+              {subjectLabel || subject}
+              {grade && <span className="popup-grade-tag"> · Lớp {grade}</span>}
+            </p>
+          </div>
+          <button className="popup-close-btn" onClick={onClose} type="button">
+            <FaTimes />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="popup-body">
+          {/* Mô tả */}
+          <div className="popup-field">
+            <label className="edu-label">Mô tả khóa học <span className="popup-required">*</span></label>
+            <textarea
+              className="edu-input popup-textarea"
+              placeholder="Mô tả nội dung, phương pháp giảng dạy và điểm đặc biệt của khóa học..."
+              value={desc}
+              onChange={e => setDesc(e.target.value)}
+              rows={4}
             />
           </div>
 
-          <label>Timing: </label>
-          {Object.keys(day).map((d) => (
-            <div
-              key={d}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-              }}
-            >
+          {/* 2-column row */}
+          <div className="popup-row-2">
+            <div className="popup-field">
+              <label className="edu-label">Số học viên tối đa</label>
               <input
-                type='checkbox'
-                checked={day[d]}
-                onChange={() => handleCheckboxChange(d)}
-              />
-              <label>{d.charAt(0).toUpperCase() + d.slice(1)}</label>
-              <input
-                className='w-[7rem] rounded-sm text-black placeholder:text-gray pl-2'
-                type='time'
-                placeholder='Start Time'
-                value={dayValue[d]}
-                onChange={(e) =>
-                  setDayValue({ ...dayValue, [d]: e.target.value })
-                }
-              />
-              <input
-                className='w-[7rem] rounded-sm text-black placeholder:text-gray pl-2'
-                type='time'
-                readOnly
-                placeholder='End Time'
-                value={dayValue[d] ? convertMinutesToTime(convertTimeToMinutes(dayValue[d]) + dateGap * 60) : ''}
+                type="number"
+                className="edu-input"
+                value={maxStudents}
+                onChange={e => setMaxStudents(e.target.value)}
+                min={1}
+                max={50}
               />
             </div>
-          ))}
+            <div className="popup-field">
+              <label className="edu-label">Ngày khai giảng</label>
+              <input
+                type="date"
+                className="edu-input"
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+              />
+            </div>
+          </div>
 
-          <div>
-            <label htmlFor=''>Description: </label>
+          {/* Điều kiện đầu vào */}
+          <div className="popup-field">
+            <label className="edu-label">Điều kiện & Đối tượng đầu vào</label>
             <input
-              type='text'
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              className='bg-[#32B0AE] p-2 rounded-md w-52 ml-3 border-0 outline-0'
+              type="text"
+              className="edu-input"
+              placeholder="vd: Học sinh lớp 10 trở lên, đã học đại số cơ bản..."
+              value={prerequisites}
+              onChange={e => setPrerequisites(e.target.value)}
             />
+          </div>
+
+          {/* Mục tiêu đầu ra */}
+          <div className="popup-field">
+            <label className="edu-label">Mục tiêu đầu ra</label>
+            {outcomes.map((outcome, i) => (
+              <div key={i} className="popup-outcome-row">
+                <input
+                  type="text"
+                  className="edu-input"
+                  placeholder={`Mục tiêu ${i + 1}...`}
+                  value={outcome}
+                  onChange={e => updateOutcome(i, e.target.value)}
+                />
+                {outcomes.length > 1 && (
+                  <button
+                    type="button"
+                    className="popup-remove-btn"
+                    onClick={() => removeOutcome(i)}
+                  >
+                    <FaTrash />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="popup-add-outcome-btn"
+              onClick={addOutcome}
+            >
+              <FaPlus /> Thêm mục tiêu
+            </button>
+          </div>
+
+          {/* Lịch học */}
+          <div className="popup-field">
+            <label className="edu-label">Lịch học hàng tuần <span className="popup-required">*</span></label>
+            <p className="popup-field-note">Chọn ngày và giờ bắt đầu. Thời lượng mỗi buổi mặc định 3 tiếng.</p>
+            <div className="popup-schedule-grid">
+              {Object.keys(day).map(d => (
+                <div key={d} className={`popup-day-row ${day[d] ? 'popup-day-row--active' : ''}`}>
+                  <label className="popup-day-check">
+                    <input
+                      type="checkbox"
+                      checked={day[d]}
+                      onChange={() => handleCheckboxChange(d)}
+                      className="popup-checkbox"
+                    />
+                    <span className="popup-day-name">{dayLabelsVI[d]}</span>
+                  </label>
+                  {day[d] && (
+                    <div className="popup-time-row">
+                      <div className="popup-time-col">
+                        <span className="popup-time-label">Bắt đầu</span>
+                        <input
+                          type="time"
+                          className="edu-input popup-time-input"
+                          value={dayValue[d]}
+                          onChange={e => setDayValue({ ...dayValue, [d]: e.target.value })}
+                        />
+                      </div>
+                      <span className="popup-time-sep">→</span>
+                      <div className="popup-time-col">
+                        <span className="popup-time-label">Kết thúc</span>
+                        <input
+                          type="time"
+                          className="edu-input popup-time-input"
+                          readOnly
+                          value={dayValue[d] ? convertMinutesToTime(convertTimeToMinutes(dayValue[d]) + dateGap * 60) : ''}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className='flex items-center justify-center mt-7'>
-          <span
-            onClick={addCourse}
-            className='bg-[#335699] text-white px-10 py-3 rounded-md text-xl cursor-pointer'
-          >
-            Create Course
-          </span>
+        {/* Footer */}
+        <div className="popup-footer">
+          {statusMsg && (
+            <div className={`popup-status-msg ${statusMsg.startsWith('✅') ? 'popup-status--success' : 'popup-status--error'}`}>
+              {statusMsg}
+            </div>
+          )}
+          <div className="popup-actions">
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={addCourse}
+              disabled={submitting}
+            >
+              {submitting ? 'Đang tạo...' : 'Tạo Khóa Học'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -340,4 +291,3 @@ function Popup({ onClose, subject }) {
 }
 
 export default Popup;
-

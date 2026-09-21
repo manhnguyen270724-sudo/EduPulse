@@ -1,104 +1,157 @@
 import React, { useEffect, useState } from 'react';
-import Camera from '../Images/Camera.png';
-import Clock from '../Images/Clock.png';
-import AddClass from './AddClass';
 import { NavLink, useParams } from 'react-router-dom';
+import { FaCalendarAlt, FaVideo, FaClock, FaPlus, FaExternalLinkAlt } from 'react-icons/fa';
+import AddClass from './AddClass';
+import { getCourseSubjectLabel } from '../../../data/subjectTaxonomy';
+import './TeacherClasses.css';
 
 function TeacherClasses() {
-    const [showPopup, setShowPopup] = useState(false);
-    const { ID } = useParams();
-    const [data, setData] = useState([]);
-    const [error, setError] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const { ID } = useParams();
+  const [data, setData] = useState([]);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        const getData = async () => {
-            try {
-                const response = await fetch(`/api/course/classes/teacher/${ID}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const response = await fetch(`/api/course/classes/teacher/${ID}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
 
-                const user = await response.json();
-                setData(user.data.classes[0]?.liveClasses || []);
-                console.log(user.data);
+        const user = await response.json();
+        setData(user.data?.classes?.[0]?.liveClasses || []);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+    if (ID) getData();
+  }, [showPopup, ID]);
 
-            } catch (error) {
-                setError(error.message);
-            }
-        };
-        getData();
+  const upcomingClasses = data.filter(clas => {
+    if (!clas.date) return false;
+    const classDate = new Date(clas.date.slice(0, 10));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const oneWeekFromNow = new Date(today);
+    oneWeekFromNow.setDate(today.getDate() + 14);
+    return classDate >= today && classDate <= oneWeekFromNow;
+  });
 
-    }, [showPopup, ID]);
+  const nextClass = data.length > 0 ? data[0] : null;
 
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
-
-    return (
-        <div className='ml-60 mt-20 text-white flex justify-between mr-80'>
-            <h1 className='absolute bottom-72 left-60 text-[#1671D8] text-2xl mt-4 mb-4 font-semibold'>Weekly Schedule</h1>
-
-            <div className='h-[17rem] w-[30rem] overflow-auto '>
-            {data.filter(clas => {
-            const classDate = new Date(clas.date.slice(0, 10));
-            const today = new Date();
-            const oneWeekFromNow = new Date();
-            oneWeekFromNow.setDate(today.getDate() + 7);
-
-            return classDate >= today && classDate <= oneWeekFromNow;
-            }).map(clas => (
-                <div key={clas.timing} className='flex items-center mb-5'>
-                    <img src="https://www.pngall.com/wp-content/uploads/5/Profile-Male-PNG.png" alt="profile_img" width={30} />
-                    <div className='ml-5 mr-10 font-bold'>
-                        <p className=' text-lg'>
-                            {clas.coursename}
-                            <span className='text-black text-sm ml-3'>
-                                {clas.date.slice(0, 10)}  {Math.floor(clas.timing / 60)}:{clas.timing % 60 === 0 ? "00" : clas.timing % 60}
-                            </span>
-                        </p>
-                        <span className='text-blue-500 text-sm ml-3'>{clas.title.slice(0, 35)} ...</span>
-                    </div>
-                    <p className='text-sm bg-[#4E84C1] p-2 rounded-lg'>{clas.status}</p>
-                </div>
-            ))}
-
-            </div>
-
-            {data.length > 0 && (
-                <NavLink to={data[0]?.link} target='_blank'>
-                    <div className='bg-white p-5 h-52 cursor-pointer rounded-lg text-black'>
-                        <div className='flex gap-3 items-center mb-5 mt-2'>
-                            <img src={Clock} alt="clock" width={50} />
-                            <span className='text-[#4E84C1] text-2xl font-semibold'>{typeof data[0]?.date === 'string' ? data[0]?.date.slice(0,10) : ''}</span> 
-                            <span className='text-[#018280] text-2xl ml-2'>
-                                {typeof data[0]?.timing === 'number' ? `${Math.floor(data[0]?.timing / 60)}:${data[0]?.timing % 60 === 0 ?"00":data[0]?.timing % 60}` :''}
-                            </span>
-                        </div>
-                        <div className='flex gap-12 items-center'>
-                            <div className='ml-3'>
-                                <p>Your next Class</p>
-                                <p className='text-[#018280] text-3xl font-semibold'>{data[0]?.coursename.toUpperCase()}</p>
-                                <p className=' text-light-blue-700'>{data[0]?.title.slice(0, 25)} ...</p>
-                            </div>
-                            <img src={Camera} alt="Camera" width={70} />
-                        </div>
-                    </div>
-                </NavLink>
-            )}
-
-            <div onClick={() => setShowPopup(true)} className='absolute right-10 bg-blue-900 p-2 rounded-sm cursor-pointer'>
-                + ADD CLASS
-            </div>
-            {showPopup && (
-                <AddClass onClose={() => setShowPopup(false)} />
-            )}
+  return (
+    <div className="tclass-wrapper">
+      <div className="tclass-topbar">
+        <div>
+          <h1 className="tclass-title">Lịch Dạy Trực Tuyến</h1>
+          <p className="tclass-subtitle">Quản lý các phòng học Google Meet và lịch giảng dạy trong 14 ngày tới</p>
         </div>
-    );
+        <button className="tclass-btn-add" onClick={() => setShowPopup(true)}>
+          <FaPlus />
+          <span>Tạo Buổi Học Mới</span>
+        </button>
+      </div>
+
+      <div className="tclass-grid">
+        {/* Schedule List */}
+        <div className="tclass-card">
+          <div className="tclass-card-title">
+            <FaCalendarAlt className="text-sky-500" />
+            <span>Lịch Học Sắp Tới</span>
+          </div>
+
+          {upcomingClasses.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+              Chưa có buổi học trực tuyến nào trong 14 ngày tới.
+            </div>
+          ) : (
+            <div className="tclass-list">
+              {upcomingClasses.map((clas, idx) => (
+                <div key={idx} className="tclass-item">
+                  <div className="tclass-item-info">
+                    <div className="tclass-item-subject">
+                      <span>{getCourseSubjectLabel(clas.coursename)}</span>
+                    </div>
+                    <div className="tclass-item-title">{clas.title}</div>
+                    <div className="tclass-item-time">
+                      <FaClock />
+                      <span>
+                        {clas.date ? clas.date.slice(0, 10) : ''} | {Math.floor(clas.timing / 60)}:
+                        {clas.timing % 60 === 0 ? "00" : clas.timing % 60}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                    <span className="tclass-status-badge">{clas.status || 'Sắp diễn ra'}</span>
+                    {clas.link && (
+                      <a
+                        href={clas.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-sky-500 hover:underline flex items-center gap-1 font-medium"
+                      >
+                        <span>Vào lớp</span>
+                        <FaExternalLinkAlt size={10} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Next Class Highlight */}
+        {nextClass ? (
+          <a
+            href={nextClass.link || '#'}
+            target="_blank"
+            rel="noreferrer"
+            className="tclass-next-card"
+          >
+            <div className="tclass-next-header">
+              <span className="tclass-next-tag">Buổi học kế tiếp</span>
+              <FaVideo size={22} />
+            </div>
+
+            <div className="tclass-next-body">
+              <h2 className="tclass-next-name">{getCourseSubjectLabel(nextClass.coursename)}</h2>
+              <p className="tclass-next-desc">{nextClass.title}</p>
+            </div>
+
+            <div className="tclass-next-footer">
+              <div className="flex items-center gap-2">
+                <FaClock />
+                <span>
+                  {typeof nextClass.date === 'string' ? nextClass.date.slice(0, 10) : ''} lúc{' '}
+                  {typeof nextClass.timing === 'number'
+                    ? `${Math.floor(nextClass.timing / 60)}:${nextClass.timing % 60 === 0 ? "00" : nextClass.timing % 60}`
+                    : ''}
+                </span>
+              </div>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Bấm để vào Meet <FaExternalLinkAlt size={12} />
+              </span>
+            </div>
+          </a>
+        ) : (
+          <div className="tclass-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 220 }}>
+            <p style={{ color: 'var(--text-muted)' }}>Chưa có buổi học nào sắp tới.</p>
+          </div>
+        )}
+      </div>
+
+      {showPopup && <AddClass onClose={() => setShowPopup(false)} />}
+    </div>
+  );
 }
 
 export default TeacherClasses;

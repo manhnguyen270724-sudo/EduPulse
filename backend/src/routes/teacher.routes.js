@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {signup, mailVerified, login, logout, addTeacherDetails, getTeacher, teacherdocuments,ForgetPassword,ResetPassword} from "../controllers/teacher.controller.js";
+import {signup, mailVerified, login, logout, addTeacherDetails, getTeacher, teacherdocuments, ForgetPassword, ResetPassword, updateTeacherProfile} from "../controllers/teacher.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import { authTeacher } from "../middlewares/teacherAuth.middleware.js";
 import { authSchema } from "../middlewares/joiLogin.middleware.js";
@@ -52,6 +52,7 @@ router.route("/teacherdocument/:id").get(authTeacher, getTeacher)
 
 router.route("/teacherdocuments").post(teacherdocuments)
 
+router.route("/profile/:id").put(authTeacher, updateTeacherProfile)
 
 router.route('/forgetpassword').post(ForgetPassword)
 

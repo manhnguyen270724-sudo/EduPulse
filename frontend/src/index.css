@@ -2,17 +2,464 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
-
-*{
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
-body{
-  background:linear-gradient(90deg, #053a4f 8.26%, rgba(20, 120, 118, 0.58) 99.96%);
-  overflow: scroll;
+
+/* ==========================================================================
+   EDUPULSE DESIGN SYSTEM: SYSTEM FONTS & DUAL THEME (LIGHT AS DEFAULT)
+   ========================================================================== */
+
+:root,
+[data-theme="light"] {
+  /* System Font Stack */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Core Backgrounds */
+  --bg-page: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-secondary: #f1f5f9;
+  --bg-surface-tertiary: #e8edf5;
+  --bg-header: rgba(255, 255, 255, 0.92);
+  --header-border: #e2e8f0;
+
+  /* Typography */
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  --text-inverse: #ffffff;
+  --text-placeholder: #94a3b8;
+
+  /* Brand Accents */
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-light: #e0f2fe;
+  --primary-glow: rgba(2, 132, 199, 0.15);
+  --accent-cyan: #0284c7;
+  --accent-blue: #2563eb;
+  --gradient-brand: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+
+  /* Cards, Borders & Shadows */
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --card-shadow-hover: 0 16px 32px -4px rgba(2, 132, 199, 0.12), 0 6px 12px -2px rgba(0, 0, 0, 0.05);
+
+  /* Input & Form */
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --input-border-focus: #0284c7;
+  --input-shadow-focus: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  --input-text: #0f172a;
+  --label-text: #374151;
+
+  /* Pills / Badges */
+  --pill-bg: #e2e8f0;
+  --pill-text: #334155;
+  --pill-border: #cbd5e1;
+  --pill-active-bg: var(--gradient-brand);
+  --badge-verified-bg: #dcfce7;
+  --badge-verified-text: #15803d;
+  --badge-beta-bg: #fef3c7;
+  --badge-beta-text: #92400e;
+
+  /* Sidebar / Dashboard */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-item-hover: #f1f5f9;
+  --sidebar-item-active: #e0f2fe;
+  --sidebar-item-active-text: #0284c7;
+  --dashboard-bg: #f8fafc;
+
+  /* Filter / Tabs */
+  --filter-tab-bg: #f1f5f9;
+  --filter-tab-border: #e2e8f0;
+  --filter-tab-active-bg: #0284c7;
+  --filter-tab-active-text: #ffffff;
+
+  /* Modal / Overlay */
+  --modal-bg: #ffffff;
+  --modal-overlay: rgba(15, 23, 42, 0.6);
+  --modal-border: #e2e8f0;
+  --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Sticky Panel */
+  --sticky-bg: #ffffff;
+  --sticky-border: #e2e8f0;
+  --sticky-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+
+  /* Status Colors */
+  --success: #10b981;
+  --success-bg: #d1fae5;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  --error: #ef4444;
+  --error-bg: #fee2e2;
+  --info: #0284c7;
+  --info-bg: #e0f2fe;
+
+  /* Footer */
+  --footer-bg: #0f172a;
+  --footer-text: #94a3b8;
+  --footer-border: rgba(255,255,255,0.06);
+
+  /* Divider */
+  --divider: #e2e8f0;
 }
-body::-webkit-scrollbar{
-  display: none;
+
+[data-theme="dark"] {
+  /* Core Backgrounds */
+  --bg-page: #060c1c;
+  --bg-surface: #0a1329;
+  --bg-surface-secondary: #0e1a38;
+  --bg-surface-tertiary: #121e40;
+  --bg-header: rgba(6, 12, 28, 0.88);
+  --header-border: rgba(255, 255, 255, 0.08);
+
+  /* Typography */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --text-inverse: #0f172a;
+  --text-placeholder: #475569;
+
+  /* Brand Accents */
+  --primary: #38bdf8;
+  --primary-hover: #0284c7;
+  --primary-light: rgba(56, 189, 248, 0.1);
+  --primary-glow: rgba(56, 189, 248, 0.25);
+  --accent-cyan: #00d2ff;
+  --accent-blue: #3a86ff;
+  --gradient-brand: linear-gradient(135deg, #00d2ff 0%, #3a86ff 100%);
+  --gradient-brand-hover: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+
+  /* Cards, Borders & Shadows */
+  --card-bg: rgba(10, 19, 41, 0.85);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 20px 40px -10px rgba(0, 210, 255, 0.2);
+
+  /* Input & Form */
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-border-focus: #38bdf8;
+  --input-shadow-focus: 0 0 0 3px rgba(56, 189, 248, 0.2);
+  --input-text: #f8fafc;
+  --label-text: #cbd5e1;
+
+  /* Pills / Badges */
+  --pill-bg: rgba(255, 255, 255, 0.06);
+  --pill-text: #94a3b8;
+  --pill-border: rgba(255, 255, 255, 0.1);
+  --pill-active-bg: var(--gradient-brand);
+  --badge-verified-bg: rgba(16, 185, 129, 0.15);
+  --badge-verified-text: #34d399;
+  --badge-beta-bg: rgba(245, 158, 11, 0.15);
+  --badge-beta-text: #fbbf24;
+
+  /* Sidebar / Dashboard */
+  --sidebar-bg: #0a1329;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-item-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-item-active: rgba(56, 189, 248, 0.15);
+  --sidebar-item-active-text: #38bdf8;
+  --dashboard-bg: #060c1c;
+
+  /* Filter / Tabs */
+  --filter-tab-bg: rgba(255, 255, 255, 0.05);
+  --filter-tab-border: rgba(255, 255, 255, 0.08);
+  --filter-tab-active-bg: #38bdf8;
+  --filter-tab-active-text: #0f172a;
+
+  /* Modal / Overlay */
+  --modal-bg: #0a1329;
+  --modal-overlay: rgba(0, 0, 0, 0.75);
+  --modal-border: rgba(255, 255, 255, 0.1);
+  --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+
+  /* Sticky Panel */
+  --sticky-bg: #0a1329;
+  --sticky-border: rgba(255, 255, 255, 0.08);
+  --sticky-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+
+  /* Status Colors */
+  --success: #34d399;
+  --success-bg: rgba(52, 211, 153, 0.1);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.1);
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.1);
+  --info: #38bdf8;
+  --info-bg: rgba(56, 189, 248, 0.1);
+
+  /* Footer */
+  --footer-bg: #030712;
+  --footer-text: #94a3b8;
+  --footer-border: rgba(255,255,255,0.05);
+
+  /* Divider */
+  --divider: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   GLOBAL BASE STYLES
+   ========================================================================== */
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="light"] body {
+  background: radial-gradient(circle at 15% 10%, rgba(2, 132, 199, 0.05) 0%, transparent 35%),
+              radial-gradient(circle at 85% 85%, rgba(37, 99, 235, 0.04) 0%, transparent 40%),
+              #f8fafc;
+  background-attachment: fixed;
+}
+
+[data-theme="dark"] body {
+  background: radial-gradient(circle at 20% 15%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 80% 80%, rgba(58, 134, 255, 0.08) 0%, transparent 40%),
+              linear-gradient(180deg, #060c1c 0%, #0a1329 50%, #060c1c 100%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+p {
+  color: var(--text-muted);
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary);
+}
+
+::selection {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   CUSTOM SCROLLBAR
+   ========================================================================== */
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-page); }
+::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #1e293b; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ==========================================================================
+   UTILITY CLASSES — SHARED ACROSS ALL PAGES
+   ========================================================================== */
+
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+/* Standard CTA Button - Sharp Academic Style */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: var(--gradient-brand);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px; /* Sắc sảo 5px chuẩn học thuật */
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px var(--primary-glow);
+}
+
+/* Standard Ghost Button - Sharp Academic Style */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 20px;
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  border-radius: 5px; /* Sắc sảo 5px */
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+}
+.btn-ghost:hover {
+  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+/* Live Dot indicator */
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: livePulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+}
+
+/* Badge verified - Sharp Academic */
+.badge-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: var(--badge-verified-bg);
+  color: var(--badge-verified-text);
+  border: 1px solid rgba(21, 128, 61, 0.25);
+  border-radius: 4px; /* Sắc sảo 4px */
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Badge beta / free - Sharp Academic */
+.badge-beta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: var(--badge-beta-bg);
+  color: var(--badge-beta-text);
+  border: 1px solid rgba(146, 64, 14, 0.25);
+  border-radius: 4px; /* Sắc sảo 4px */
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Section container chuẩn */
+.section-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Card chuẩn */
+.edu-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.edu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Input chuẩn */
+.edu-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 10px;
+  color: var(--input-text);
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+.edu-input:focus {
+  border-color: var(--input-border-focus);
+  box-shadow: var(--input-shadow-focus);
+}
+.edu-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* Label chuẩn */
+.edu-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--label-text);
+  margin-bottom: 6px;
+}
+
+/* Divider */
+.edu-divider {
+  height: 1px;
+  background: var(--divider);
+  margin: 24px 0;
+}
+
+/* Loading spinner */
+.edu-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--card-border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Page loading state */
+.edu-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 20px;
+  color: var(--text-muted);
+}
+
+/* Empty state */
+.edu-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.edu-empty-state h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+/* Page transition wrapper */
+.page-wrapper {
+  min-height: 100vh;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
 }

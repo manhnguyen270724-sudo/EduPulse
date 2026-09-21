@@ -66,6 +66,15 @@ export default function Login() {
       if (response.ok) {
         // Authentication successful, you can redirect or do something else
         console.log("Login successful");
+        const uData = responesData.data.user;
+        localStorage.setItem('edupulse_user', JSON.stringify({
+          role: userType,
+          id: userid,
+          name: uData.Lastname ? `${uData.Lastname} ${uData.Firstname}` : (uData.Firstname || 'Người dùng'),
+          avatar: uData.Avatar || '',
+          email: uData.Email || ''
+        }));
+        window.dispatchEvent(new Event('edupulse-auth-change'));
         console.log(responesData.data.user.Isapproved);
         
         
@@ -119,88 +128,109 @@ export default function Login() {
   };
 
   return (
-    <>
-    <Header/>
-    <section className="main">
-      <div className="container">
-        {/* <div className="logo">
-          <img src="" alt="" />
-          <h1 className="head">Logo</h1>
-        </div> */}
-        {/* headings */}
-        <div className="para1">
-          <h2> WELCOME BACK!</h2>
-        </div>
+    <div className="auth-page-wrapper">
+      <Header />
+      <div className="auth-container">
+        {/* Login Form Card */}
+        <div className="auth-card">
+          <div className="auth-card-header">
+            <div className="auth-badge">CỔNG ĐĂNG NHẬP</div>
+            <h2 className="auth-title">Chào Mừng Trở Lại</h2>
+            <p className="auth-subtitle">Đăng nhập để tiếp tục hành trình học tập và giảng dạy cùng EduPulse</p>
+          </div>
 
-        <div className="para">
-          <h5> Please Log Into Your Account.</h5>
-        </div>
-
-        <div className="form">
-          <form onSubmit={handleSubmit}>
-            <div className="input-1">
-              <input
-                type="text"
-                placeholder="Email Address"
-                className="input-0"
-                value={Email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {errors.email && (
-                <div className="error-message">{errors.email}</div>
-              )}
-            </div>
-            <div className="input-2">
-              <input
-                type="password"
-                placeholder="Password"
-                className="input-0"
-                value={Password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              {errors.password && (
-                <div className="error-message">{errors.password}</div>
-              )}
-            </div>
-
-            {/* radio buttons */}
-            <div className="radio-btn">
-              <Radiobtn  userType={userType} setUserType={setUserType}  />
-            </div>
-
-            <div className="signup-link">
-              <span>Don't have an account? </span>
-              <NavLink to="/signup" className="link text-yellow-400 text-semibold text-md ">
-                signup
-              </NavLink>
-            </div>
-
-            <div className="text-yellow-400 text-semibold pt-3 cursor-pointer" onClick={()=>navigate('/forgetpassword')} >
-              Forget Password?
-            </div>
-
-            {/* btns */}
-            <div className="btns">
-              <button type="submit" className="btns-1">
-                Log In
+          <form onSubmit={handleSubmit} className="auth-form">
+            {/* Role Tabs */}
+            <div className="role-selector-container">
+              <button 
+                type="button" 
+                className={`role-tab ${userType === 'student' ? 'active' : ''}`}
+                onClick={() => setUserType('student')}
+              >
+                🎓 Học Sinh
+              </button>
+              <button 
+                type="button" 
+                className={`role-tab ${userType === 'teacher' ? 'active' : ''}`}
+                onClick={() => setUserType('teacher')}
+              >
+                👨‍🏫 Giảng Viên
               </button>
             </div>
-            {err != '' && (
-              <p className="text-red-400 text-sm">{err}</p>
+            {!userType && (
+              <p className="text-yellow-400 text-xs text-center">Vui lòng chọn vai trò: Học Sinh hoặc Giảng Viên</p>
             )}
-            {/* {errors.general && (
-              <div className="error-message">{errors.general}</div>
-            )} */}
+
+            {/* Email Input */}
+            <div className="form-group">
+              <label className="form-label">Email Đăng Nhập</label>
+              <div className="auth-input-wrapper">
+                <input
+                  type="email"
+                  placeholder="name@example.com"
+                  className="auth-input"
+                  value={Email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              {errors.email && <div className="error-text">{errors.email}</div>}
+            </div>
+
+            {/* Password Input */}
+            <div className="form-group">
+              <label className="form-label">Mật Khẩu</label>
+              <div className="auth-input-wrapper">
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu..."
+                  className="auth-input"
+                  value={Password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              {errors.password && <div className="error-text">{errors.password}</div>}
+            </div>
+
+            {/* Extra links */}
+            <div className="auth-extra-links">
+              <span className="text-xs text-slate-400">Bảo mật SSL 256-bit</span>
+              <span 
+                className="forgot-password-link text-xs font-semibold"
+                onClick={() => navigate('/forgetpassword')}
+              >
+                Quên mật khẩu?
+              </span>
+            </div>
+
+            {/* Error Message */}
+            {err && <div className="error-text text-center font-semibold">{err}</div>}
+            {errors.general && <div className="error-text text-center font-semibold">{errors.general}</div>}
+
+            {/* Submit Button */}
+            <button type="submit" className="auth-submit-btn">
+              Đăng Nhập Vào Hệ Thống
+            </button>
+
+            {/* Footer Prompt */}
+            <div className="auth-footer-prompt">
+              <span>Chưa có tài khoản?</span>
+              <NavLink to="/signup">Đăng ký ngay</NavLink>
+            </div>
           </form>
         </div>
-      </div>
 
-      {/* image */}
-      <div className="img-3">
-        <img src={HR} width={600} alt="" />
+        {/* Visual Illustration Column */}
+        <div className="auth-visual-col">
+          <img src={HR} alt="EduPulse Illustration" className="auth-visual-img" />
+          <div className="auth-visual-caption">
+            <h3 className="auth-visual-title">Học Tập Không Giới Hạn</h3>
+            <p className="auth-visual-desc">
+              Kết nối với hơn 50+ Giảng viên chuyên gia từ các trường đại học hàng đầu Việt Nam.
+            </p>
+          </div>
+        </div>
       </div>
-    </section>
-    </>
+    </div>
   );
  
 }

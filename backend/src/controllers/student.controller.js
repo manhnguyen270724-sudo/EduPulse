@@ -226,15 +226,55 @@ const logout = asyncHandler(async(req,res)=>{
 })
 
 const getStudent = asyncHandler(async(req,res)=>{
-    const user = req.Student
-    const id = req.params.id
-    if(req.Student._id != id){
-        throw new ApiError(400, "unauthroized access")
+    const user = req.Student;
+    const id = req.params.id;
+    if (id !== "me" && String(req.Student._id) !== String(id)) {
+        throw new ApiError(400, "unauthorized access");
     }
     return res
     .status(200)
-    .json(new ApiResponse(200, user, "Student is logged in"))
-})
+    .json(new ApiResponse(200, user, "Student is logged in"));
+});
+
+const updateStudentProfile = asyncHandler(async (req, res) => {
+    const user = req.Student;
+    const id = req.params.id;
+    if (id !== "me" && String(req.Student._id) !== String(id)) {
+        throw new ApiError(400, "Unauthorized to update this profile");
+    }
+
+    const { Firstname, Lastname, Avatar, Phone, Address, Highesteducation } = req.body;
+
+    const updatedStudent = await student.findByIdAndUpdate(
+        user._id,
+        {
+            $set: {
+                ...(Firstname && { Firstname }),
+                ...(Lastname && { Lastname }),
+                ...(Avatar && { Avatar }),
+            }
+        },
+        { new: true }
+    ).select("-Password -Refreshtoken");
+
+    if (user.Studentdetails && (Phone || Address || Highesteducation)) {
+        await studentdocs.findByIdAndUpdate(
+            user.Studentdetails,
+            {
+                $set: {
+                    ...(Phone && { Phone }),
+                    ...(Address && { Address }),
+                    ...(Highesteducation && { Highesteducation }),
+                }
+            },
+            { new: true }
+        );
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedStudent, "Cập nhật hồ sơ học viên thành công")
+    );
+});
 const addStudentDetails = asyncHandler(async(req, res)=>{
 
     const id = req.params.id
@@ -406,6 +446,7 @@ export{
       logout, 
       addStudentDetails,
        getStudent, 
+       updateStudentProfile,
        forgetPassword,
        resetPassword
 }

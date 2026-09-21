@@ -14,8 +14,8 @@ app.use(cookieParser())
 
 
 export const instance = new Razorpay({
-    key_id: process.env.KEY_ID,
-    key_secret: process.env.KEY_SECRET
+    key_id: process.env.KEY_ID || 'rzp_test_placeholder',
+    key_secret: process.env.KEY_SECRET || 'placeholder_secret'
 })
 
 //student routes
@@ -37,5 +37,9 @@ app.use("/api/admin", adminRouter)
 import paymentRouter from "./routes/payment.routes.js"
 app.use("/api/payment", paymentRouter)
 
+// public routes (không cần auth)
+import publicRouter from "./routes/public.routes.js"
+app.use("/api/public", publicRouter)
 
-export {app}
+
+export {app}

@@ -10,7 +10,7 @@ const getCourse = asyncHandler(async(req,res)=>{
 
     const courses = await course.find(
       {isapproved:true}
-    );
+    ).populate('enrolledteacher');
 
     return res
     .status(200)
@@ -50,8 +50,8 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
       throw new ApiError(400,"Invalid user")
     }
  
-    if(loggedTeacher._id != teacherParams){
-      throw new ApiError(400,"not authorized")
+    if(String(loggedTeacher._id) !== String(teacherParams)){
+      throw new ApiError(403,"Không có quyền tạo khóa học cho giảng viên khác")
     }
 
     
@@ -135,8 +135,8 @@ const addCourseStudent = asyncHandler(async(req,res)=>{
     throw new ApiError(400, "no params found")
   }
 
-  if(loggedStudent._id != studentParams){
-    throw new ApiError(400, "not authorized")
+  if(String(loggedStudent._id) !== String(studentParams)){
+    throw new ApiError(403, "Không có quyền đăng ký khóa học cho học viên khác")
   }
 
   const courseID = req.params.courseID
@@ -243,8 +243,8 @@ const enrolledcourseSTD = asyncHandler(async(req,res)=>{
     throw new ApiError(400, "authorization failed")
   }
 
-  if(stdID != req.Student._id){
-    throw new ApiError(400, "params and logged student id doesnt match")
+  if(String(stdID) !== String(req.Student._id)){
+    throw new ApiError(403, "Không có quyền truy cập dữ liệu của học viên khác")
   }
 
   const Student = await course.find({ enrolledStudent: stdID }).select( "-enrolledStudent -liveClasses -enrolledteacher")
@@ -267,8 +267,8 @@ const enrolledcourseTeacher = asyncHandler(async(req,res)=>{
     throw new ApiError(400, "authorization failed")
   }
 
-  if(teacherID != req.teacher._id){
-    throw new ApiError(400, "params and logged teacher id doesnt match")
+  if(String(teacherID) !== String(req.teacher._id)){
+    throw new ApiError(403, "Không có quyền truy cập dữ liệu của giảng viên khác")
   }
 
   const teacher = await course.find({ enrolledteacher: teacherID }).select( "-enrolledStudent -liveClasses -enrolledteacher")
@@ -296,6 +296,11 @@ const addClass = asyncHandler(async(req,res) => {
   }
 
   const {courseId, teacherId } = req.params
+
+  if(String(req.teacher._id) !== String(teacherId)){
+    throw new ApiError(403, "Không có quyền thêm lớp cho giảng viên khác")
+  }
+
   const dateObject = new Date(date);
 
   const enrolledTeacher = await course.findOne({
@@ -306,7 +311,7 @@ const addClass = asyncHandler(async(req,res) => {
   
 
   if(!enrolledTeacher){
-  throw new ApiError(400, "not authorized")
+  throw new ApiError(403, "not authorized")
   }
 
   const cst = timing - 60;
@@ -363,6 +368,11 @@ const addClass = asyncHandler(async(req,res) => {
 
 const stdEnrolledCoursesClasses = asyncHandler(async(req,res)=>{
   const Student = req.Student
+  const { studentId } = req.params;
+
+  if (studentId && String(studentId) !== String(Student._id)) {
+    throw new ApiError(403, "Không có quyền xem lịch học của học viên khác");
+  }
 
   
 
@@ -410,6 +420,11 @@ const stdEnrolledCoursesClasses = asyncHandler(async(req,res)=>{
 
 const teacherEnrolledCoursesClasses = asyncHandler(async(req,res)=>{
   const teacher = req.teacher
+  const { teacherId } = req.params;
+
+  if (teacherId && String(teacherId) !== String(teacher._id)) {
+    throw new ApiError(403, "Không có quyền xem lịch dạy của giảng viên khác");
+  }
 
   const classes = await course.aggregate([
     {

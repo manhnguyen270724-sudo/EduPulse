@@ -1,225 +1,328 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, NavLink, useOutletContext } from "react-router-dom";
 import Withdrawal from "./Withdrawal";
-import { TbMessage2Star } from "react-icons/tb";
+import { FaGraduationCap, FaUsers, FaWallet, FaCalendarAlt, FaBook, FaPlus, FaVideo, FaUserEdit, FaExternalLinkAlt } from "react-icons/fa";
+import { MdVerified } from "react-icons/md";
+import { getCourseSubjectLabel, DAYS_VI, formatTime } from "../../../data/subjectTaxonomy";
+import "./DashboardTeacher.css";
 
 function DashboardTeacher() {
   const { ID } = useParams();
-  const [data, setdata] = useState([]);
+  const outlet = useOutletContext() || {};
+  const data = outlet.teacher || {};
+  const Tdec = outlet.teacherDetails || null;
+
   const [courses, setCourses] = useState([]);
-  const [error, setError] = useState([]);
-  const [popup, setPopup] = useState(false);
-  const [notification, setNotification] = useState(false);
   const [amount, setAmount] = useState(0);
-  const [subjectForm, setsubjectForm] = useState('Math');
-  const [Tdec, setTeacherDetails] = useState(null);
-  const [starCount, setStar] = useState(5);
+  const [popup, setPopup] = useState(false);
+  const [liveClasses, setLiveClasses] = useState([]);
 
-  const [formPopup, setFormPopup] = useState(false);
-
-  const price = {
-    math: 700,
-    physics: 800,
-    computer: 1000,
-    chemistry: 600,
-    biology: 500,
-  };
-
-  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await fetch(`/api/Teacher/TeacherDocument/${ID}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-
-        const user = await response.json();
-        setdata(user.data);
-        // console.log(user.data);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
-    getData();
-  }, []);
-
-  useEffect(()=>{
-    const getData = async()=>{
-      const Data = await fetch('/api/teacher/teacherdocuments',{
-        method: 'POST',
-        credentials: "include",
-        headers: {
-        "Content-Type": "application/json",
-        },
-        body: JSON.stringify({teacherID : data.Teacherdetails}),
-      })
-      const res = await Data.json();
-      // console.log(res.data);
-      setTeacherDetails(res.data);
-    }
-
-    getData();
-  },[courses])
-
+  // Lấy số dư ví
   useEffect(() => {
     const getAmount = async () => {
       try {
         const response = await fetch(`/api/payment/teacher/${ID}/balance`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-
+        if (!response.ok) return;
         const user = await response.json();
-        setAmount(user.data.newTeacher.Balance);
-        // console.log(user)
-      } catch (error) {
-        // setError(error.message)
-        console.log(error);
+        setAmount(user.data?.newTeacher?.Balance || 0);
+      } catch (err) {
+        console.error("Fetch balance error:", err);
       }
     };
-    getAmount();
-  }, [amount, popup]);
+    if (ID) getAmount();
+  }, [ID, popup]);
 
+  // Lấy danh sách khóa học của giảng viên
   useEffect(() => {
     const getCourses = async () => {
       try {
         const response = await fetch(`/api/course/Teacher/${ID}/enrolled`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-
+        if (!response.ok) throw new Error("Failed to fetch courses");
         const res = await response.json();
-        setCourses(res.data);
-        console.log(res.data);
+        setCourses(res.data || []);
       } catch (error) {
-        setError(error.message);
+        console.error("Fetch enrolled courses error:", error);
       }
     };
-    getCourses();
-  }, []);
+    if (ID) getCourses();
+  }, [ID]);
+
+  // Lấy lịch dạy
+  useEffect(() => {
+    const getClasses = async () => {
+      try {
+        const response = await fetch(`/api/course/classes/teacher/${ID}`, {
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!response.ok) return;
+        const res = await response.json();
+        setLiveClasses(res.data?.classes?.[0]?.liveClasses || []);
+      } catch (err) {
+        console.error("Fetch classes error:", err);
+      }
+    };
+    if (ID) getClasses();
+  }, [ID]);
+
+  const approvedCourses = courses.filter(c => c.isapproved);
+  const totalStudents = approvedCourses.reduce((sum, c) => sum + (c.enrolledStudent?.length || 0), 0);
+  const nextClass = liveClasses.length > 0 ? liveClasses[0] : null;
+  const teacherFullName = data.Lastname ? `${data.Lastname} ${data.Firstname}` : (data.Firstname || 'Giảng Viên');
+  const publicUrl = `/teacher/${data.slug || ID}`;
 
   return (
-    <>
-      <div className="m-5 ml-60 text-white flex flex-col gap-7">
-        <div className="text-[1.1rem] w-[30rem] flex gap-60 items-center">
-          {/* <p>Amount: <span className=" text-green-500">Rs. {amount}</span></p> */}
-          <div className="bg-[#1671D8] p-3 rounded-md cursor-pointer">
-            Details
-          </div>
-          <div
-            // onClick={() => setPopup(true)}
-            className="bg-[#1671D8] p-3 rounded-md cursor-pointer"
-          >
-            Remuneration
-          </div>
-          {/* <div className="flex items-center gap-2 ml-28 bg-[#1671D8] p-3 rounded-md cursor-pointer" onClick={()=>setNotification(prev => !prev)}>
-            <span>Notifications</span>
-            <TbMessage2Star />
-          </div> */}
+    <div className="dt-wrapper">
+      {/* ─── WELCOME BANNER ─── */}
+      <div className="dt-welcome-banner">
+        <div>
+          <div className="dt-welcome-greeting">Xin chào, Thầy/Cô 👋</div>
+          <h1 className="dt-welcome-title">{teacherFullName}</h1>
+          <p className="dt-welcome-desc">
+            Bảng điều khiển quản trị giảng dạy học thuật tại EduPulse Academy.
+          </p>
         </div>
-        <hr />
-        <div className="flex gap-32">
-          <div className="flex flex-col gap-5">
-            <p>Name: <span className="text-black">{data.Firstname} {data.Lastname}</span></p>
-            {/* <p>Name: {data.Firstname} {data.Lastname} {'⭐'.repeat(starCount)}</p> */}
-            <p>Email: <span className="text-black">{data.Email}</span></p>
-            <p>Phone: <span className="text-black">{Tdec?.Phone}</span></p>
-            <p>Address: <span className="text-black">{Tdec?.Address}</span></p>
-            <p>Experience: <span className="text-black">{Tdec?.Experience} years</span></p>
+
+        <div className="dt-quick-actions">
+          <NavLink to={`/Teacher/Dashboard/${ID}/Courses`} className="dt-btn-action dt-btn-action--primary">
+            <FaPlus size={11} />
+            <span>Tạo Khóa Học</span>
+          </NavLink>
+          <NavLink to={`/Teacher/Dashboard/${ID}/Classes`} className="dt-btn-action">
+            <FaVideo size={11} />
+            <span>Lịch Dạy Trực Tuyến</span>
+          </NavLink>
+          <NavLink to={`/Teacher/Dashboard/${ID}/Profile`} className="dt-btn-action">
+            <FaUserEdit size={11} />
+            <span>Hồ Sơ Cá Nhân</span>
+          </NavLink>
+        </div>
+      </div>
+
+      {/* ─── STATS ROW ─── */}
+      <div className="dt-stats-row">
+        {/* Stat 1: Số dư */}
+        <div className="dt-stat-card">
+          <div className="dt-stat-icon dt-stat-icon--green">
+            <FaWallet />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div className="dt-stat-value">{amount.toLocaleString('vi-VN')}đ</div>
+            <div className="dt-stat-label">Số dư khả dụng</div>
+          </div>
+          <button
+            onClick={() => setPopup(true)}
+            style={{
+              padding: '4px 10px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              background: 'var(--success-bg)',
+              color: 'var(--success)',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Rút tiền
+          </button>
+        </div>
+
+        {/* Stat 2: Khóa học */}
+        <div className="dt-stat-card">
+          <div className="dt-stat-icon dt-stat-icon--blue">
+            <FaBook />
           </div>
           <div>
-            <div className="flex gap-3 flex-col">
-              <p className="bg-[#1671D8] py-1 px-2 w-fit">Courses</p>
-              {courses &&
-                courses.filter((course) => course.isapproved)
-                .map((course) => (
-                  <p
-                    key={course._id}
-                    // className=" bg-[#1671D8] py-1 px-2 rounded-xl w-fit"
-                    className="py-1 px-2 rounded-xl w-fit"
-                  >
-                    {course.coursename} :{" "}
-                    <span className="text-black">
-                      {" [ "}{course.schedule.map(days => `${daysOfWeek[days.day]} ${Math.floor(days.starttime/60)}:${(days.starttime%60 === 0 ? "00":days.starttime%60)} - ${Math.floor(days.endtime/60)}:${(days.endtime%60 === 0 ? "00" : days.endtime%60)}`).join(', ')}{" ] "}
-                    </span>
-                    <span className="text-black font-bold">
-                      {" => "}
-                      Rs. {price[course.coursename]} per student / per month
-                    </span>
-                  </p>
-                ))}
-            </div>
-          </div>
-          <div className="ml-28">
-            {/* {notification && (
-              show all notifications
-              example
-              <div>
-                <p>course : Math</p>
-                <p>Timing : sun,Mon,tue</p>
-                <p>status : pending</p>
-                <p>message : sbcxbbdjbd</p>
-              </div>
-            )} */}
+            <div className="dt-stat-value">{courses.length}</div>
+            <div className="dt-stat-label">Khóa học phụ trách</div>
           </div>
         </div>
 
-        {popup && <Withdrawal onClose={() => setPopup(false)} TA={amount} />}
-        
-        {formPopup && (
-          <div className='fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center'>
-            <div className='bg-[#5be0de] text-black w-[70vw] px-14 py-10 rounded-sm'>
-              {/* <div className=' absolute w-9 h-9 bg-white rounded-xl cursor-pointer flex items-center justify-center m-2' onClick={onClose}>✖️</div> */}
+        {/* Stat 3: Học viên */}
+        <div className="dt-stat-card">
+          <div className="dt-stat-icon dt-stat-icon--purple">
+            <FaUsers />
+          </div>
+          <div>
+            <div className="dt-stat-value">{totalStudents}</div>
+            <div className="dt-stat-label">Học viên ghi danh</div>
+          </div>
+        </div>
 
-              <p className='text-3xl'>Teacher Feedback Form</p>
-              <p className=' border-b-2 py-2'>We highly appreciate your involvement. Please help us improve by filling out this teacher feedback form. Thank you!</p>
-
-              <div className='flex flex-col gap-3 my-5 pb-5 border-b-2'>
-                <label>Full Name</label>
-                <input type="text" className='p-2'  placeholder='Teacher / Instructor Name'/>
-                <label>Course Name</label>
-
-                <input type="text" className='p-2'  placeholder='Course Name'/>
-                {/* <input type="text" value={subjectForm} readOnly className='p-2'  placeholder='Course Name'/> */}
-
-                <label>Number of Years Teaching ?</label>
-                <input type="text" className='p-2'  placeholder='in years'/>
-              </div>
-
-              <div className='py-3 flex flex-col justify-center items-center'>
-                <p className='pb-3 text-center'>Do you have suggestions on what we can do to provide you with a better service?</p>
-                <textarea className=" rounded-md w-[80%] h-32 p-2" placeholder="Type here ..."></textarea>
-              </div>
-
-              <div className='flex justify-center mt-3'>
-                <button className='w-[10rem]'>Submit Form</button>
-              </div>
-              
+        {/* Stat 4: Buổi học kế tiếp */}
+        <div className="dt-stat-card">
+          <div className="dt-stat-icon dt-stat-icon--amber">
+            <FaCalendarAlt />
+          </div>
+          <div>
+            <div className="dt-stat-value" style={{ fontSize: '1rem' }}>
+              {nextClass ? (nextClass.date ? nextClass.date.slice(0, 10) : 'Sắp tới') : 'Chưa có lịch'}
+            </div>
+            <div className="dt-stat-label">
+              {nextClass ? `${Math.floor(nextClass.timing / 60)}:${nextClass.timing % 60 === 0 ? "00" : nextClass.timing % 60} Google Meet` : 'Buổi học kế tiếp'}
             </div>
           </div>
-        )}
+        </div>
       </div>
-    </>
+
+      {/* ─── MAIN 2-COLUMN GRID ─── */}
+      <div className="dt-main-grid">
+        {/* Col 1: Khóa học đang mở */}
+        <div className="dt-panel">
+          <div className="dt-panel-header">
+            <h2 className="dt-panel-title">
+              <FaBook style={{ color: 'var(--primary)' }} />
+              <span>Khóa Học Đang Mở ({courses.length})</span>
+            </h2>
+            <NavLink to={`/Teacher/Dashboard/${ID}/Courses`} className="dt-panel-link">
+              Quản lý toàn bộ →
+            </NavLink>
+          </div>
+
+          {courses.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+              <p style={{ marginBottom: '12px' }}>Bạn chưa có khóa học nào trên hệ thống.</p>
+              <NavLink to={`/Teacher/Dashboard/${ID}/Courses`} className="dt-btn-action dt-btn-action--primary">
+                <FaPlus size={11} />
+                <span>Tạo Khóa Học Đầu Tiên</span>
+              </NavLink>
+            </div>
+          ) : (
+            <div className="dt-course-list">
+              {courses.slice(0, 4).map((c) => {
+                const enrolledCount = c.enrolledStudent?.length || 0;
+                const maxCount = c.maxStudents || 25;
+                const percent = Math.min(100, Math.round((enrolledCount / maxCount) * 100));
+
+                return (
+                  <div key={c._id} className="dt-course-item">
+                    <div className="dt-course-info">
+                      <div className="dt-course-badge-row">
+                        <span className="dt-course-badge">{getCourseSubjectLabel(c.coursename)}</span>
+                        {c.grade && <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Lớp {c.grade}</span>}
+                      </div>
+                      <div className="dt-course-title">{c.subject || c.description}</div>
+                      <div className="dt-course-meta">
+                        Học phí: {c.fees > 0 ? `${c.fees.toLocaleString('vi-VN')}đ` : 'Miễn phí'} · Khai giảng: {c.startDate ? new Date(c.startDate).toLocaleDateString('vi-VN') : 'Đang mở'}
+                      </div>
+                    </div>
+
+                    <div className="dt-course-stats">
+                      <span className="dt-student-count">{enrolledCount}/{maxCount} HS</span>
+                      <span className={`dt-badge-status ${c.isapproved ? 'dt-badge-status--approved' : 'dt-badge-status--pending'}`}>
+                        {c.isapproved ? 'Đã duyệt' : 'Chờ duyệt'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Col 2: Hồ sơ tóm tắt & Lịch tuần */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Hồ sơ cá nhân snapshot */}
+          <div className="dt-panel">
+            <div className="dt-panel-header">
+              <h2 className="dt-panel-title">
+                <FaUserEdit style={{ color: 'var(--primary)' }} />
+                <span>Hồ Sơ Chuyên Môn</span>
+              </h2>
+              <NavLink to={`/Teacher/Dashboard/${ID}/Profile`} className="dt-panel-link">
+                Chỉnh sửa →
+              </NavLink>
+            </div>
+
+            <div className="dt-profile-snapshot">
+              <img
+                src={data.Avatar || 'https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924688/edupulse/teachers/teacher_nguyen_van_an.jpg'}
+                alt={teacherFullName}
+                className="dt-profile-snap-avatar"
+              />
+              <div className="dt-profile-snap-info">
+                <div className="dt-profile-snap-name">{teacherFullName}</div>
+                <div className="dt-profile-snap-degree">
+                  {Tdec?.PGcollege || Tdec?.UGcollege || 'Giảng viên chuyên môn'}
+                </div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
+              {data.bio ? (data.bio.slice(0, 120) + (data.bio.length > 120 ? '...' : '')) : 'Chưa cập nhật tiểu sử chuyên môn.'}
+            </p>
+
+            <a
+              href={publicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                color: 'var(--primary)',
+                textDecoration: 'none',
+                paddingTop: '6px'
+              }}
+            >
+              <span>Xem trang công khai (như khách xem)</span>
+              <FaExternalLinkAlt size={10} />
+            </a>
+          </div>
+
+          {/* Lịch dạy tuần */}
+          <div className="dt-panel">
+            <div className="dt-panel-header">
+              <h2 className="dt-panel-title">
+                <FaCalendarAlt style={{ color: 'var(--primary)' }} />
+                <span>Lịch Dạy Trực Tuyến</span>
+              </h2>
+              <NavLink to={`/Teacher/Dashboard/${ID}/Classes`} className="dt-panel-link">
+                Xem tất cả →
+              </NavLink>
+            </div>
+
+            {liveClasses.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+                Chưa có buổi học nào được lên lịch trong tuần này.
+              </p>
+            ) : (
+              <div className="dt-schedule-list">
+                {liveClasses.slice(0, 3).map((item, idx) => (
+                  <div key={idx} className="dt-schedule-item">
+                    <div>
+                      <div className="dt-schedule-time">
+                        <FaCalendarAlt size={10} />
+                        <span>{item.date ? item.date.slice(0, 10) : ''} · {Math.floor(item.timing / 60)}:{item.timing % 60 === 0 ? "00" : item.timing % 60}</span>
+                      </div>
+                      <div className="dt-schedule-title">{item.title}</div>
+                    </div>
+                    {item.link && (
+                      <a href={item.link} target="_blank" rel="noreferrer" className="dt-btn-meet">
+                        <FaVideo size={10} />
+                        <span>Vào Meet</span>
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal rút tiền */}
+      {popup && <Withdrawal onClose={() => setPopup(false)} amount={amount} />}
+    </div>
   );
 }
 

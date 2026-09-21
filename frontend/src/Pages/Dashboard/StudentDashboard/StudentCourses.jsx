@@ -1,96 +1,118 @@
-import React,{ useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import Popup from './Popup';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useParams, NavLink } from 'react-router-dom';
+import { FaBookOpen, FaCalendarAlt, FaArrowRight, FaClock } from 'react-icons/fa';
+import { getCourseSubjectLabel, DAYS_VI, formatTime } from '../../../data/subjectTaxonomy';
+import './StudentCourses.css';
 
 function StudentCourses() {
   const { ID } = useParams();
-  const [data, setdata] = useState([]);
-  const [popup, setPopup] = useState(false);
-  const [subDetails, setsubDetails] = useState({});
-  const [subD, setsubD] = useState();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-      const getData = async () => {
-        try {
-          const response = await fetch(`/api/course/student/${ID}/enrolled`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-  
-          if (!response.ok) {
-            throw new Error('Failed to fetch data');
-          }
-  
-          const user = await response.json();
-          setdata(user.data);
-          console.log(user.data);
+    const getData = async () => {
+      try {
+        const response = await fetch(`/api/course/student/${ID}/enrolled`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-        } catch (error) {
-          setError(error.message)
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
         }
-      };
-      getData();
-  },[]);
 
-  const openpopup = async(sub)=>{ 
-    setsubDetails(sub);
-    await axios.get(`/api/course/${sub.coursename}`)
-      .then(res => {setPopup(true);
-      setsubD(res.data.data)})
-  }
-
-  const price = {
-    math: 700,
-    physics: 800,
-    computer: 1000,
-    chemistry: 600,
-    biology: 500,
-  };
-
-  const daysName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-  const Image = {
-    "physics" : "https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/8e9bf690d23d886f63466a814cfbec78187f91d2",
-    "chemistry" : "https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/3e546b344774eb0235acc6bf6dad7814a59d6e95",
-    "biology" : "https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/28ac70002ae0a676d9cfb0f298f3e453d12b5555",
-    "math" : "https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/61930117e428a1f0f7268f888a84145f93aa0664",
-    "computer" : "https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/a64c93efe984ab29f1dfb9e8d8accd9ba449f272",
-  }
+        const user = await response.json();
+        setData(user.data || []);
+      } catch (error) {
+        console.error("Fetch enrolled courses error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (ID) getData();
+  }, [ID]);
 
   return (
-    <>
-    <div className='flex gap-10 pl-[12rem] mt-12 flex-wrap justify-center mb-2'>
-        {data.map(sub => (
-          <div key={sub._id} className="text-white rounded-md bg-[#042439] cursor-pointer text-center p-3 w-[15rem]" onClick={()=>openpopup(sub)}>
-            <div className='flex justify-center items-center'>
-              <img src={Image[sub.coursename]} alt={sub.coursename} width={60}/>
-              <p>{sub.coursename.toUpperCase()}</p>
-            </div>
-            <p className='mt-5 text-gray-300 text-sm text-center px-2 '>{sub.description}</p>
+    <div className="sc-wrapper">
+      <div className="sc-header">
+        <div>
+          <h1 className="sc-title">Khóa Học Của Tôi</h1>
+          <p className="sc-subtitle">Danh sách các lớp học bạn đang tham gia trên EduPulse</p>
+        </div>
+        <NavLink to="/courses" className="sc-btn-explore">
+          <FaBookOpen />
+          <span>Khám Phá Thêm Khóa Học</span>
+        </NavLink>
+      </div>
 
-            {sub.schedule && (
-              <div>
-                <p className='mt-2 text-blue-700 font-bold'>Timing:</p>
-                {'[ '}
-                {sub.schedule.map(daytime => {
-                  return `${daysName[daytime.day]} ${Math.floor(daytime.starttime / 60)}:${daytime.starttime % 60 === 0 ? "00" : daytime.starttime % 60} - ${Math.floor(daytime.endtime/60)}:${daytime.endtime % 60 === 0 ? "00" : daytime.endtime % 60}`;
-                }).join(', ')}
-                {' ]'}
+      {loading ? (
+        <div className="sc-empty-state">Đang tải danh sách khóa học...</div>
+      ) : data.length === 0 ? (
+        <div className="sc-empty-state">
+          <p style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '8px' }}>
+            Bạn chưa đăng ký khóa học nào
+          </p>
+          <p style={{ marginBottom: '20px' }}>
+            Khám phá hàng chục khóa học chất lượng cao từ đội ngũ giảng viên hàng đầu.
+          </p>
+          <NavLink to="/courses" className="sc-btn-explore">
+            Xem Tất Cả Khóa Học
+          </NavLink>
+        </div>
+      ) : (
+        <div className="sc-grid">
+          {data.map((sub) => {
+            const subjectLabel = getCourseSubjectLabel(sub.coursename);
+            const courseTitle = sub.subject || subjectLabel;
+
+            return (
+              <div key={sub._id} className="sc-card">
+                <div>
+                  <div className="sc-card-badge-row">
+                    <span className="sc-badge-subject">{subjectLabel}</span>
+                    <span className="sc-badge-enrolled">Đang theo học</span>
+                  </div>
+
+                  <h3 className="sc-card-title">{courseTitle}</h3>
+                  <p className="sc-card-desc">{sub.description || 'Chưa có mô tả chi tiết cho khóa học này.'}</p>
+                </div>
+
+                {sub.schedule && sub.schedule.length > 0 && (
+                  <div className="sc-schedule-box">
+                    <div className="sc-schedule-title">
+                      <FaCalendarAlt size={12} className="text-sky-500" />
+                      <span>Thời khóa biểu:</span>
+                    </div>
+                    <div>
+                      {sub.schedule.map((s, idx) => (
+                        <span key={idx} style={{ marginRight: '8px' }}>
+                          {DAYS_VI[s.day] || `Thứ ${s.day}`}: {formatTime(s.starttime)} - {formatTime(s.endtime)}
+                          {idx < sub.schedule.length - 1 ? '; ' : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="sc-card-footer">
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Trạng thái: Hoạt động
+                  </span>
+                  <NavLink to={`/courses/${sub._id}`} className="sc-btn-detail">
+                    <span>Xem chi tiết khóa</span>
+                    <FaArrowRight size={11} />
+                  </NavLink>
+                </div>
               </div>
-            )}
-        
-            {/* <p className='mt-5 text-gray-300 text-sm text-center px-2 '>Fees : Rs. {price[sub.coursename]}</p> */}
-          </div>
-        ))}
+            );
+          })}
+        </div>
+      )}
     </div>
-    {popup && (
-      <Popup onClose={()=> setPopup(false)} subject={subDetails} allSubject={subD}/>
-    )}
-    </>
-  )
+  );
 }
 
-export default StudentCourses
+export default StudentCourses;

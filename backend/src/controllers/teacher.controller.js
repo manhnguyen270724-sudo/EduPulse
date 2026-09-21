@@ -190,23 +190,22 @@ const logout = asyncHandler(async(req, res)=>{
 })
 
 const getTeacher = asyncHandler(async(req,res) =>{
-    const user = req.teacher
-
-    const id = req.params.id
-    if(req.teacher._id != id){
-        throw new ApiError(400, "unauthroized access")
+    const user = req.teacher;
+    const id = req.params.id;
+    if (id !== "me" && String(req.teacher._id) !== String(id)) {
+        throw new ApiError(403, "unauthorized access");
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200, user, "Teacher is logged in"))
-})
+    .json(new ApiResponse(200, user, "Teacher is logged in"));
+});
 
 const addTeacherDetails = asyncHandler(async(req,res)=>{
 
     const id = req.params.id
-    if(req.teacher._id != id){
-        throw new ApiError(400, "unauthroized access")
+    if(String(req.teacher._id) !== String(id)){
+        throw new ApiError(403, "unauthorized access")
     }
 
     const{Phone, Address, Experience, SecondarySchool, HigherSchool,UGcollege, PGcollege, SecondaryMarks, HigherMarks, UGmarks, PGmarks} = req.body
@@ -388,5 +387,38 @@ const ForgetPassword=asyncHandler(async(req,res)=>{
          throw new ApiError(500, 'Internal server error!!!');
      }
  });
+const updateTeacherProfile = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (String(req.teacher._id) !== String(id)) {
+        throw new ApiError(403, "Bạn không có quyền sửa đổi hồ sơ của giảng viên khác");
+    }
+    const { bio, certificates, Phone, Address, Experience, PGcollege, UGcollege, Avatar, UG, PG } = req.body;
 
-export { signup, mailVerified, login, logout, addTeacherDetails, getTeacher, teacherdocuments,ForgetPassword,ResetPassword};
+    const teacher = await Teacher.findById(id);
+    if (!teacher) {
+        throw new ApiError(404, "Teacher not found");
+    }
+
+    if (bio !== undefined) teacher.bio = bio;
+    if (certificates !== undefined) teacher.certificates = certificates;
+    if (Avatar) teacher.Avatar = Avatar;
+    await teacher.save();
+
+    if (teacher.Teacherdetails) {
+        const docsUpdate = {};
+        if (Phone !== undefined) docsUpdate.Phone = Phone;
+        if (Address !== undefined) docsUpdate.Address = Address;
+        if (Experience !== undefined) docsUpdate.Experience = Experience;
+        if (PGcollege !== undefined) docsUpdate.PGcollege = PGcollege;
+        if (UGcollege !== undefined) docsUpdate.UGcollege = UGcollege;
+        if (UG !== undefined) docsUpdate.UG = UG;
+        if (PG !== undefined) docsUpdate.PG = PG;
+
+        await Teacherdocs.findByIdAndUpdate(teacher.Teacherdetails, { $set: docsUpdate });
+    }
+
+    const updatedTeacher = await Teacher.findById(id).populate('Teacherdetails').select('-Password -Refreshtoken');
+    return res.status(200).json(new ApiResponse(200, updatedTeacher, "Profile updated successfully"));
+});
+
+export { signup, mailVerified, login, logout, addTeacherDetails, getTeacher, teacherdocuments, ForgetPassword, ResetPassword, updateTeacherProfile };

@@ -1,0 +1,232 @@
+/* ============================================================
+   EDUPULSE — STUDENT PERSONAL PROFILE STYLES
+   ============================================================ */
+
+.spp-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1000px;
+}
+
+.spp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.spp-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.spp-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.spp-badge-role {
+  padding: 4px 10px;
+  border-radius: 4px; /* Sắc sảo 4px */
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-left: 3px solid #10b981;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spp-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.spp-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 14px;
+}
+
+.spp-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.spp-avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  display: block;
+}
+
+.spp-avatar-upload-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  border: 2px solid var(--card-bg);
+}
+
+.spp-avatar-upload-badge:hover {
+  transform: scale(1.1);
+  background: #059669;
+}
+
+.spp-avatar-input-box {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spp-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 5px; /* Sắc sảo 5px */
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25);
+}
+
+.spp-upload-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.spp-reset-btn {
+  padding: 8px 14px;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 5px; /* Sắc sảo 5px */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.spp-reset-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-surface-secondary);
+}
+
+.spp-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .spp-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.spp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spp-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.spp-input {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  transition: all 0.2s;
+  outline: none;
+  font-family: inherit;
+}
+
+.spp-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.spp-input:disabled {
+  opacity: 0.65;
+  background: var(--bg-surface-secondary);
+  cursor: not-allowed;
+}
+
+.spp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 10px;
+}
+
+.spp-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 10px;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+}
+
+.spp-btn-save:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.spp-btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

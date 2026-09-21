@@ -1,13 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { IoArrowBack } from "react-icons/io5";
 import { useNavigate } from 'react-router-dom';
-import Radiobtn from '../Components/RadioBtn/Radiobtn';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import Header from '../Home/Header/Header';
+import Footer from '../Footer/Footer';
+import '../Login/Login.css';
 
 const Forgetpassword = () => {
-  const [userType, setUserType] = useState('');
+  const [userType, setUserType] = useState('student');
   const [data, setData] = useState({ email: '' });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,55 +24,86 @@ const Forgetpassword = () => {
   const onFormSubmit = async (e) => {
     e.preventDefault();
 
-    if (!data.email) {
-      toast.error('Email is required');
+    if (!data.email.trim()) {
+      toast.error('Vui lòng nhập địa chỉ email của bạn!');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {
-      toast.error('Please provide a valid email');
+      toast.error('Định dạng email không hợp lệ!');
       return;
     }
 
+    setLoading(true);
     try {
-      const response = await axios.post(`/api/${userType}/forgetpassword`, { Email: data.email});
+      const response = await axios.post(`/api/${userType}/forgetpassword`, { Email: data.email });
       console.log(response.data);
-      toast.success('Email sent successfully');
+      toast.success('Đã gửi link đặt lại mật khẩu về email của bạn!');
     } catch (error) {
-
-      toast.error('An error occurred while sending the email');
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi gửi email khôi phục');
+    } finally {
+      setLoading(false);
     }
   };
 
-  console.log(userType);
-
   return (
-    <section className='h-[100vh] flex items-center justify-center'>
-      <form noValidate className='w-96 p-10 flex flex-col justify-center gap-4 text-white shadow-[0_0_10px_white] bg-cyan-900 rounded-lg' onSubmit={onFormSubmit}>
-        <h1 className='text-2xl font-bold text-white'>Forgot Your Password?</h1>
-        <p className='text-lg text-white'>Enter your email address below to reset your password.</p>
-        <label htmlFor='email' className='text-2xl text-white font-semibold rounded-md'>Email Address</label>
-        <input  
-          type="email"
-          name="email" 
-          id="email" 
-          placeholder="Enter your email"
-          value={data.email}
-          onChange={handleChange}
-          className='bg-transparent border-2 border-white py-3 px-4 focus:outline-none focus:border-yellow-500 rounded-lg'
-        />
-        <div className='radio-btn'>
-          <Radiobtn userType={userType} setUserType={setUserType} />
+    <div className="auth-page-wrapper">
+      <Header />
+      <div className="auth-container" style={{ margin: '60px auto' }}>
+        <div className="auth-card">
+          <div className="auth-card-header">
+            <div className="auth-badge">KHÔI PHỤC TÀI KHOẢN</div>
+            <h2 className="auth-title">Quên Mật Khẩu?</h2>
+            <p className="auth-subtitle">
+              Nhập email liên kết với tài khoản EduPulse của bạn để nhận hướng dẫn thiết lập lại mật khẩu an toàn.
+            </p>
+          </div>
+
+          <form onSubmit={onFormSubmit} className="auth-form">
+            {/* Role Tabs */}
+            <div className="role-selector-container">
+              <button
+                type="button"
+                className={`role-tab ${userType === 'student' ? 'active' : ''}`}
+                onClick={() => setUserType('student')}
+              >
+                🎓 Học Sinh
+              </button>
+              <button
+                type="button"
+                className={`role-tab ${userType === 'teacher' ? 'active' : ''}`}
+                onClick={() => setUserType('teacher')}
+              >
+                👨‍🏫 Giảng Viên
+              </button>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Địa Chỉ Email Cần Khôi Phục</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                placeholder="name@example.com"
+                value={data.email}
+                onChange={handleChange}
+                className="auth-input"
+              />
+            </div>
+
+            <button type="submit" className="auth-submit-btn" disabled={loading}>
+              {loading ? 'Đang gửi email...' : 'Gửi Yêu Cầu Khôi Phục'}
+            </button>
+
+            <div className="flex items-center justify-center gap-2 mt-4 cursor-pointer text-cyan-400 hover:text-cyan-300 font-semibold text-sm transition-colors" onClick={() => navigate(-1)}>
+              <IoArrowBack /> Quay Lại Trang Đăng Nhập
+            </div>
+          </form>
         </div>
-        <div className='flex flex-row items-center justify-between mt-4'>
-          <button type="submit" className='bg-yellow-500 text-cyan-900 py-2 px-4 font-bold hover:bg-yellow-800'>Send</button>
-          <p className='text-xl text-yellow-500 flex items-center' onClick={() => navigate(-1)}>
-            <IoArrowBack className='text-xl text-semibold' /> Go back
-          </p>
-        </div>
-      </form>
-    </section>
+      </div>
+      <Footer />
+    </div>
   );
 };
 

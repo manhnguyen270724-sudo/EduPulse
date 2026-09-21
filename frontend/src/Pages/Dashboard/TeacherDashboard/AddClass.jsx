@@ -1,43 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { FaVideo, FaTimes, FaCalendarAlt, FaLink, FaHeading, FaClock } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import DateTime from './DateTime';
+import { getCourseSubjectLabel, DAYS_VI } from '../../../data/subjectTaxonomy';
+import './AddClass.css';
 
 function AddClass({ onClose }) {
   const { ID } = useParams();
   const [courses, setCourses] = useState([]);
-  const [error, setError] = useState([]);
-  const [date, setDate] = useState("");
-  const [link, setLink] = useState("");
-  const [note, setNote] = useState("");
+  const [date, setDate] = useState('');
+  const [link, setLink] = useState('');
+  const [note, setNote] = useState('');
   const [CourseId, setCourseId] = useState('');
   const [allowedDays, setCurrData] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
-  const DAY = [
-    "Sunday",    
-    "Monday",    
-    "Tuesday",   
-    "Wednesday", 
-    "Thursday",  
-    "Friday",    
-    "Saturday"   
-  ];
-  
   function setToMidnight(dateTimeString) {
-    // Create a new Date object from the input string
-    let date = new Date(dateTimeString);
-    
-    // Extract the time part
-    let hours = date.getUTCHours();
-    let minutes = date.getUTCMinutes();
-    let seconds = date.getUTCSeconds();
-    
-    let totalMinutes = (hours * 60) + minutes;
-    date.setUTCHours(0, 0, 0, 0);
-    let modifiedDateTimeString = date.toISOString();
-    
-    const DATETIME = [totalMinutes, modifiedDateTimeString];
-    
-    return DATETIME;
+    let d = new Date(dateTimeString);
+    let hours = d.getUTCHours();
+    let minutes = d.getUTCMinutes();
+    let totalMinutes = hours * 60 + minutes;
+    d.setUTCHours(0, 0, 0, 0);
+    return [totalMinutes, d.toISOString()];
   }
 
   useEffect(() => {
@@ -45,126 +30,190 @@ function AddClass({ onClose }) {
       try {
         const response = await fetch(`/api/course/Teacher/${ID}/enrolled`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
 
-        // console.log(response);
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
+        if (!response.ok) throw new Error('Không thể lấy danh sách khóa học');
         const res = await response.json();
-
-        // console.log(res.data);
-        setCourses(res.data);
-        setCourseId(res.data[0]._id);
+        const list = (res.data || []).filter(c => c.isapproved);
+        setCourses(list);
+        if (list.length > 0) {
+          setCourseId(list[0]._id);
+        }
       } catch (error) {
-        setError(error.message);
+        toast.error(error.message);
       }
     };
-    getCourses();
-  }, [ID]); 
+    if (ID) getCourses();
+  }, [ID]);
 
   useEffect(() => {
-    const filteredData = courses.filter(course => course._id === CourseId);
-    setCurrData(filteredData[0]?.schedule);
-    // console.log("output:", filteredData[0]?.schedule);
-  }, [CourseId]);
-  
+    const selected = courses.find(c => c._id === CourseId);
+    setCurrData(selected?.schedule || []);
+  }, [CourseId, courses]);
 
-  const addCourses = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!CourseId) {
+      toast.error('Vui lòng chọn khóa học.');
+      return;
+    }
+    if (!note.trim()) {
+      toast.error('Vui lòng nhập chủ đề / tiêu đề buổi học.');
+      return;
+    }
+    if (!date) {
+      toast.error('Vui lòng chọn ngày và giờ dạy phù hợp.');
+      return;
+    }
+    if (!link.trim()) {
+      toast.error('Vui lòng dán link Google Meet hoặc phòng học trực tuyến.');
+      return;
+    }
+
     const currentDate = new Date();
     const givenDate = new Date(date);
+    if (currentDate > givenDate) {
+      toast.error('Ngày giờ học phải ở tương lai!');
+      return;
+    }
 
     const modifyDate = setToMidnight(date);
-
     const data = {
-      title: note,
+      title: note.trim(),
       timing: modifyDate[0],
       date: modifyDate[1],
-      link: link,
+      link: link.trim(),
       status: 'upcoming',
     };
 
-    // console.log("add classes",data)
+    setSubmitting(true);
+    try {
+      const response = await fetch(`/api/course/${CourseId}/teacher/${ID}/add-class`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-
-    if (currentDate > givenDate) {
-      alert('choose a valid Date!');
-    } else if (note === '' || date === '' || link === '') {
-      alert('All fields are required!');
-    } else {
-      try {
-        const response = await fetch(`/api/course/${CourseId}/teacher/${ID}/add-class`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-
-        const res = await response.json();
-        alert(res.message);
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        
-        
-
-        if (res.statusCode === 200) {
-          onClose();
-        }
-      } catch (error) {
-        setError(error.message);
+      const res = await response.json();
+      if (response.ok && res.statusCode === 200) {
+        toast.success('Lên lịch buổi học thành công!');
+        onClose();
+      } else {
+        toast.error(res.message || 'Lên lịch thất bại.');
       }
+    } catch (error) {
+      toast.error(error.message || 'Lỗi kết nối máy chủ.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center'>
-      <div className='w-[60%] h-[70%] bg-blue-gray-700 text-white rounded-md'>
-        <div className='absolute w-9 h-9 bg-[#E2B659] rounded-xl cursor-pointer flex items-center justify-center m-2' onClick={onClose}>✖️</div>
-        
-        <div className='flex justify-center mt-5 gap-10 border-b-2 py-5'>
-          <p className='text-2xl'>Create next class</p>
-          <select value={CourseId} onChange={(e) => setCourseId(e.target.value)} className='text-gray-900 rounded-md w-28 px-2 border-0 outline-0'>
-            {courses && (
-              courses.filter((course) => course.isapproved)
-              .map((course) => (
-                <option key={course._id} value={course._id}>{course.coursename.toUpperCase()} {'['} {course.schedule.map(day => DAY[day.day]).join(', ')} {']'}</option>
-              ))
-            )}
-          </select>
-        </div>
-
-        <div className='flex items-center justify-around my-20 mx-5'>
-
-          <div className='flex gap-5 text-black'>
-            <label htmlFor="" className='text-xl text-white'>Date & Time:</label>
-            <DateTime setDate={setDate} allowedDays={allowedDays}/>
+    <div className="ac-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="ac-modal">
+        {/* Header */}
+        <div className="ac-header">
+          <div className="ac-title-wrap">
+            <div className="ac-header-icon">
+              <FaVideo />
+            </div>
+            <div>
+              <h2 className="ac-title">Lên Lịch Buổi Học Trực Tuyến</h2>
+              <p className="ac-subtitle">Thiết lập phòng học Google Meet theo thời khóa biểu đã đăng ký</p>
+            </div>
           </div>
+          <button className="ac-btn-close" onClick={onClose} type="button">
+            <FaTimes />
+          </button>
         </div>
 
-        <div className='m-10 flex items-center justify-center gap-20 mb-20'>
-          <div className='flex gap-5'>
-            <label htmlFor="" className='text-xl'>Link:</label>
-            <input value={link} onChange={(e) => setLink(e.target.value)} type="url" className='border-0 outline-0 text-gray-900 py-1 px-3 rounded-sm' />
+        {/* Form Body */}
+        <form onSubmit={handleSubmit}>
+          <div className="ac-body">
+            {/* Khóa học */}
+            <div className="ac-field">
+              <label className="ac-label">
+                <FaCalendarAlt size={13} className="text-sky-500" />
+                <span>Khóa học phụ trách</span>
+              </label>
+              {courses.length === 0 ? (
+                <div className="text-sm text-amber-500 p-2 border border-amber-500/20 rounded-lg">
+                  Bạn chưa có khóa học nào được duyệt để lên lịch.
+                </div>
+              ) : (
+                <select
+                  value={CourseId}
+                  onChange={(e) => setCourseId(e.target.value)}
+                  className="ac-select"
+                >
+                  {courses.map((c) => {
+                    const daysStr = (c.schedule || [])
+                      .map(d => DAYS_VI[d.day] || `Thứ ${d.day}`)
+                      .join(', ');
+                    return (
+                      <option key={c._id} value={c._id}>
+                        {getCourseSubjectLabel(c.coursename)} {c.grade ? `(Lớp ${c.grade})` : ''} - Lịch: [{daysStr || 'Chưa định'}]
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
+            </div>
+
+            {/* Tiêu đề buổi học */}
+            <div className="ac-field">
+              <label className="ac-label">
+                <FaHeading size={13} className="text-sky-500" />
+                <span>Chủ đề / Bài học</span>
+              </label>
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Ví dụ: Buổi 3: Luyện giải hệ phương trình nâng cao"
+                className="ac-input"
+              />
+            </div>
+
+            {/* Ngày và Giờ */}
+            <div className="ac-field">
+              <label className="ac-label">
+                <FaClock size={13} className="text-sky-500" />
+                <span>Ngày & Giờ Bắt Đầu (Theo khung giờ khóa học)</span>
+              </label>
+              <div className="ac-datepicker-wrap">
+                <DateTime setDate={setDate} allowedDays={allowedDays} />
+              </div>
+              <span className="ac-hint">Hệ thống chỉ cho phép chọn đúng thứ và khung giờ bạn đã cam kết với lớp.</span>
+            </div>
+
+            {/* Link Google Meet */}
+            <div className="ac-field">
+              <label className="ac-label">
+                <FaLink size={13} className="text-sky-500" />
+                <span>Đường link Google Meet</span>
+              </label>
+              <input
+                type="url"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                placeholder="https://meet.google.com/abc-defg-hij"
+                className="ac-input"
+              />
+            </div>
           </div>
 
-          <div className='flex gap-5'>
-            <label htmlFor="" className='text-xl'>Title:</label>
-            <input value={note} onChange={(e) => setNote(e.target.value)} type="text" className='border-0 outline-0 text-gray-900 py-1 px-3 rounded-sm' />
+          {/* Footer */}
+          <div className="ac-footer">
+            <button type="button" className="ac-btn-cancel" onClick={onClose} disabled={submitting}>
+              Hủy
+            </button>
+            <button type="submit" className="ac-btn-submit" disabled={submitting || courses.length === 0}>
+              {submitting ? 'Đang lưu...' : 'Xác Nhận & Tạo Buổi Học'}
+            </button>
           </div>
-        </div>
-
-        <div className='flex items-center justify-center'>
-          <div onClick={addCourses} className='bg-[#E2B659] w-32 text-center py-2 rounded-sm text-brown-900 text-xl cursor-pointer'>Submit</div>
-        </div>
+        </form>
       </div>
     </div>
   );

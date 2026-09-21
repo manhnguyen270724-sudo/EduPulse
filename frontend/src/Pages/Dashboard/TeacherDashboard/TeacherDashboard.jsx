@@ -1,27 +1,32 @@
-import React , { useEffect, useState } from 'react'
-import teachingImg from '../../Images/Teaching.svg'
-import { NavLink, useParams, useNavigate } from 'react-router-dom'
-import logo from '../../Images/logo.svg'
+import React, { useEffect, useState } from 'react';
+import { NavLink, useParams, useNavigate } from 'react-router-dom';
+import { FaHome, FaChalkboardTeacher, FaBookOpen, FaSignOutAlt, FaUserTie, FaExternalLinkAlt } from 'react-icons/fa';
+import teachingImg from '../../Images/Teaching.svg';
+import './TeacherDashboard.css';
 
 function TeacherDashboard() {
   const { ID } = useParams();
-  const navigator = useNavigate();
-  const [data, setdata] = useState([]);
+  const navigate = useNavigate();
+  const [data, setData] = useState({});
 
-  const Handlelogout = async() =>{
-    const response = await fetch(`/api/teacher/logout`, {
-      method: 'POST',
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`/api/teacher/logout`, {
+        method: 'POST',
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      const resData = await response.json();
+      if (resData.statusCode === 200 || response.ok) {
+        navigate('/');
       }
-    });
-    const data = await response.json();
-    console.log(data);
-    if(data.statusCode == 200){
-      navigator('/');
+    } catch (err) {
+      console.error("Logout error:", err);
+      navigate('/');
     }
-  }
+  };
 
   useEffect(() => {
     const getData = async () => {
@@ -38,67 +43,102 @@ function TeacherDashboard() {
         }
 
         const user = await response.json();
-        setdata(user.data);
-        // console.log(user)
-        
-        
+        setData(user.data || {});
       } catch (error) {
-        // setError(error.message)
+        console.error("Fetch teacher data error:", error);
       }
     };
-    getData();
-   },[]);
+    if (ID) getData();
+  }, [ID]);
 
   return (
     <>
-    {/* navbar */}
-      <nav className='bg-[#04253A] px-10 py-3 flex justify-between items-center'>
-        <NavLink to="/">
-        <div className='flex items-center gap-3'>
-          <img src={logo}
-            className="w-14" alt="" />
-          <h1 className='text-2xl text-[#4E84C1] font-bold'>Shiksharthee</h1>
-        </div>
+      {/* Top Navbar */}
+      <nav className="td-nav">
+        <NavLink to="/" className="td-brand">
+          <img
+            src="https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924695/edupulse/branding/edupulse_logo.jpg"
+            className="td-logo"
+            alt="EduPulse"
+          />
+          <span className="td-brand-title">EduPulse</span>
         </NavLink>
-        <div className='bg-[#0D199D] text-white py-2 px-5 rounded-full'>
-          <p onClick={Handlelogout} >logout</p>
+
+        <div className="td-nav-actions">
+          <button className="td-btn-logout" onClick={handleLogout} title="Đăng xuất">
+            <FaSignOutAlt />
+            <span>Đăng xuất</span>
+          </button>
         </div>
       </nav>
 
-      <div className='bg-[#008280] flex justify-between items-center'>
-        <div className=' text-[#071645] font-semibold text-5xl ml-72'>
-          <h1 className='mb-5'>Welcome to <span className='text-white'>Shiksharthee</span></h1>
-          <h3 className='ml-16 text-[#071645]'>{data.Firstname} {data.Lastname}</h3>
+      {/* Welcome Banner */}
+      <div className="td-banner">
+        <div>
+          <div className="td-banner-greeting">Chào mừng trở lại,</div>
+          <h1 className="td-banner-name">
+            {data.Lastname ? `${data.Lastname} ${data.Firstname}` : (data.Firstname || 'Giảng Viên')}
+          </h1>
+          <span className="td-banner-role">Bảng Điều Khiển Giảng Viên</span>
         </div>
-        <div className='m-5 mr-20'>
-          <img src={teachingImg} alt="teaching" width={300}/>
-        </div>
+        <img src={teachingImg} alt="Teaching" className="td-banner-img" />
       </div>
 
-      {/* sidebar */}
-      <div className='bg-[#071645] w-52 h-full absolute top-20'>
-        <div className='flex flex-col gap-5 text-xl items-center text-white mt-8 mb-10'>
-          <img src="https://www.pngall.com/wp-content/uploads/5/Profile-Male-PNG.png" alt="profile_img" width={50} />
-          <p>{data.Firstname} {data.Lastname}</p>
+      {/* Sidebar */}
+      <aside className="td-sidebar">
+        <div className="td-profile-summary">
+          <div className="td-avatar-wrap">
+            <img
+              src={data.Avatar || "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924688/edupulse/teachers/teacher_nguyen_van_an.jpg"}
+              alt="Avatar"
+              className="td-avatar"
+            />
+          </div>
+          <div className="td-user-name">
+            {data.Lastname ? `${data.Lastname} ${data.Firstname}` : 'Thầy/Cô'}
+          </div>
+          <span className="td-user-badge">Giảng Viên Thẩm Định</span>
         </div>
 
-        <div className='flex flex-col gap-1'>
-          <NavLink to={`/Teacher/Dashboard/${ID}/Home`} className={({isActive}) => isActive ? "bg-white p-3 px-[4.61rem] text-center font-semibold text-[#4E84C1]" : "p-3 text-center font-semibold text-[#4E84C1]" }> 
-          Dashboard
+        <nav className="td-nav-list">
+          <NavLink
+            to={`/Teacher/Dashboard/${ID}/Home`}
+            className={({ isActive }) => `td-nav-item ${isActive ? 'active' : ''}`}
+          >
+            <FaHome className="td-nav-icon" />
+            <span>Tổng Quan</span>
           </NavLink>
 
-          <NavLink to={`/Teacher/Dashboard/${ID}/Classes`} className={({isActive}) => isActive ? "bg-white p-3 px-[4.61rem] text-center font-semibold text-[#4E84C1]" : "p-3 text-center font-semibold text-[#4E84C1]" }> 
-          Classes
+          <NavLink
+            to={`/Teacher/Dashboard/${ID}/Classes`}
+            className={({ isActive }) => `td-nav-item ${isActive ? 'active' : ''}`}
+          >
+            <FaChalkboardTeacher className="td-nav-icon" />
+            <span>Lịch Dạy Trực Tuyến</span>
           </NavLink>
 
-          <NavLink to={`/Teacher/Dashboard/${ID}/Courses`} className={({isActive}) => isActive ? "bg-white p-3 px-[4.61rem] text-center font-semibold text-[#4E84C1]" : "p-3 text-center font-semibold text-[#4E84C1]" }> 
-          Courses
+          <NavLink
+            to={`/Teacher/Dashboard/${ID}/Courses`}
+            className={({ isActive }) => `td-nav-item ${isActive ? 'active' : ''}`}
+          >
+            <FaBookOpen className="td-nav-icon" />
+            <span>Quản Lý Khóa Học</span>
           </NavLink>
-        </div>
 
-      </div>
+          <NavLink
+            to={`/teacher/${ID}`}
+            target="_blank"
+            className="td-nav-item"
+            style={{ marginTop: 'auto', borderTop: '1px solid var(--sidebar-border)', paddingTop: '14px' }}
+          >
+            <FaUserTie className="td-nav-icon" style={{ color: 'var(--primary)' }} />
+            <span>Xem Hồ Sơ Công Khai</span>
+            <FaExternalLinkAlt style={{ fontSize: '0.7rem', marginLeft: 'auto', opacity: 0.6 }} />
+          </NavLink>
+        </nav>
+      </aside>
     </>
-  )
+  );
 }
 
-export default TeacherDashboard
+export default TeacherDashboard;

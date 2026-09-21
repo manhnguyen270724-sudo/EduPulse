@@ -23,6 +23,7 @@ const Admin = () => {
       try {
         const response = await fetch(`/api/admin/messages/all`, {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -46,6 +47,7 @@ const Admin = () => {
 
       const response = await fetch(`/api/admin/${adminID}/approve/${type}/${ID}`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
         },
@@ -76,6 +78,7 @@ const Admin = () => {
       try {
         const response = await fetch(`/api/admin/${data}/approve`, {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

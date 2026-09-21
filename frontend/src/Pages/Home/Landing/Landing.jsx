@@ -1,273 +1,522 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Landing.css";
 import Classroom from "../../Images/Classroom.svg";
 import Plant from "../../Images/Plant.svg";
-import Plant2 from "../../Images/Plant2.svg"
+import Plant2 from "../../Images/Plant2.svg";
 import Contact from "../Contact/Contact.jsx";
 import Footer from "../../Footer/Footer.jsx";
 import Header from "../Header/Header.jsx";
 import { CgProfile } from "react-icons/cg";
 import { IoSchoolSharp } from "react-icons/io5";
-import { FaSchool } from "react-icons/fa";
-import { NavLink , useNavigate} from "react-router-dom";
+import { FaSchool, FaGraduationCap, FaVideo, FaHeadset, FaSearch, FaCheckCircle, FaStar } from "react-icons/fa";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Landing() {
   const [LClass, setLClass] = useState(false);
-  const [EMentor, setEMentor] = useState(false);
+  const [EMentor, setEMentor] = useState(true);
   const [subject, setSubject] = useState('');
-  
+  const [activeSubject, setActiveSubject] = useState('math');
   const [facList, setFacList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const handleSearch = ()=>{
-    // console.log('working')
-    navigate(`/Search/${subject}`)
-  }
+  const handleSearch = () => {
+    if (!subject.trim()) return;
+    navigate(`/Search/${subject.trim().toLowerCase()}`);
+  };
 
-  const AA = ()=>{
+  const showMentor = () => {
     setEMentor(true);
     setLClass(false);
-  }
+  };
 
-  const BB = ()=>{
+  const showLiveClass = () => {
     setEMentor(false);
     setLClass(true);
-  }
+  };
 
-  const teachersList = async(sub)=>{
+  const fetchTeachersBySubject = async (sub) => {
+    setActiveSubject(sub);
     setLoading(true);
+    try {
+      const response = await fetch(`/api/course/${sub}`, {
+        method: 'GET',
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+      const data = await response.json();
+      setFacList(data.data || []);
+    } catch (err) {
+      console.error("Lỗi khi tải giảng viên:", err);
+      setFacList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const response = await fetch(`/api/course/${sub}`, {
-      method: 'GET',
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      }
-    });
+  // Tự động load môn Toán đầu tiên khi vào trang
+  useEffect(() => {
+    fetchTeachersBySubject('math');
+  }, []);
 
-    const data = await response.json();
-    setFacList(data.data);
-    console.log(data.data);
-    setLoading(false);
-  }
+  const subjectTabs = [
+    { key: 'math', label: 'Toán Học' },
+    { key: 'physics', label: 'Vật Lý' },
+    { key: 'chemistry', label: 'Hóa Học' },
+    { key: 'biology', label: 'Sinh Học' },
+    { key: 'computer', label: 'Tin Học & AI' },
+    { key: 'ielts', label: 'Tiếng Anh & IELTS' },
+    { key: 'ai-data', label: 'Khoa Học Dữ Liệu' },
+    { key: 'finance', label: 'Tài Chính Số' }
+  ];
 
+  const teacherImages = {
+    math: "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924688/edupulse/teachers/teacher_nguyen_van_an.jpg",
+    physics: "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924689/edupulse/teachers/teacher_tran_thi_mai.jpg",
+    chemistry: "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924691/edupulse/teachers/teacher_le_hoang_long.jpg",
+    biology: "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924692/edupulse/teachers/teacher_pham_thi_lan.jpg",
+    computer: "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924693/edupulse/teachers/teacher_do_minh_duc.jpg",
+    ielts: "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924689/edupulse/teachers/teacher_tran_thi_mai.jpg",
+    "ai-data": "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924688/edupulse/teachers/teacher_nguyen_van_an.jpg",
+    finance: "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924692/edupulse/teachers/teacher_pham_thi_lan.jpg"
+  };
 
   return (
-    <>
-    <Header/>
-    {/* Top Section */}
-      <div className="top">
-        <div className="left">
-          <h1>
-          Empowering Minds, Inspiring Futures: <br />Your Gateway to Online Learning with <span className="font-semibold text-amber-400 font-serif text-5xl">Shiksharthee</span>
-          </h1>
-          {/*  Search  */}
+    <div className="edupulse-landing">
+      <Header />
 
-          <div className="search mb-10">
-            <img src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/6c476f454537d7f27cae2b4d0f31e2b59b3020f5" width={30} alt="" />
-            <input type="text" placeholder='Ex: Math ...' value={subject} onChange={(e)=>setSubject(e.target.value)}/>
-            <button className='w-32' onClick={handleSearch}>Find Teacher</button>
-          </div>
+      {/* ================= HERO SECTION ================= */}
+      <section className="edupulse-hero">
+        <div className="hero-glow-bg hero-glow-1"></div>
+        <div className="hero-glow-bg hero-glow-2"></div>
+        
+        <div className="edupulse-hero-container">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <span className="badge-pulse"></span>
+              <span className="badge-text">TRUNG TÂM ĐÀO TẠO & HỌC TRỰC TUYẾN CHẤT LƯỢNG CAO • 99 TÔ HIẾN THÀNH, ĐÀ NẴNG</span>
+            </div>
 
-        </div>
-        <div className="right">
-          <img src={Classroom} width={500} alt="" />
-        </div>
-      </div>
+            <h1 className="hero-title">
+              <span className="hero-line hero-line-1">Nâng Tầm Tri Thức,</span>
+              <span className="hero-line hero-line-2">Vững Bước Tương Lai Cùng <span className="gradient-text">EduPulse</span></span>
+            </h1>
 
-      {/* Features */}
-      <div className="features ">
-        <p>Why You Choose Us</p>
-        {/* <hr className="underLine"/> */}
-        <div className="fets2">
-          <div className="fet cursor-pointer mb-5" onClick={AA}>
-            <img
-              src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/622a85ea75414daadf6055613c074c5280b95444"
-              alt=""
-            />
-            <h4>Expert Mentor</h4>
-            <p>
-              Our expert mentors are the cornerstone of our educational
-              approach. With a wealth of knowledge they support our students on
-              their journey to success.
+            <p className="hero-subtitle">
+              Nền tảng giáo dục số đồng hành cùng đội ngũ Giảng viên đầu ngành. 
+              Học tương tác 2 chiều qua Google Meet, giải đáp thấu đáo và xây dựng nền tảng vững chắc cho mọi kỳ thi và sự nghiệp.
             </p>
+
+            {/* Search Bar */}
+            <div className="hero-search-wrapper">
+              <div className="hero-search-box">
+                <FaSearch className="search-icon" />
+                <input 
+                  type="text" 
+                  placeholder="Nhập môn học bạn muốn tìm (vd: math, physics, chemistry)..." 
+                  value={subject} 
+                  onChange={(e) => setSubject(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+                <button className="hero-search-btn" onClick={handleSearch}>
+                  Tìm Giảng Viên
+                </button>
+              </div>
+
+              {/* Quick Tags */}
+              <div className="hero-quick-tags">
+                <span className="quick-tag-label">Tìm nhanh:</span>
+                {subjectTabs.map(tab => (
+                  <button 
+                    key={tab.key} 
+                    className="quick-tag-btn" 
+                    onClick={() => {
+                      setSubject(tab.key);
+                      fetchTeachersBySubject(tab.key);
+                    }}
+                  >
+                    {tab.icon} {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Hero CTA buttons */}
+            <div className="hero-cta-group">
+              <NavLink to="/courses" className="btn-primary-glow">
+                Khám Phá Khóa Học
+              </NavLink>
+              <NavLink to="/signup" className="btn-secondary-glass">
+                Đăng Ký Tài Khoản Miễn Phí
+              </NavLink>
+            </div>
           </div>
 
-          <div className="fet cursor-pointer mb-5" onClick={BB}>
-            <img
-              src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/1478ee1b2a35123ded761b65c3ed2ceaece0d20f"
-              alt=""
-            />
-            <h4>High Quality Live Class</h4>
-            <p>
-              We deliver high-quality live classes to our students, providing
-              interactive learning experiences led by experienced instructors.{" "}
+          <div className="hero-visual">
+            <div className="hero-image-wrapper">
+              <img src={Classroom} alt="Lớp học trực tuyến EduPulse" className="hero-main-img" />
+              
+              {/* Floating Stat Card */}
+              <div className="floating-stat-card stat-live">
+                <div className="stat-icon-wrapper">
+                  <FaVideo className="text-cyan-400 text-lg" />
+                </div>
+                <div>
+                  <div className="stat-title font-bold text-white text-sm">Lớp Học Trực Tuyến</div>
+                  <div className="stat-desc text-xs text-green-400 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-ping"></span> Đang diễn ra tương tác
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Mentor Card */}
+              <div className="floating-stat-card stat-mentor">
+                <div className="stat-icon-wrapper bg-amber-500/20 text-amber-400">
+                  <FaStar className="text-sm" />
+                </div>
+                <div>
+                  <div className="stat-title font-bold text-white text-sm">4.9 / 5.0 ⭐</div>
+                  <div className="stat-desc text-xs text-slate-300">Đánh giá từ 15,000+ Học viên</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Counter Bar */}
+        <div className="hero-stats-bar">
+          <div className="stat-box">
+            <div className="stat-number">15,000+</div>
+            <div className="stat-label">Học Viên Tin Tưởng</div>
+          </div>
+          <div className="stat-divider"></div>
+          <div className="stat-box">
+            <div className="stat-number">50+</div>
+            <div className="stat-label">Giảng Viên Đầu Ngành</div>
+          </div>
+          <div className="stat-divider"></div>
+          <div className="stat-box">
+            <div className="stat-number">98.8%</div>
+            <div className="stat-label">Tỷ Lệ Đạt Mục Tiêu</div>
+          </div>
+          <div className="stat-divider"></div>
+          <div className="stat-box">
+            <div className="stat-number">24/7</div>
+            <div className="stat-label">Đồng Hành & Hỗ Trợ</div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* ================= FEATURES SECTION ================= */}
+      <section className="edupulse-features-section">
+        <div className="section-header text-center">
+          <span className="section-tag">GIÁ TRỊ VƯỢT TRỘI</span>
+          <h2 className="section-title">Tại Sao Nên Lựa Chọn <span className="gradient-text">EduPulse</span>?</h2>
+          <p className="section-desc">
+            Chúng tôi xây dựng môi trường học thuật chuẩn mực, ứng dụng công nghệ hiện đại mang lại kết quả học tập tối ưu.
+          </p>
+        </div>
+
+        <div className="features-grid">
+          {/* Feature 1 */}
+          <div className={`feature-card ${EMentor ? 'active' : ''}`} onClick={showMentor}>
+            <div className="feature-icon-box cyan">
+              <FaGraduationCap />
+            </div>
+            <h3 className="feature-card-title">Cố Vấn Chuyên Môn Đầu Ngành</h3>
+            <p className="feature-card-desc">
+              Đội ngũ Phó Giáo sư, Tiến sĩ, Giảng viên ưu tú từ các trường đại học danh tiếng trực tiếp giảng dạy và dẫn dắt.
             </p>
+            <div className="feature-card-action">
+              <span>Xem chi tiết cố vấn</span> →
+            </div>
           </div>
 
-          <NavLink to='/contact'>
-            <div className="fet cursor-pointer">
-              <img
-                src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/c412120e39b2095486c76978d4cd0bea88fd883b"
-                alt=""
-              />
-              <h4>24/7 Live Support</h4>
-              <p>
-                We offer our students 24/7 live support. Whether it's a question
-                or a challenge at midnight, our dedicated team is here to provide
-                guidance, assistance.
+          {/* Feature 2 */}
+          <div className={`feature-card ${LClass ? 'active' : ''}`} onClick={showLiveClass}>
+            <div className="feature-icon-box blue">
+              <FaVideo />
+            </div>
+            <h3 className="feature-card-title">Lớp Live Tương Tác 2 Chiều</h3>
+            <p className="feature-card-desc">
+              Học trực tiếp qua Google Meet thời gian thực, hỏi đáp và trao đổi trực tiếp với giảng viên ngay trong buổi học.
+            </p>
+            <div className="feature-card-action">
+              <span>Xem trải nghiệm lớp học</span> →
+            </div>
+          </div>
+
+          {/* Feature 3 */}
+          <NavLink to='/contact' className="feature-card-link">
+            <div className="feature-card">
+              <div className="feature-icon-box emerald">
+                <FaHeadset />
+              </div>
+              <h3 className="feature-card-title">Hỗ Trợ Học Tập 24/7</h3>
+              <p className="feature-card-desc">
+                Hệ thống trợ giảng và đội ngũ kỹ thuật luôn túc trực hỗ trợ giải đáp mọi bài tập và khó khăn của học viên.
               </p>
+              <div className="feature-card-action">
+                <span>Liên hệ hỗ trợ ngay</span> →
+              </div>
             </div>
           </NavLink>
         </div>
-        {LClass && (
-          <div className="flex items-center justify-center">
-            <div className="flex gap-5 items-center my-5">
-              <img src="https://lh3.googleusercontent.com/kq1PrZ8Kh1Pomlbfq4JM1Gx4z-oVr3HG9TEKzwZfqPLP3TdVYrx0QrIbpR-NmMwgDzhNTgi3FzuzseMpjzkfNrdHK5AzWGZl_RtKB80S-GZmWOQciR9s=w1296-v1-e30" alt="" width={300}/>
-              <div className="text-white flex flex-col items-center">
-                <h1>High Quality Live Class</h1>
-                <p>We deliver high-quality live classes to our students,<br /> providing interactive learning experiences <br />led by experienced instructors.</p>
-              </div>
-            </div>
-          </div>
-        )}
 
+        {/* Feature Detail: E-Mentor Display */}
         {EMentor && (
-          <div className="flex items-center justify-center mt-7 gap-5">
-            <div className="bg-[#0E3A59] m-2 p-5 rounded-3xl overflow-hidden flex flex-col items-center justify-center">
-              <img className=" rounded-full" src="https://media.istockphoto.com/id/1310210662/photo/portrait-of-indian-woman-as-a-teacher-in-sari-standing-isolated-over-white-background-stock.jpg?s=612x612&w=0&k=20&c=EMI42nCFpak1c4JSFvwfN0Qllyxt19dlihYEXAdnCXY=" alt="" width={200}/>
-
-              <div className="flex items-center justify-start">
-                <CgProfile/>
-                <p>Prof. Dina Sharma</p>
-              </div>
-              <div className="flex items-center">
-                <FaSchool />
-                <p>Galaxy University</p>
-              </div>
-              <div className="flex items-center">
-                <IoSchoolSharp />
-                <p>Ph.D. in Astrophysics</p>
-              </div>
+          <div className="feature-detail-container">
+            <div className="detail-header">
+              <h3 className="detail-title">Hội Đồng Cố Vấn Học Thuật Tiêu Biểu</h3>
+              <p className="detail-subtitle">Gặp gỡ những người thầy tận tâm đồng hành cùng thành công của bạn</p>
             </div>
-            <div className="bg-[#0E3A59] m-2 p-5 rounded-3xl overflow-hidden flex flex-col items-center justify-center">
-              <img className=" rounded-full" src="https://media.istockphoto.com/id/1324558913/photo/confident-young-man-in-casual-green-shirt-looking-away-standing-with-crossed-arms-isolated-on.jpg?s=612x612&w=0&k=20&c=NOrKRrUuxvePKijL9sFBHlDwHESv7Van68-hoS-_4hQ=" alt="" width={200}/>
 
-              <div className="flex items-center justify-start">
-                <CgProfile/>
-                <p>Dr. Anand Mishra</p>
-              </div>
-              <div className="flex items-center">
-                <FaSchool />
-                <p>Maharishi University</p>
-              </div>
-              <div className="flex items-center">
-                <IoSchoolSharp />
-                <p>Ph.D. in Quantum Physics</p>
-              </div>
-            </div>
-            <div className="bg-[#0E3A59] m-2 p-5 rounded-3xl overflow-hidden flex flex-col items-center justify-center">
-              <img className=" rounded-full" src="https://media.istockphoto.com/id/1663458254/photo/portrait-of-beautiful-indian-woman-in-sari.jpg?s=612x612&w=0&k=20&c=raeTJOEyA4sFX_GwrgboXt9ZxtAZ8RkFuljPJnL9sCU=" alt="" width={200}/>
+            <div className="mentors-showcase-grid">
+              {/* Mentor 1 */}
+              <NavLink to="/teacher/an-nguyen-van" className="mentor-card-link" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="mentor-card">
+                  <div className="mentor-avatar-wrapper">
+                    <img src="https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924688/edupulse/teachers/teacher_nguyen_van_an.jpg" alt="GS. TS. Nguyễn Văn An" className="mentor-avatar" />
+                    <span className="mentor-verified-badge" title="Đã xác thực danh tính"><FaCheckCircle /></span>
+                  </div>
+                  <h4 className="mentor-name">GS. TS. Nguyễn Văn An</h4>
+                  <div className="mentor-meta">
+                    <div className="mentor-meta-item">
+                      <FaSchool className="meta-icon text-yellow-400" />
+                      <span>ĐH Sư Phạm Hà Nội</span>
+                    </div>
+                    <div className="mentor-meta-item">
+                      <IoSchoolSharp className="meta-icon text-cyan-400" />
+                      <span>Tiến sĩ Toán Học & Giải Tích</span>
+                    </div>
+                  </div>
+                  <div className="mentor-experience">15+ năm kinh nghiệm đào tạo học sinh giỏi quốc gia</div>
+                  <div style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600 }}>Xem hồ sơ giảng viên →</div>
+                </div>
+              </NavLink>
 
-              <div className="flex items-center justify-start">
-                <CgProfile/>
-                <p>Prof. Sunita Patel</p>
-              </div>
-              <div className="flex items-center">
-                <FaSchool />
-                <p>Ramanujan Institute</p>
-              </div>
-              <div className="flex items-center">
-                <IoSchoolSharp />
-                <p>D.Phil. in Number Theory</p>
-              </div>
+              {/* Mentor 2 */}
+              <NavLink to="/teacher/mai-tran-thi" className="mentor-card-link" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="mentor-card">
+                  <div className="mentor-avatar-wrapper">
+                    <img src="https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924689/edupulse/teachers/teacher_tran_thi_mai.jpg" alt="PGS. TS. Trần Thị Mai" className="mentor-avatar" />
+                    <span className="mentor-verified-badge" title="Đã xác thực danh tính"><FaCheckCircle /></span>
+                  </div>
+                  <h4 className="mentor-name">PGS. TS. Trần Thị Mai</h4>
+                  <div className="mentor-meta">
+                    <div className="mentor-meta-item">
+                      <FaSchool className="meta-icon text-yellow-400" />
+                      <span>Đại học Quốc Gia Hà Nội</span>
+                    </div>
+                    <div className="mentor-meta-item">
+                      <IoSchoolSharp className="meta-icon text-cyan-400" />
+                      <span>Thạc sĩ Vật Lý Lượng Tử</span>
+                    </div>
+                  </div>
+                  <div className="mentor-experience">10+ năm kinh nghiệm giảng dạy & nghiên cứu ứng dụng</div>
+                  <div style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600 }}>Xem hồ sơ giảng viên →</div>
+                </div>
+              </NavLink>
+
+              {/* Mentor 3 */}
+              <NavLink to="/teacher/long-le-hoang" className="mentor-card-link" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="mentor-card">
+                  <div className="mentor-avatar-wrapper">
+                    <img src="https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924691/edupulse/teachers/teacher_le_hoang_long.jpg" alt="TS. Lê Hoàng Long" className="mentor-avatar" />
+                    <span className="mentor-verified-badge" title="Đã xác thực danh tính"><FaCheckCircle /></span>
+                  </div>
+                  <h4 className="mentor-name">TS. Lê Hoàng Long</h4>
+                  <div className="mentor-meta">
+                    <div className="mentor-meta-item">
+                      <FaSchool className="meta-icon text-yellow-400" />
+                      <span>ĐH Bách Khoa TP.HCM</span>
+                    </div>
+                    <div className="mentor-meta-item">
+                      <IoSchoolSharp className="meta-icon text-cyan-400" />
+                      <span>Tiến sĩ Kỹ Thuật Hóa Học</span>
+                    </div>
+                  </div>
+                  <div className="mentor-experience">8+ năm giảng dạy đại học & hướng dẫn nghiên cứu sinh</div>
+                  <div style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600 }}>Xem hồ sơ giảng viên →</div>
+                </div>
+              </NavLink>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Courses */}
-      <div className="courses">
-      <p>Faculty List</p>
-      <hr className="underLine"/>
-      <div className="subjects">
-        <div className="subject" onClick={()=>teachersList("physics")}>
-          <img src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/8e9bf690d23d886f63466a814cfbec78187f91d2" alt="Physics" />
-          <p>Physics</p>
-        </div>
-        <div className="subject" onClick={()=>teachersList("chemistry")}>
-          <img src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/3e546b344774eb0235acc6bf6dad7814a59d6e95" alt="Chemistry" />
-          <p>Chemistry</p>
-        </div>
-        <div className="subject" onClick={()=>teachersList("biology")}>
-          <img src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/28ac70002ae0a676d9cfb0f298f3e453d12b5555" alt="Zoology" />
-          <p>Biology</p>
-        </div>
-        <div className="subject" onClick={()=>teachersList("math")}>
-          <img src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/61930117e428a1f0f7268f888a84145f93aa0664" alt="Math" />
-          <p>Math</p>
-        </div>
-        <div className="subject" onClick={()=>teachersList("computer")}>
-          <img src="https://www.figma.com/file/6b4R8evBkii6mI53IA4vSS/image/a64c93efe984ab29f1dfb9e8d8accd9ba449f272" alt="Computer" />
-          <p>Computer</p>
-        </div>
-        
-      </div>
-
-      <div className="flex items-center justify-center gap-10">
-        {!loading && facList && (
-          facList.map(fac => (
-          <div key={fac._id} className="bg-[#99afbc] p-5 rounded-md ">
-            <div className="flex gap-3 items-center mb-2 ">
-            <img src="https://www.pngall.com/wp-content/uploads/5/Profile-Male-PNG.png" alt="profile_img" width={50} />
-            <div className="flex flex-col justify-center items-start pl-3">
-            <p>{fac.enrolledteacher.Firstname} {fac.enrolledteacher.Lastname}</p>
-            <h4 className="text-blue-900">{fac.enrolledteacher.Email}</h4>
+        {/* Feature Detail: Live Class Display */}
+        {LClass && (
+          <div className="feature-detail-container live-class-detail">
+            <div className="live-preview-card">
+              <div className="live-preview-header">
+                <span className="live-dot"></span>
+                <span className="live-badge-text">PHÒNG HỌC TRỰC TUYẾN CHẤT LƯỢNG CAO</span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Tích hợp Google Meet Bản Quyền</h3>
+              <p className="text-slate-300 text-sm max-w-xl mx-auto mb-4">
+                Hình ảnh sắc nét chuẩn Full HD, âm thanh trong trẻo, không giới hạn thời gian buổi học. 
+                Giảng viên có thể ghi hình bài giảng để học viên xem lại bất cứ lúc nào.
+              </p>
+              <NavLink to="/courses" className="btn-primary-glow inline-block">
+                Xem Lịch Lớp Học Ngay
+              </NavLink>
             </div>
+          </div>
+        )}
+      </section>
+
+
+      {/* ================= FACULTY & COURSES EXPLORER ================= */}
+      <section className="edupulse-courses-section">
+        <div className="section-header text-center">
+          <span className="section-tag">CHƯƠNG TRÌNH HỌC TẬP</span>
+          <h2 className="section-title">Khám Phá Giảng Viên & Môn Học</h2>
+          <p className="section-desc">Chọn môn học để xem thông tin Giảng viên phụ trách và nội dung đào tạo chuyên sâu.</p>
+        </div>
+
+        {/* Subject Filter Pills */}
+        <div className="subject-pills-wrapper">
+          {subjectTabs.map(tab => (
+            <button 
+              key={tab.key}
+              className={`subject-pill ${activeSubject === tab.key ? 'active' : ''}`}
+              onClick={() => fetchTeachersBySubject(tab.key)}
+            >
+              <span className="pill-text">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Course & Faculty Cards Grid */}
+        <div className="courses-grid-container">
+          {loading ? (
+            <div className="courses-loading">
+              <div className="spinner"></div>
+              <p>Đang tải dữ liệu giảng viên...</p>
             </div>
-            { fac.enrolledteacher.Email === "urttsg@gmail.com" ?
-              <h4><span className="font-bold text-brown-800">Education :</span> Post graduate from Calcutta University</h4> 
-              : 
-              <h4><span className="font-bold text-brown-800">Education :</span> Post graduate from Sister Nivedita university</h4>
-            }
-            { fac.enrolledteacher.Email === "urttsg@gmail.com" ? <h4>1 years of teaching experience</h4> : <h4>2 years of teaching experience</h4>}
-          </div>
-        )))}
-      </div>
+          ) : facList.length > 0 ? (
+            <div className="faculty-cards-grid">
+              {facList.map(fac => {
+                const teacherImg = fac.enrolledteacher?.Avatar || teacherImages[fac.coursename?.toLowerCase()] || "https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924688/edupulse/teachers/teacher_nguyen_van_an.jpg";
+                return (
+                  <div key={fac._id} className="faculty-card">
+                    <div className="faculty-card-top">
+                      <NavLink to={`/teacher/${fac.enrolledteacher?._id}`} className="faculty-avatar-box" style={{ textDecoration: 'none' }}>
+                        <img src={teacherImg} alt={fac.enrolledteacher?.Firstname} className="faculty-avatar" />
+                        <span className="status-online-dot"></span>
+                      </NavLink>
+                      <div className="faculty-info">
+                        <NavLink to={`/teacher/${fac.enrolledteacher?._id}`} style={{ textDecoration: 'none' }}>
+                          <h4 className="faculty-name" title="Xem hồ sơ giảng viên">
+                            {fac.enrolledteacher?.Lastname} {fac.enrolledteacher?.Firstname}
+                          </h4>
+                        </NavLink>
+                        <div className="faculty-badge-verified">
+                          <FaCheckCircle className="text-cyan-400 text-xs" />
+                          <span>Giảng viên chính thức</span>
+                        </div>
+                      </div>
+                    </div>
 
-      </div>
+                    <div className="faculty-card-body">
+                      <div className="course-title-tag">
+                        Khóa học môn: <span className="uppercase font-bold text-cyan-300">{fac.coursename}</span>
+                      </div>
+                      <p className="course-desc-text">
+                        {fac.description}
+                      </p>
 
-      {/* About Us */}
-      <div className="about" style={{backgroundColor: "#042439"}}>
-        <h4>About Us</h4>
-        <hr className="underLine"/>
-        <div className="content">
-          <div className="left-svg">
-            <img src={Plant2} width={300} alt="" />
+                      {fac.liveClasses && fac.liveClasses.length > 0 && (
+                        <div className="course-live-schedule">
+                          <FaVideo className="text-cyan-400 text-xs" />
+                          <span>Lớp học: {fac.liveClasses[0]?.title}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="faculty-card-footer" style={{ display: 'flex', gap: '10px' }}>
+                      <NavLink to={`/teacher/${fac.enrolledteacher?._id}`} className="btn-view-doc" style={{ flex: 1, textAlign: 'center' }}>
+                        Hồ Sơ GV
+                      </NavLink>
+                      <NavLink to={`/courses/${fac._id}`} className="btn-join-course" style={{ flex: 2, textAlign: 'center' }}>
+                        Xem & Đăng Ký
+                      </NavLink>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="courses-empty">
+              <p>Chưa có giảng viên nào cho môn học này.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+
+      {/* ================= ABOUT US SECTION ================= */}
+      <section className="edupulse-about-section">
+        <div className="edupulse-about-container">
+          <div className="about-visual">
+            <img src={Plant2} alt="Minh họa học tập" className="about-img" />
           </div>
-          <p>
-            At Shiksharthee, we believe in the power of education to transform lives. Our platform is designed to be a gateway to knowledge, offering a diverse range of courses and learning experiences for students.
-            <h1 className=" bg-blue-700 w-fit py-1 px-3 rounded-sm my-2">Our Story</h1>
-            Shiksharthee was born out of a passion for learning and a desire to make quality education accessible to everyone. We understand the challenges faced by modern learners and strive to provide a solution that is both convenient and effective.
-            <h1 className=" bg-blue-700 w-fit py-1 px-3 rounded-sm my-2">Our Mission</h1>
-            Our mission is simple yet profound: to empower individuals through education. We aim to create a global learning community where students can discover new passions, enhance their skills, and achieve their academic and professional goals. By leveraging technology and innovative teaching methods, we strive to make learning engaging, interactive, and enjoyable.
-          </p>
-          <div className="right-svg">
-            <img src={Plant} width={400} alt="" />
+
+          <div className="about-content">
+            <span className="section-tag">VỀ EDUPULSE</span>
+            <h2 className="about-title">Sứ Mệnh Kiến Tạo Thế Hệ Người Học Toàn Cầu</h2>
+            
+            <p className="about-lead">
+              Tại <span className="text-cyan-400 font-bold">EduPulse</span>, chúng tôi tin rằng giáo dục chất lượng cao phải là quyền lợi dễ dàng tiếp cận của mọi học sinh trên khắp Việt Nam.
+            </p>
+
+            <div className="about-pillars">
+              <div className="pillar-item">
+                <div className="pillar-icon">🎯</div>
+                <div>
+                  <h4 className="pillar-title">Học Đi Đôi Với Hành</h4>
+                  <p className="pillar-desc">Nội dung bài học bám sát kỳ thi THPT Quốc gia và tiêu chuẩn đại học quốc tế.</p>
+                </div>
+              </div>
+
+              <div className="pillar-item">
+                <div className="pillar-icon">💡</div>
+                <div>
+                  <h4 className="pillar-title">Công Nghệ Dẫn Lối</h4>
+                  <p className="pillar-desc">Áp dụng công nghệ E-Learning thời gian thực, quản lý học tập minh bạch.</p>
+                </div>
+              </div>
+
+              <div className="pillar-item">
+                <div className="pillar-icon">🤝</div>
+                <div>
+                  <h4 className="pillar-title">Tận Tâm Đồng Hành</h4>
+                  <p className="pillar-desc">Đội ngũ giảng viên và trợ lý hỗ trợ trực tiếp từng khúc mắc của học viên.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="about-cta">
+              <NavLink to="/about" className="btn-primary-glow">
+                Tìm Hiểu Thêm Về Chúng Tôi
+              </NavLink>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Contact Us */}
-      <div className="contact-us">
-        <Contact/>
-      </div>
+      {/* ================= CONTACT SECTION ================= */}
+      <section className="edupulse-contact-section">
+        <Contact />
+      </section>
 
-      {/* Footer */}
-      <Footer/>
-    </>
+      {/* ================= FOOTER ================= */}
+      <Footer />
+    </div>
   );
 }
 

@@ -57,6 +57,11 @@ const studentSchema = new mongoose.Schema({
         ref:"studentdocs"
     },
 
+    Avatar:{
+        type:String,
+        default:""
+    },
+
     forgetPasswordToken: String,
 
     forgetPasswordExpiry: Date,
