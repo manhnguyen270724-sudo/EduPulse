@@ -195,4 +195,4 @@ const student = mongoose.model("student",studentSchema)
 
 const studentdocs = mongoose.model("studentdocs", studentDetailsSchema)
 
-export {student, studentdocs}
+export { student, student as Student, studentdocs }

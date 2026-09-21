@@ -55,9 +55,11 @@ const StudentPersonalProfile = lazy(() => import('@pages/Dashboard/StudentDashbo
 // ─── Teacher Dashboard ───
 const TeacherLayout          = lazy(() => import('@pages/Dashboard/TeacherDashboard/TeacherLayout'))
 const DashboardTeacher       = lazy(() => import('@pages/Dashboard/TeacherDashboard/DashboardTeacher'))
+const TeacherClassrooms      = lazy(() => import('@pages/Dashboard/TeacherDashboard/TeacherClassrooms'))
 const TeacherClasses         = lazy(() => import('@pages/Dashboard/TeacherDashboard/TeacherClasses'))
 const TeacherCourses         = lazy(() => import('@pages/Dashboard/TeacherDashboard/TeacherCourses'))
 const TeacherPersonalProfile = lazy(() => import('@pages/Dashboard/TeacherDashboard/TeacherPersonalProfile'))
+const ClassroomChat          = lazy(() => import('@pages/Dashboard/ClassroomChat/ClassroomChat'))
 
 // ─── Admin ───
 const Admin    = lazy(() => import('@pages/Components/Admin/Admin'))
@@ -121,6 +123,7 @@ const router = createBrowserRouter(
           <Route index element={<StudentCourses />} />
           <Route path='Courses' element={<StudentCourses />} />
           <Route path='Classes' element={<StudentClasses />} />
+          <Route path='Classes/:classroomId/chat' element={<ClassroomChat />} />
           <Route path='Search' element={<SearchTeacher />} />
           <Route path='Profile' element={<StudentPersonalProfile />} />
         </Route>
@@ -132,7 +135,9 @@ const router = createBrowserRouter(
         <Route path='/Teacher/Dashboard/:ID' element={<TeacherLayout />}>
           <Route index element={<DashboardTeacher />} />
           <Route path='Home' element={<DashboardTeacher />} />
+          <Route path='Classrooms' element={<TeacherClassrooms />} />
           <Route path='Classes' element={<TeacherClasses />} />
+          <Route path='Classes/:classroomId/chat' element={<ClassroomChat />} />
           <Route path='Courses' element={<TeacherCourses />} />
           <Route path='Profile' element={<TeacherPersonalProfile />} />
         </Route>

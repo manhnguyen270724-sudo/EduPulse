@@ -4,6 +4,8 @@ import { FaBookOpen, FaCalendarAlt, FaChalkboardTeacher, FaSignOutAlt } from 're
 import teachingImg from '../../Images/Teaching.svg';
 import './StudentDashboard.css';
 
+import NotificationBell from '../../Components/NotificationBell/NotificationBell';
+
 function StudentDashboard() {
   const { ID } = useParams();
   const navigate = useNavigate();
@@ -31,11 +33,11 @@ function StudentDashboard() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await fetch(`/api/Student/StudentDocument/${ID}`, {
+        const response = await fetch(`/api/student/StudentDocument/${ID}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
         });
 
         if (!response.ok) {
@@ -64,7 +66,8 @@ function StudentDashboard() {
           <span className="sd-brand-title">EduPulse</span>
         </NavLink>
 
-        <div className="sd-nav-actions">
+        <div className="sd-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <NotificationBell role="student" userId={ID} />
           <button className="sd-btn-logout" onClick={handleLogout} title="Đăng xuất">
             <FaSignOutAlt />
             <span>Đăng xuất</span>

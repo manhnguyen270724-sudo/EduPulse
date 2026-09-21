@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, NavLink } from 'react-router-dom';
 import Header from '../Header/Header';
 import Footer from '../../Footer/Footer';
-import { FaCheckCircle, FaVideo, FaClock, FaCalendarAlt, FaUsers, FaGraduationCap, FaChevronDown, FaChevronUp, FaTimes } from 'react-icons/fa';
+import { FaCheckCircle, FaVideo, FaClock, FaCalendarAlt, FaUsers, FaUserGraduate, FaGraduationCap, FaChevronDown, FaChevronUp, FaTimes } from 'react-icons/fa';
 import { MdSchool, MdVerified } from 'react-icons/md';
 import { getCourseSubjectLabel, getCourseLevelLabel, DAYS_VI, formatTime } from '../../../data/subjectTaxonomy';
 import './CourseDetail.css';
@@ -22,6 +22,8 @@ function CourseDetail() {
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showMobileSticky, setShowMobileSticky] = useState(false);
+  const [classrooms, setClassrooms] = useState([]);
+  const [selectedClassroom, setSelectedClassroom] = useState(null);
 
   // Theo dõi cuộn trang: Vạch tiến độ đọc 2px & Sticky bar đáy trên mobile
   useEffect(() => {
@@ -58,6 +60,13 @@ function CourseDetail() {
         } else {
           setError('Không tìm thấy khóa học này.');
         }
+
+        // Fetch danh sách lớp mở của khóa học này
+        const classRes = await fetch(`/api/classrooms/course/${courseId}`);
+        if (classRes.ok) {
+          const classData = await classRes.json();
+          setClassrooms(classData.data || []);
+        }
       } catch {
         setError('Lỗi kết nối. Vui lòng thử lại.');
       } finally {
@@ -79,9 +88,15 @@ function CourseDetail() {
     }
   })();
 
-  const handleEnroll = async () => {
+  const handleEnroll = async (specificClass = null) => {
     if (currentUser?.role === 'teacher') {
       return; // Giáo viên không đăng ký học chính khóa học
+    }
+
+    if (specificClass) {
+      setSelectedClassroom(specificClass);
+    } else {
+      setSelectedClassroom(null);
     }
 
     if (currentUser?.role === 'student') {
@@ -117,28 +132,44 @@ function CourseDetail() {
     setEnrolling(true);
     setEnrollMsg('');
     try {
-      const checkRes = await fetch('/api/student/StudentDocument/me', {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const studentData = await checkRes.json();
-      const studentId = studentData.data?._id;
-
-      const res = await fetch(`/api/public/course/${courseId}/enroll/${studentId}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const result = await res.json();
-      if (res.ok) {
-        setEnrollSuccess(true);
-        setEnrollMsg({ type: 'success', text: result.data?.message || 'Đăng ký thành công!' });
-        // Refresh course data
-        const refreshRes = await fetch(`/api/public/course/${courseId}`, { credentials: 'include' });
-        const refreshData = await refreshRes.json();
-        if (refreshData.data) setCourseData(refreshData.data);
+      if (selectedClassroom) {
+        // Đăng ký vào lớp học cụ thể
+        const res = await fetch(`/api/classrooms/${selectedClassroom._id}/enroll`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          setEnrollSuccess(true);
+          setEnrollMsg({ type: 'success', text: `Tham gia lớp "${selectedClassroom.className}" thành công!` });
+        } else {
+          setEnrollMsg({ type: 'error', text: result.message || 'Đăng ký lớp học thất bại.' });
+        }
       } else {
-        setEnrollMsg({ type: 'error', text: result.message || 'Đăng ký thất bại.' });
+        // Đăng ký chung vào khóa học
+        const checkRes = await fetch('/api/student/StudentDocument/me', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const studentData = await checkRes.json();
+        const studentId = studentData.data?._id;
+
+        const res = await fetch(`/api/public/course/${courseId}/enroll/${studentId}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await res.json();
+        if (res.ok) {
+          setEnrollSuccess(true);
+          setEnrollMsg({ type: 'success', text: result.data?.message || 'Đăng ký thành công!' });
+          const refreshRes = await fetch(`/api/public/course/${courseId}`, { credentials: 'include' });
+          const refreshData = await refreshRes.json();
+          if (refreshData.data) setCourseData(refreshData.data);
+        } else {
+          setEnrollMsg({ type: 'error', text: result.message || 'Đăng ký thất bại.' });
+        }
       }
     } catch {
       setEnrollMsg({ type: 'error', text: 'Lỗi kết nối. Vui lòng thử lại.' });
@@ -306,6 +337,101 @@ function CourseDetail() {
                     )}
                   </div>
                 ))}
+              </div>
+            </section>
+          )}
+
+          {/* Các Lớp Học Đang Tuyển Sinh (Nhóm & 1-kèm-1) */}
+          {classrooms && classrooms.length > 0 && (
+            <section className="cd-section">
+              <h2 className="cd-section-title">
+                <FaUsers className="cd-section-icon text-sky-400" />
+                Các Lớp Học Đang Mở Tuyển Sinh
+              </h2>
+              <p style={{ fontSize: '0.88rem', color: '#94a3b8', marginBottom: 16 }}>
+                Chọn lớp học phù hợp với lịch trình của bạn (hỗ trợ cả lớp nhóm và gia sư 1 kèm 1):
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                {classrooms.map((cls) => {
+                  const is1on1 = cls.classType === 'one-on-one';
+                  const isClsFull = cls.students?.length >= cls.maxStudents;
+                  return (
+                    <div
+                      key={cls._id}
+                      style={{
+                        background: '#1e293b',
+                        border: is1on1 ? '2px solid #f59e0b' : '1px solid rgba(255, 255, 255, 0.12)',
+                        borderRadius: 16,
+                        padding: 18,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              padding: '2px 8px',
+                              borderRadius: 9999,
+                              background: is1on1 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(14, 165, 233, 0.15)',
+                              color: is1on1 ? '#fbbf24' : '#38bdf8',
+                              border: is1on1 ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(14, 165, 233, 0.3)'
+                            }}
+                          >
+                            {is1on1 ? '🎯 Lớp 1 Kèm 1' : '👥 Lớp Nhóm'}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>
+                            {cls.classCode}
+                          </span>
+                        </div>
+
+                        <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: 6 }}>
+                          {cls.className}
+                        </h4>
+
+                        <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: 12 }}>
+                          Sĩ số: <strong>{cls.students?.length || 0}</strong> / {cls.maxStudents} học viên
+                        </div>
+
+                        {cls.weeklySchedule && cls.weeklySchedule.length > 0 && (
+                          <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginBottom: 16 }}>
+                            {cls.weeklySchedule.map((w, idx) => (
+                              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '4px 0' }}>
+                                <FaClock style={{ color: '#38bdf8', fontSize: '0.72rem' }} />
+                                <span>
+                                  {DAYS_VI[w.dayOfWeek]}: {w.startTime} – {w.endTime}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: 10,
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          background: isClsFull ? 'rgba(255, 255, 255, 0.08)' : is1on1 ? '#d97706' : '#0284c7',
+                          color: isClsFull ? '#64748b' : '#ffffff',
+                          border: 'none',
+                          cursor: isClsFull ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        disabled={isClsFull}
+                        onClick={() => handleEnroll(cls)}
+                      >
+                        {isClsFull ? 'Lớp Đã Đủ Sĩ Số' : is1on1 ? 'Đăng Ký Học 1 Kèm 1' : 'Đăng Ký Vào Lớp Này'}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -511,9 +637,17 @@ function CourseDetail() {
                 <div className="cd-modal-icon">
                   <FaGraduationCap />
                 </div>
-                <h3 className="cd-modal-title">Xác Nhận Đăng Ký Khóa Học</h3>
+                <h3 className="cd-modal-title">
+                  {selectedClassroom
+                    ? `Xác Nhận Đăng Ký ${selectedClassroom.classType === 'one-on-one' ? 'Lớp 1 Kèm 1' : 'Lớp Nhóm'}`
+                    : 'Xác Nhận Đăng Ký Khóa Học'}
+                </h3>
                 <p className="cd-modal-desc">
-                  Bạn đang đăng ký tham gia khóa học <strong>{subjectLabel}</strong>
+                  {selectedClassroom ? (
+                    <>Bạn đang đăng ký vào lớp <strong>{selectedClassroom.className}</strong> ({selectedClassroom.classCode})</>
+                  ) : (
+                    <>Bạn đang đăng ký tham gia khóa học <strong>{subjectLabel}</strong></>
+                  )}
                   {teacher && <> do <strong>{teacher.Lastname} {teacher.Firstname}</strong> phụ trách</>}.
                 </p>
                 <div className="cd-modal-info">

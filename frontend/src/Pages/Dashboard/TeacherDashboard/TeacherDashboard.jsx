@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
-import { FaHome, FaChalkboardTeacher, FaBookOpen, FaSignOutAlt, FaUserTie, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaHome, FaChalkboardTeacher, FaBookOpen, FaSignOutAlt, FaUserTie, FaExternalLinkAlt, FaUsers } from 'react-icons/fa';
+import NotificationBell from '../../Components/NotificationBell/NotificationBell';
 import teachingImg from '../../Images/Teaching.svg';
 import './TeacherDashboard.css';
 
@@ -64,7 +65,8 @@ function TeacherDashboard() {
           <span className="td-brand-title">EduPulse</span>
         </NavLink>
 
-        <div className="td-nav-actions">
+        <div className="td-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <NotificationBell role="teacher" userId={ID} />
           <button className="td-btn-logout" onClick={handleLogout} title="Đăng xuất">
             <FaSignOutAlt />
             <span>Đăng xuất</span>
@@ -107,6 +109,14 @@ function TeacherDashboard() {
           >
             <FaHome className="td-nav-icon" />
             <span>Tổng Quan</span>
+          </NavLink>
+
+          <NavLink
+            to={`/Teacher/Dashboard/${ID}/Classrooms`}
+            className={({ isActive }) => `td-nav-item ${isActive ? 'active' : ''}`}
+          >
+            <FaUsers className="td-nav-icon" />
+            <span>Quản Lý Lớp Học</span>
           </NavLink>
 
           <NavLink

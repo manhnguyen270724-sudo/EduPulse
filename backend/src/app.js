@@ -41,5 +41,16 @@ app.use("/api/payment", paymentRouter)
 import publicRouter from "./routes/public.routes.js"
 app.use("/api/public", publicRouter)
 
+// classroom routes (quản lý lớp học, lớp 1-kèm-1, lịch học)
+import classroomRouter from "./routes/classroom.routes.js"
+app.use("/api/classrooms", classroomRouter)
+
+// notification routes (thông báo nhắc giờ học)
+import notificationRouter from "./routes/notification.routes.js"
+app.use("/api/notifications", notificationRouter)
+
+// chat routes (kênh chat theo từng lớp học)
+import chatRouter from "./routes/chat.routes.js"
+app.use("/api/chat", chatRouter)
 
 export {app}
