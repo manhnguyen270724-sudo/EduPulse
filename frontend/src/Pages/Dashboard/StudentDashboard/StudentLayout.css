@@ -1,0 +1,298 @@
+/* ============================================================
+   EDUPULSE — STUDENT PORTAL LAYOUT STYLES
+   Design System: Academic Portal (Navy & Sky Blue)
+   ============================================================ */
+
+.sp-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--dashboard-bg);
+  color: var(--text-main);
+}
+
+/* ─── TOPBAR ─── */
+.sp-topbar {
+  height: 64px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--header-border);
+  backdrop-filter: blur(12px);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.sp-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sp-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.sp-brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+.sp-brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+
+.sp-portal-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.sp-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sp-theme-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sp-theme-btn:hover {
+  background: var(--bg-surface-tertiary);
+  transform: translateY(-1px);
+}
+
+.sp-student-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 14px 4px 6px;
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--card-border);
+  border-radius: 9999px;
+}
+
+.sp-student-pill-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sp-student-pill-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.sp-btn-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sp-btn-logout:hover {
+  background: var(--error-bg);
+  color: var(--error);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ─── BODY (SIDEBAR + MAIN) ─── */
+.sp-body {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 64px);
+}
+
+/* ─── SIDEBAR ─── */
+.sp-sidebar {
+  width: 260px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+.sp-sidebar-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sp-sidebar-avatar-frame {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.sp-sidebar-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.sp-sidebar-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.sp-sidebar-tag {
+  font-size: 0.75rem;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.sp-sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.sp-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.sp-menu-item:hover {
+  background: var(--sidebar-item-hover);
+  color: var(--text-main);
+  transform: translateX(2px);
+}
+
+.sp-menu-item.active {
+  background: var(--gradient-brand);
+  color: #fff;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.sp-menu-icon {
+  font-size: 1.15rem;
+}
+
+/* Footer of Sidebar */
+.sp-sidebar-footer {
+  padding-top: 16px;
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.sp-public-preview-card {
+  display: block;
+  padding: 14px;
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.sp-public-preview-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow);
+}
+
+.sp-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.sp-preview-hint {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* ─── MAIN VIEWPORT ─── */
+.sp-main-viewport {
+  flex: 1;
+  padding: 28px 36px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .sp-body {
+    flex-direction: column;
+  }
+  .sp-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+  }
+  .sp-main-viewport {
+    padding: 20px;
+  }
+}
