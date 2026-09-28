@@ -1,0 +1,2351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ Đồ Ngữ Cảnh Hệ Thống (DFD Mức 0) Chuẩn Hóa - EduPulse Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b1120;
+      --bg-secondary: #131d33;
+      --bg-card: rgba(19, 29, 51, 0.88);
+      --bg-card-hover: rgba(30, 45, 77, 0.95);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-highlight: rgba(59, 130, 246, 0.6);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --core-glow: #2563eb;
+      --core-bg: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #0284c7 100%);
+      
+      --color-input: #38bdf8;       /* Xanh cyan - Dữ liệu vào (Input) */
+      --color-output: #34d399;      /* Xanh ngọc lục bảo - Dữ liệu ra (Output) */
+      --color-service: #a855f7;     /* Tím - Dịch vụ đám mây ngoài */
+      --color-admin: #f43f5e;       /* Đỏ hồng - Quản trị viên */
+      --color-teacher: #f59e0b;     /* Vàng cam - Giảng viên */
+      --color-student: #06b6d4;     /* Cyan tươi - Học viên */
+      --color-payment: #10b981;     /* Xanh lá - Cổng thanh toán */
+      --color-live: #ec4899;        /* Hồng tím - Live Classroom */
+      
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 45px rgba(37, 99, 235, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --bg-card: rgba(255, 255, 255, 0.96);
+      --bg-card-hover: #ffffff;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --border-highlight: rgba(37, 99, 235, 0.5);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      
+      --core-glow: #3b82f6;
+      --core-bg: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #1d4ed8 100%);
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 10px 20px -3px rgba(0, 0, 0, 0.08);
+      --shadow-glow: 0 0 35px rgba(37, 99, 235, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Header Bar */
+    header {
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #0284c7, #2563eb, #7c3aed);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    }
+
+    .brand-info h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.2);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .brand-badge.standard {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.35);
+    }
+
+    .brand-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .tab-btn {
+      padding: 0.45rem 0.95rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: var(--border-highlight);
+    }
+
+    .tab-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    /* Filter Toolbar */
+    .filter-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.65rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .filter-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filter-chips {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .chip {
+      padding: 0.32rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .chip:hover {
+      border-color: var(--border-highlight);
+      color: var(--text-main);
+    }
+
+    .chip.active {
+      background: rgba(37, 99, 235, 0.25);
+      border-color: #3b82f6;
+      color: #60a5fa;
+    }
+
+    .chip.student.active { background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; color: #38bdf8; }
+    .chip.teacher.active { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fbbf24; }
+    .chip.admin.active { background: rgba(244, 63, 94, 0.2); border-color: #f43f5e; color: #fb7185; }
+    .chip.services.active { background: rgba(168, 85, 247, 0.2); border-color: #a855f7; color: #c084fc; }
+
+    /* Assessment Banner */
+    .assessment-bar {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15));
+      border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+
+    .assessment-status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .assessment-details-btn {
+      color: #38bdf8;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.78rem;
+      background: none;
+      border: none;
+    }
+
+    /* Viewport Stage */
+    .viewport-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 165px);
+      min-height: 720px;
+      overflow: hidden;
+      background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+      background-size: 28px 28px;
+    }
+
+    [data-theme="light"] .viewport-container {
+      background-image: 
+        radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0);
+    }
+
+    .diagram-stage {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
+    }
+
+    /* SVG Layer */
+    .flow-svg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .flow-path {
+      fill: none;
+      stroke-width: 2.2;
+      transition: opacity 0.3s ease, stroke-width 0.3s ease;
+    }
+
+    .flow-path.input-flow {
+      stroke: var(--color-input);
+      stroke-dasharray: 6 4;
+      animation: dashMove 22s linear infinite;
+    }
+
+    .flow-path.output-flow {
+      stroke: var(--color-output);
+      stroke-dasharray: 6 4;
+      animation: dashMoveReverse 22s linear infinite;
+    }
+
+    .flow-path.service-flow {
+      stroke: var(--color-service);
+      stroke-dasharray: 5 4;
+      animation: dashMove 18s linear infinite;
+    }
+
+    .flow-path.dimmed {
+      opacity: 0.06 !important;
+    }
+
+    .flow-path.highlighted {
+      stroke-width: 3.8 !important;
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    @keyframes dashMove {
+      to { stroke-dashoffset: -200; }
+    }
+
+    @keyframes dashMoveReverse {
+      to { stroke-dashoffset: 200; }
+    }
+
+    /* System Core (0.0 Process) */
+    .system-core {
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: var(--core-bg);
+      border: 4px solid #60a5fa;
+      box-shadow: var(--shadow-glow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1.5rem;
+      z-index: 25;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    }
+
+    .system-core:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 55px rgba(37, 99, 235, 0.75);
+    }
+
+    .core-pulse {
+      position: absolute;
+      top: -14px;
+      left: -14px;
+      right: -14px;
+      bottom: -14px;
+      border-radius: 50%;
+      border: 2px dashed rgba(96, 165, 250, 0.45);
+      animation: rotatePulse 45s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotatePulse {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .core-icon {
+      font-size: 2.4rem;
+      margin-bottom: 0.25rem;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+
+    .core-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1.25;
+    }
+
+    .core-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #bae6fd;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      margin-top: 0.45rem;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .core-sub {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 0.3rem;
+    }
+
+    /* Entity Cards (External Entities) */
+    .entity-card {
+      position: absolute;
+      width: 260px;
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid var(--border-color);
+      border-radius: 16px;
+      padding: 0.95rem 1.1rem;
+      box-shadow: var(--shadow-md);
+      z-index: 20;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .entity-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+      border-color: var(--border-highlight);
+    }
+
+    .entity-card.dimmed {
+      opacity: 0.12;
+      transform: scale(0.96);
+    }
+
+    .entity-card.highlighted {
+      transform: translateY(-4px) scale(1.03);
+      border-width: 2px;
+    }
+
+    /* Distinct Entity Borders */
+    .entity-card.student-card { border-left: 5px solid var(--color-student); }
+    .entity-card.teacher-card { border-left: 5px solid var(--color-teacher); }
+    .entity-card.admin-card   { border-left: 5px solid var(--color-admin); }
+    .entity-card.payment-card { border-left: 5px solid var(--color-payment); width: 240px; }
+    .entity-card.cloud-card   { border-left: 5px solid var(--color-service); width: 235px; }
+    .entity-card.email-card   { border-left: 5px solid #38bdf8; width: 235px; }
+    .entity-card.live-card    { border-left: 5px solid var(--color-live); width: 235px; }
+
+    .entity-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .entity-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .entity-icon {
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .entity-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .entity-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .entity-badge {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .badge-human {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .badge-service {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    /* Flow mini-summary inside cards */
+    .flow-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.45rem;
+      margin-top: 0.15rem;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.4rem;
+      line-height: 1.35;
+    }
+
+    .flow-arrow-icon {
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 0.05rem;
+    }
+
+    .flow-row.in .flow-arrow-icon { color: var(--color-input); }
+    .flow-row.out .flow-arrow-icon { color: var(--color-output); }
+    .flow-row.svc .flow-arrow-icon { color: var(--color-service); }
+
+    .flow-text {
+      color: var(--text-muted);
+    }
+
+    .flow-row:hover .flow-text {
+      color: var(--text-main);
+    }
+
+    /* Floating Legend */
+    .diagram-legend {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 0.85rem 1.25rem;
+      box-shadow: var(--shadow-md);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: auto;
+    }
+
+    .legend-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .legend-items {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .legend-line {
+      width: 24px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    .legend-line.in {
+      background: var(--color-input);
+      box-shadow: 0 0 6px var(--color-input);
+    }
+
+    .legend-line.out {
+      background: var(--color-output);
+      box-shadow: 0 0 6px var(--color-output);
+    }
+
+    .legend-line.svc {
+      background: var(--color-service);
+      box-shadow: 0 0 6px var(--color-service);
+    }
+
+    /* Floating Controls */
+    .floating-controls {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.35rem;
+      box-shadow: var(--shadow-md);
+      z-index: 30;
+    }
+
+    .control-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.15s;
+    }
+
+    .control-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    /* Detail Drawer */
+    .detail-drawer {
+      position: fixed;
+      top: 0;
+      right: -520px;
+      width: 480px;
+      height: 100vh;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -10px 0 35px rgba(0, 0, 0, 0.45);
+      z-index: 100;
+      transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .detail-drawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      padding: 1.4rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--bg-secondary);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .drawer-title-box h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .drawer-title-box p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .drawer-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .drawer-close:hover {
+      background: var(--bg-card-hover);
+      color: #ffffff;
+    }
+
+    .drawer-content {
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .drawer-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.1rem;
+    }
+
+    .drawer-section-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .drawer-section-title.input-title { color: var(--color-input); }
+    .drawer-section-title.output-title { color: var(--color-output); }
+    .drawer-section-title.tech-title { color: #f59e0b; }
+
+    .drawer-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .drawer-list li {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      position: relative;
+      padding-left: 1.2rem;
+      line-height: 1.45;
+    }
+
+    .drawer-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--border-highlight);
+      font-size: 1.2rem;
+      top: -0.15rem;
+    }
+
+    .drawer-code-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #38bdf8;
+    }
+
+    /* Matrix View */
+    .matrix-view {
+      display: none;
+      padding: 2rem;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .matrix-view.active {
+      display: block;
+    }
+
+    .matrix-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .matrix-card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-secondary);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .matrix-card-header h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .search-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.45rem 0.9rem;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      width: 280px;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-highlight);
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .matrix-table th {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 0.85rem 1.2rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .matrix-table td {
+      padding: 0.95rem 1.2rem;
+      font-size: 0.82rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    .matrix-table tr:hover td {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    .badge-flow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-flow.in {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .badge-flow.out {
+      background: rgba(52, 211, 153, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .badge-flow.svc {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    /* Draw.io Specific Layout */
+    .drawio-viewport {
+      padding: 1.5rem 2rem 3rem 2rem;
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    .drawio-card {
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 14px;
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+    }
+    [data-theme="dark"] .drawio-card {
+      background: #0f172a;
+      color: #f8fafc;
+      border-color: #334155;
+    }
+    .drawio-toolbar {
+      padding: 0.85rem 1.5rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    [data-theme="dark"] .drawio-toolbar {
+      background: #1e293b;
+      border-color: #334155;
+    }
+    .drawio-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #ffffff;
+    }
+    [data-theme="dark"] .drawio-svg {
+      background: #0b1120;
+    }
+
+    /* Print styles */
+    @media print {
+      header, .filter-bar, .assessment-bar, .floating-controls, .detail-drawer {
+        display: none !important;
+      }
+      .viewport-container {
+        height: auto;
+        overflow: visible;
+      }
+      body {
+        background: #ffffff;
+        color: #000000;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Bar -->
+  <header>
+    <div class="brand-group">
+      <div class="brand-logo">⚡</div>
+      <div class="brand-info">
+        <h1>
+          EduPulse Platform
+          <span class="brand-badge">DFD Mức 0</span>
+          <span class="brand-badge standard">Chuẩn 41 CN</span>
+        </h1>
+        <p>Sơ đồ ngữ cảnh kiến trúc hệ thống & biên giới luồng dữ liệu (Context Diagram - Level 0)</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="tab-btn active" id="tab-drawio" onclick="switchView('drawio')">
+        <span>📐</span> Chuẩn Draw.io (DFD Mức 0)
+      </button>
+      <button class="tab-btn" id="tab-visual" onclick="switchView('visual')">
+        <span>🎨</span> Trực quan Neon
+      </button>
+      <button class="tab-btn" id="tab-matrix" onclick="switchView('matrix')">
+        <span>📋</span> Ma trận dữ liệu (41 CN)
+      </button>
+      <button class="tab-btn" id="tab-image" onclick="switchView('image')">
+        <span>🖼️</span> Bản vẽ AI Concept
+      </button>
+
+      <button class="icon-btn" onclick="toggleTheme()" title="Chuyển chế độ sáng/tối">
+        <span id="theme-icon">🌙</span>
+      </button>
+      <button class="icon-btn" onclick="window.print()" title="In / Xuất PDF">
+        <span>🖨️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Assessment Notification Bar -->
+  <div class="assessment-bar">
+    <div class="assessment-status">
+      <span>✅</span>
+      <span>Đã chuẩn hóa & kiểm chứng 100% khớp với 41 chức năng đặc tả (CN01 ➔ CN41) và 7 thực thể tác nhân.</span>
+    </div>
+    <button class="assessment-details-btn" onclick="openDrawer('evaluation')">Xem bảng đánh giá chi tiết ➔</button>
+  </div>
+
+  <!-- Filter Toolbar (For Visual View) -->
+  <div class="filter-bar" id="filter-bar" style="display: none;">
+    <div class="filter-chips">
+      <span class="filter-label">Lọc thực thể:</span>
+      <button class="chip active" onclick="filterActor('all', this)">🌟 Tất cả thực thể (7)</button>
+      <button class="chip student" onclick="filterActor('student', this)">🎓 Học Viên</button>
+      <button class="chip teacher" onclick="filterActor('teacher', this)">👨‍🏫 Giảng Viên</button>
+      <button class="chip admin" onclick="filterActor('admin', this)">🛡️ Quản Trị Viên</button>
+      <button class="chip" onclick="filterActor('payment', this)">💳 Razorpay</button>
+      <button class="chip services" onclick="filterActor('services', this)">☁️ Dịch Vụ Đám Mây</button>
+    </div>
+
+    <div style="font-size: 0.78rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.5rem;">
+      <span>💡 Nhấp vào từng khối để xem chi tiết trường dữ liệu & mã chức năng!</span>
+    </div>
+  </div>
+
+  <!-- VIEW 0: Bản Vẽ Chuẩn Draw.io (DFD Mức 0) -->
+  <section class="drawio-viewport" id="drawio-container">
+    <div class="drawio-card">
+      <div class="drawio-toolbar">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+            <span>📐</span> Sơ Đồ Ngữ Cảnh Chuẩn Draw.io / DFD Mức 0 (Academic Standard)
+          </h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+            Phân định rõ ràng từng khối Tác nhân ngoài (Hình chữ nhật) • Hệ thống trung tâm (Hình tròn 0.0) • Nhãn dữ liệu trực tiếp trên từng mũi tên Vào / Ra.
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.6rem;">
+          <button class="tab-btn" onclick="window.print()">
+            <span>🖨️</span> In / Xuất PDF
+          </button>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto; padding: 1rem; background: var(--bg-card);">
+        <svg class="drawio-svg" viewBox="0 0 1340 880" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%; height: auto; font-family: 'Plus Jakarta Sans', sans-serif;">
+          <defs>
+            <!-- Draw.io Grid Pattern -->
+            <pattern id="drawio-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(148, 163, 184, 0.15)" stroke-width="1"/>
+            </pattern>
+            <!-- Drop Shadow Filter -->
+            <filter id="box-shadow" x="-5%" y="-5%" width="115%" height="115%">
+              <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.15"/>
+            </filter>
+            <!-- Arrow Markers -->
+            <marker id="d-arrow-in" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+            </marker>
+            <marker id="d-arrow-out" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16a34a" />
+            </marker>
+          </defs>
+
+          <!-- Canvas Background Grid -->
+          <rect width="1340" height="880" fill="url(#drawio-grid)" />
+
+          <!-- ==================== LUỒNG MŨI TÊN & NHÃN TEXT (CONNECTORS & LABELS) ==================== -->
+
+          <!-- 1. HỌC VIÊN ➔ HỆ THỐNG (INPUT) -->
+          <path d="M 280 170 L 565 375" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#d-arrow-in)" />
+          <!-- Label Input Học Viên -->
+          <g transform="translate(305, 230)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] DỮ LIỆU VÀO TỪ HỌC VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Đăng ký, OTP, CCCD KYC, Học phí, Tin nhắn hỏi</text>
+          </g>
+
+          <!-- 1. HỆ THỐNG ➔ HỌC VIÊN (OUTPUT) -->
+          <path d="M 555 410 L 280 215" fill="none" stroke="#16a34a" stroke-width="2.5" marker-end="url(#d-arrow-out)" />
+          <!-- Label Output Học Viên -->
+          <g transform="translate(305, 305)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] DỮ LIỆU XUẤT CHO HỌC VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">DS khóa học, Link Meet, Kết quả KYC, Phản hồi GV</text>
+          </g>
+
+          <!-- 2. GIẢNG VIÊN ➔ HỆ THỐNG (INPUT) -->
+          <path d="M 280 655 L 565 520" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#d-arrow-in)" />
+          <!-- Label Input Giảng Viên -->
+          <g transform="translate(305, 545)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] DỮ LIỆU VÀO TỪ GIẢNG VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Hồ sơ bằng cấp UG/PG, Đề cương khóa, Lịch Live, Rút tiền</text>
+          </g>
+
+          <!-- 2. HỆ THỐNG ➔ GIẢNG VIÊN (OUTPUT) -->
+          <path d="M 555 490 L 280 695" fill="none" stroke="#16a34a" stroke-width="2.5" marker-end="url(#d-arrow-out)" />
+          <!-- Label Output Giảng Viên -->
+          <g transform="translate(305, 620)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] DỮ LIỆU XUẤT CHO GIẢNG VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Trạng thái duyệt KYC/Khóa, DS học viên, Số dư thù lao</text>
+          </g>
+
+          <!-- 3. QUẢN TRỊ VIÊN ➔ HỆ THỐNG (INPUT) -->
+          <path d="M 1060 170 L 775 375" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#d-arrow-in)" />
+          <!-- Label Input Admin -->
+          <g transform="translate(775, 230)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] LỆNH & QUYẾT ĐỊNH QUẢN TRỊ</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Duyệt/từ chối KYC HS & GV, Duyệt khóa học, Xử lý khiếu nại</text>
+          </g>
+
+          <!-- 3. HỆ THỐNG ➔ QUẢN TRỊ VIÊN (OUTPUT) -->
+          <path d="M 785 410 L 1060 215" fill="none" stroke="#16a34a" stroke-width="2.5" marker-end="url(#d-arrow-out)" />
+          <!-- Label Output Admin -->
+          <g transform="translate(775, 305)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] BÁO CÁO & HỒ SƠ CHỜ DUYỆT</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống</text>
+          </g>
+
+          <!-- 4. CỔNG THANH TOÁN ➔ HỆ THỐNG (INPUT) -->
+          <path d="M 1060 655 L 775 520" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#d-arrow-in)" />
+          <!-- Label Input Razorpay -->
+          <g transform="translate(775, 545)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] KẾT QUẢ TỪ RAZORPAY</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Payment ID, Chữ ký số mã hóa SHA256 HMAC</text>
+          </g>
+
+          <!-- 4. HỆ THỐNG ➔ CỔNG THANH TOÁN (OUTPUT) -->
+          <path d="M 785 490 L 1060 695" fill="none" stroke="#16a34a" stroke-width="2.5" marker-end="url(#d-arrow-out)" />
+          <!-- Label Output Razorpay -->
+          <g transform="translate(775, 620)">
+            <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] YÊU CẦU TẠO GIAO DỊCH</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Thông tin đơn hàng (amount, currency, receipt_id)</text>
+          </g>
+
+          <!-- 5. HỆ THỐNG <-> CLOUDINARY (VERTICAL TOP) -->
+          <!-- Output (Lên CDN) -->
+          <path d="M 650 330 L 650 130" fill="none" stroke="#16a34a" stroke-width="2.5" marker-end="url(#d-arrow-out)" />
+          <!-- Input (Về Hệ Thống) -->
+          <path d="M 690 130 L 690 330" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#d-arrow-in)" />
+          <!-- Label Cloudinary -->
+          <g transform="translate(705, 175)">
+            <rect x="0" y="0" width="180" height="42" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#box-shadow)"/>
+            <text x="6" y="14" font-size="9" font-weight="700" fill="#16a34a">▲ Upload: File avatar, CCCD, bằng</text>
+            <text x="6" y="32" font-size="9" font-weight="700" fill="#0284c7">▼ Trả về: Secure HTTPS CDN URL</text>
+          </g>
+
+          <!-- 6. HỆ THỐNG <-> EMAIL SMTP (BOTTOM LEFT) -->
+          <path d="M 590 560 L 460 760" fill="none" stroke="#16a34a" stroke-width="2.2" marker-end="url(#d-arrow-out)" />
+          <path d="M 490 760 L 620 560" fill="none" stroke="#0284c7" stroke-width="2.2" marker-end="url(#d-arrow-in)" />
+          <!-- Label Email -->
+          <g transform="translate(390, 680)">
+            <rect x="0" y="0" width="165" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#box-shadow)"/>
+            <text x="6" y="14" font-size="8.8" font-weight="700" fill="#16a34a">▼ Gửi OTP kích hoạt, Reset pass</text>
+            <text x="6" y="30" font-size="8.8" font-weight="700" fill="#0284c7">▲ Trạng thái gửi mail thành công</text>
+          </g>
+
+          <!-- 7. HỆ THỐNG <-> LIVE CLASSROOM (BOTTOM RIGHT) -->
+          <path d="M 720 560 L 850 760" fill="none" stroke="#16a34a" stroke-width="2.2" marker-end="url(#d-arrow-out)" />
+          <path d="M 880 760 L 750 560" fill="none" stroke="#0284c7" stroke-width="2.2" marker-end="url(#d-arrow-in)" />
+          <!-- Label Live -->
+          <g transform="translate(780, 680)">
+            <rect x="0" y="0" width="170" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#box-shadow)"/>
+            <text x="6" y="14" font-size="8.8" font-weight="700" fill="#16a34a">▼ Link Meet, lịch học, thời lượng</text>
+            <text x="6" y="30" font-size="8.8" font-weight="700" fill="#0284c7">▲ Trạng thái phiên Live trực tuyến</text>
+          </g>
+
+          <!-- ==================== TIẾN TRÌNH TRUNG TÂM (PROCESS 0.0) ==================== -->
+          <g id="drawio-core" transform="translate(670, 445)" style="cursor: pointer;" onclick="openDrawer('system')">
+            <!-- Vòng tròn nền -->
+            <circle cx="0" cy="0" r="115" fill="#f0f9ff" stroke="#0284c7" stroke-width="3.5" filter="url(#box-shadow)"/>
+            <circle cx="0" cy="0" r="108" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <!-- Văn bản Process -->
+            <text x="0" y="-35" text-anchor="middle" font-size="22" font-weight="900" fill="#0369a1">0.0</text>
+            <line x1="-70" y1="-20" x2="70" y2="-20" stroke="#bae6fd" stroke-width="1.5"/>
+            <text x="0" y="2" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0f172a">HỆ THỐNG QUẢN LÝ</text>
+            <text x="0" y="20" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0f172a">HỌC TRỰC TUYẾN</text>
+            <text x="0" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#0284c7">EDUPULSE PLATFORM</text>
+            <rect x="-65" y="55" width="130" height="18" rx="9" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1"/>
+            <text x="0" y="67" text-anchor="middle" font-size="9" font-weight="700" fill="#0369a1">TIẾN TRÌNH DUY NHẤT</text>
+          </g>
+
+          <!-- ==================== CÁC KHỐI CHỮ NHẬT TÁC NHÂN (EXTERNAL ENTITIES) ==================== -->
+
+          <!-- ENTITY 1: HỌC VIÊN -->
+          <g id="node-student" transform="translate(40, 140)" style="cursor: pointer;" onclick="openDrawer('student')">
+            <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
+            <rect width="240" height="26" rx="8" fill="#0284c7"/>
+            <rect y="18" width="240" height="8" fill="#0284c7"/>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">TÁC NHÂN BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">🎓 HỌC VIÊN</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">(Student Subsystem)</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0284c7">11 Chức năng: CN10 ➔ CN20</text>
+          </g>
+
+          <!-- ENTITY 2: GIẢNG VIÊN -->
+          <g id="node-teacher" transform="translate(40, 620)" style="cursor: pointer;" onclick="openDrawer('teacher')">
+            <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
+            <rect width="240" height="26" rx="8" fill="#d97706"/>
+            <rect y="18" width="240" height="8" fill="#d97706"/>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">TÁC NHÂN BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">👨‍🏫 GIẢNG VIÊN</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">(Teacher Subsystem)</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d97706">10 Chức năng: CN21 ➔ CN30</text>
+          </g>
+
+          <!-- ENTITY 3: QUẢN TRỊ VIÊN -->
+          <g id="node-admin" transform="translate(1060, 140)" style="cursor: pointer;" onclick="openDrawer('admin')">
+            <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
+            <rect width="240" height="26" rx="8" fill="#e11d48"/>
+            <rect y="18" width="240" height="8" fill="#e11d48"/>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">TÁC NHÂN BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">🛡️ QUẢN TRỊ VIÊN</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">(Admin Subsystem)</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e11d48">11 Chức năng: CN31 ➔ CN41</text>
+          </g>
+
+          <!-- ENTITY 4: CỔNG THANH TOÁN -->
+          <g id="node-payment" transform="translate(1060, 620)" style="cursor: pointer;" onclick="openDrawer('razorpay')">
+            <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
+            <rect width="240" height="26" rx="8" fill="#059669"/>
+            <rect y="18" width="240" height="8" fill="#059669"/>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">HỆ THỐNG BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a">💳 RAZORPAY GATEWAY</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">Cổng Thanh Toán Trực Tuyến</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#059669">Xác thực SHA-256 HMAC (CN16)</text>
+          </g>
+
+          <!-- ENTITY 5: CLOUDINARY CDN -->
+          <g id="node-cloudinary" transform="translate(550, 40)" style="cursor: pointer;" onclick="openDrawer('cloudinary')">
+            <rect width="240" height="85" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
+            <rect width="240" height="24" rx="8" fill="#7c3aed"/>
+            <rect y="16" width="240" height="8" fill="#7c3aed"/>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">DỊCH VỤ BÊN NGOÀI</text>
+            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">☁️ CLOUDINARY CDN</text>
+            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">Lưu Trữ Avatar & Bằng Cấp</text>
+            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">HTTPS CDN URLs (CN10, CN21)</text>
+          </g>
+
+          <!-- ENTITY 6: EMAIL SMTP -->
+          <g id="node-email" transform="translate(340, 765)" style="cursor: pointer;" onclick="openDrawer('email')">
+            <rect width="240" height="85" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
+            <rect width="240" height="24" rx="8" fill="#0284c7"/>
+            <rect y="16" width="240" height="8" fill="#0284c7"/>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">DỊCH VỤ BÊN NGOÀI</text>
+            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">✉️ EMAIL SMTP SERVER</text>
+            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">Gửi OTP & Thông Báo Tự Động</text>
+            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#0284c7">Gmail SMTP Gateway (CN02, CN05)</text>
+          </g>
+
+          <!-- ENTITY 7: LIVE MEET -->
+          <g id="node-live" transform="translate(760, 765)" style="cursor: pointer;" onclick="openDrawer('live')">
+            <rect width="240" height="85" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
+            <rect width="240" height="24" rx="8" fill="#db2777"/>
+            <rect y="16" width="240" height="8" fill="#db2777"/>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">DỊCH VỤ BÊN NGOÀI</text>
+            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">🎥 LỚP HỌC LIVE MEET</text>
+            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">Video Conferencing Tương Tác</text>
+            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#db2777">Google Meet Room (CN19, CN25)</text>
+          </g>
+
+          <!-- ==================== BẢNG CHÚ GIẢI CHUẨN DRAW.IO (LEGEND BOX) ==================== -->
+          <g id="drawio-legend" transform="translate(40, 395)">
+            <rect width="240" height="185" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" filter="url(#box-shadow)"/>
+            <rect width="240" height="24" rx="8" fill="#334155"/>
+            <rect y="16" width="240" height="8" fill="#334155"/>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">QUY ƯỚC KÝ HIỆU DRAW.IO</text>
+
+            <!-- Ký hiệu hình chữ nhật -->
+            <rect x="15" y="35" width="24" height="16" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+            <text x="48" y="47" font-size="10" font-weight="700" fill="#1e293b">Hình chữ nhật:</text>
+            <text x="125" y="47" font-size="10" fill="#475569">Tác nhân ngoài</text>
+
+            <!-- Ký hiệu hình tròn -->
+            <circle cx="27" cy="70" r="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+            <text x="48" y="73" font-size="10" font-weight="700" fill="#1e293b">Hình tròn:</text>
+            <text x="105" y="73" font-size="10" fill="#475569">Tiến trình (Process 0.0)</text>
+
+            <!-- Ký hiệu Mũi tên Xanh dương -->
+            <line x1="15" y1="98" x2="36" y2="98" stroke="#0284c7" stroke-width="2.5" marker-end="url(#d-arrow-in)"/>
+            <text x="48" y="101" font-size="10" font-weight="700" fill="#0284c7">Mũi tên Xanh (In):</text>
+            <text x="150" y="101" font-size="10" fill="#475569">Dữ liệu vào</text>
+
+            <!-- Ký hiệu Mũi tên Xanh lá -->
+            <line x1="15" y1="126" x2="36" y2="126" stroke="#16a34a" stroke-width="2.5" marker-end="url(#d-arrow-out)"/>
+            <text x="48" y="129" font-size="10" font-weight="700" fill="#16a34a">Mũi tên Xanh lá (Out):</text>
+            <text x="168" y="129" font-size="10" fill="#475569">Dữ liệu ra</text>
+
+            <!-- Tiêu chuẩn -->
+            <rect x="12" y="145" width="216" height="28" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+            <text x="120" y="157" text-anchor="middle" font-size="9" font-weight="600" fill="#64748b">Nguyên tắc: Không có luồng tắt giữa</text>
+            <text x="120" y="168" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">2 tác nhân ngoài, toàn bộ qua Process 0.0</text>
+          </g>
+
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW 1: Visual Diagram Viewport -->
+  <main class="viewport-container" id="visual-container" style="display: none;">
+    <div class="diagram-stage" id="diagram-stage">
+      
+      <!-- SVG Connectors Layer -->
+      <svg class="flow-svg-layer" id="flow-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-in" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M 0 1 L 7 4 L 0 7 z" fill="#38bdf8" />
+          </marker>
+          <marker id="arrow-out" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M 0 1 L 7 4 L 0 7 z" fill="#34d399" />
+          </marker>
+          <marker id="arrow-svc" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M 0 1 L 7 4 L 0 7 z" fill="#a855f7" />
+          </marker>
+        </defs>
+      </svg>
+
+      <!-- Center Node: HỆ THỐNG EDUPULSE (Process 0.0) -->
+      <div class="system-core" id="core-system" onclick="openDrawer('system')">
+        <div class="core-pulse"></div>
+        <div class="core-icon">⚡</div>
+        <div class="core-title">EDUPULSE<br>PLATFORM</div>
+        <div class="core-tag">Process 0.0 (Hệ Thống Trung Tâm)</div>
+        <div class="core-sub">NodeJS • Express • MongoDB Atlas</div>
+      </div>
+
+      <!-- ENTITY 1: Học Viên (Student) - Top Left -->
+      <div class="entity-card student-card" id="card-student" style="top: 8%; left: 6%;" onclick="openDrawer('student')">
+        <div class="entity-header">
+          <div class="entity-title-group">
+            <div class="entity-icon">🎓</div>
+            <div>
+              <div class="entity-title">Học Viên</div>
+              <div class="entity-subtitle">Student (CN10 ➔ CN20)</div>
+            </div>
+          </div>
+          <span class="entity-badge badge-human">Tác nhân</span>
+        </div>
+        <div class="flow-summary">
+          <div class="flow-row in">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Thông tin đăng ký, Hồ sơ KYC CCCD, Yêu cầu mua khóa, Tin nhắn hỏi bài</span>
+          </div>
+          <div class="flow-row out">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Danh sách khóa học, Link phòng Live, Kết quả duyệt hồ sơ, Tin nhắn GV</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTITY 2: Giảng Viên (Teacher) - Bottom Left -->
+      <div class="entity-card teacher-card" id="card-teacher" style="bottom: 8%; left: 6%;" onclick="openDrawer('teacher')">
+        <div class="entity-header">
+          <div class="entity-title-group">
+            <div class="entity-icon">👨‍🏫</div>
+            <div>
+              <div class="entity-title">Giảng Viên</div>
+              <div class="entity-subtitle">Teacher (CN21 ➔ CN30)</div>
+            </div>
+          </div>
+          <span class="entity-badge badge-human">Tác nhân</span>
+        </div>
+        <div class="flow-summary">
+          <div class="flow-row in">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Hồ sơ bằng cấp (UG/PG), Đề cương khóa học, Lịch dạy Live, Lệnh rút tiền</span>
+          </div>
+          <div class="flow-row out">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Trạng thái duyệt hồ sơ/khóa, Danh sách học sinh, Số dư thù lao (Balance)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTITY 3: Quản Trị Viên (Admin) - Top Right -->
+      <div class="entity-card admin-card" id="card-admin" style="top: 8%; right: 6%;" onclick="openDrawer('admin')">
+        <div class="entity-header">
+          <div class="entity-title-group">
+            <div class="entity-icon">🛡️</div>
+            <div>
+              <div class="entity-title">Quản Trị Viên</div>
+              <div class="entity-subtitle">Admin (CN31 ➔ CN41)</div>
+            </div>
+          </div>
+          <span class="entity-badge badge-human">Tác nhân</span>
+        </div>
+        <div class="flow-summary">
+          <div class="flow-row in">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Quyết định duyệt/từ chối KYC, Duyệt xuất bản khóa học, Xử lý khiếu nại</span>
+          </div>
+          <div class="flow-row out">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống, Tin nhắn liên hệ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTITY 4: Cổng Thanh Toán Razorpay - Bottom Right -->
+      <div class="entity-card payment-card" id="card-payment" style="bottom: 8%; right: 6%;" onclick="openDrawer('razorpay')">
+        <div class="entity-header">
+          <div class="entity-title-group">
+            <div class="entity-icon">💳</div>
+            <div>
+              <div class="entity-title">Cổng Razorpay</div>
+              <div class="entity-subtitle">Thanh Toán Trực Tuyến (CN16)</div>
+            </div>
+          </div>
+          <span class="entity-badge badge-service">Payment</span>
+        </div>
+        <div class="flow-summary">
+          <div class="flow-row in">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Yêu cầu tạo đơn (Order ID), Thông tin giao dịch & số tiền</span>
+          </div>
+          <div class="flow-row out">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Chữ ký số xác thực SHA256 HMAC (Payment Signature)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTITY 5: Cloudinary CDN - Top Center -->
+      <div class="entity-card cloud-card" id="card-cloudinary" style="top: 3%; left: 50%; transform: translateX(-50%);" onclick="openDrawer('cloudinary')">
+        <div class="entity-header">
+          <div class="entity-title-group">
+            <div class="entity-icon">☁️</div>
+            <div>
+              <div class="entity-title">Cloudinary CDN</div>
+              <div class="entity-subtitle">Lưu Trữ Ảnh & Tài Liệu</div>
+            </div>
+          </div>
+          <span class="entity-badge badge-service">Storage</span>
+        </div>
+        <div class="flow-summary">
+          <div class="flow-row svc">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Upload file ảnh avatar, scan CCCD, bằng Cử nhân, Thạc sĩ</span>
+          </div>
+          <div class="flow-row svc">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Trả về Secure HTTPS CDN URL tối ưu tốc độ tải</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTITY 6: Email Service SMTP - Middle Left/Center -->
+      <div class="entity-card email-card" id="card-email" style="bottom: 3%; left: 32%; transform: translateX(-50%);" onclick="openDrawer('email')">
+        <div class="entity-header">
+          <div class="entity-title-group">
+            <div class="entity-icon">✉️</div>
+            <div>
+              <div class="entity-title">Email Service</div>
+              <div class="entity-subtitle">SMTP Gateway (CN02, CN05)</div>
+            </div>
+          </div>
+          <span class="entity-badge badge-service">Email</span>
+        </div>
+        <div class="flow-summary">
+          <div class="flow-row svc">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Yêu cầu gửi OTP kích hoạt tài khoản, liên kết reset mật khẩu</span>
+          </div>
+          <div class="flow-row svc">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Trạng thái gửi thư thành công / thất bại qua Gmail SMTP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTITY 7: Lớp Học Trực Tuyến Live - Middle Right/Center -->
+      <div class="entity-card live-card" id="card-live" style="bottom: 3%; left: 68%; transform: translateX(-50%);" onclick="openDrawer('live')">
+        <div class="entity-header">
+          <div class="entity-title-group">
+            <div class="entity-icon">🎥</div>
+            <div>
+              <div class="entity-title">Lớp Học Trực Tuyến</div>
+              <div class="entity-subtitle">Video Meet (CN19, CN25)</div>
+            </div>
+          </div>
+          <span class="entity-badge badge-service">Video</span>
+        </div>
+        <div class="flow-summary">
+          <div class="flow-row svc">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Đồng bộ link phòng học trực tiếp, lịch học, thời lượng buổi</span>
+          </div>
+          <div class="flow-row svc">
+            <span class="flow-arrow-icon">➔</span>
+            <span class="flow-text">Kết nối luồng Video/Audio 2 chiều cho Học viên & Giảng viên</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Floating Legend -->
+    <div class="diagram-legend">
+      <div class="legend-title">Quy Chuẩn Luồng Dữ Liệu DFD Mức 0</div>
+      <div class="legend-items">
+        <div class="legend-item">
+          <div class="legend-line in"></div>
+          <span>Dữ liệu vào hệ thống (Inputs)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line out"></div>
+          <span>Dữ liệu hệ thống phản hồi (Outputs)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line svc"></div>
+          <span>Đồng bộ dịch vụ ngoài (3rd Party Services)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Controls -->
+    <div class="floating-controls">
+      <button class="control-btn" onclick="zoomDiagram(0.1)" title="Phóng to">+</button>
+      <button class="control-btn" onclick="zoomDiagram(-0.1)" title="Thu nhỏ">-</button>
+      <button class="control-btn" onclick="resetZoom()" title="Về mặc định">⟲</button>
+    </div>
+  </main>
+
+  <!-- VIEW 2: Data Flow Matrix View -->
+  <section class="matrix-view" id="matrix-container">
+    <div class="matrix-card">
+      <div class="matrix-card-header">
+        <div>
+          <h2>Ma Trận Đặc Tả Luồng Dữ Liệu Ngữ Cảnh (Khớp 41 Chức Năng Hệ Thống)</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+            Toàn bộ các luồng thông tin vào - ra đều được đối soát chuẩn xác với mã chức năng (CN01 ➔ CN41) từ tài liệu đặc tả hệ thống.
+          </p>
+        </div>
+        <input type="text" class="search-input" id="search-matrix" placeholder="🔍 Tìm kiếm luồng dữ liệu hoặc mã CN..." onkeyup="filterMatrixTable()">
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="matrix-table" id="data-table">
+          <thead>
+            <tr>
+              <th style="width: 110px;">Mã Luồng</th>
+              <th style="width: 140px;">Mã CN</th>
+              <th style="width: 160px;">Nguồn (Source)</th>
+              <th style="width: 80px;">Hướng</th>
+              <th style="width: 180px;">Đích (Destination)</th>
+              <th>Dữ Liệu Trao Đổi (Payload & Data Items)</th>
+              <th>Nghiệp Vụ Liên Quan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Học Viên -->
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-01</span></td>
+              <td><strong>CN01, CN02, CN03</strong></td>
+              <td>Học Viên (Student)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Email, mật khẩu băm, mã OTP kích hoạt tài khoản.</td>
+              <td>Đăng ký, xác minh email và đăng nhập tài khoản học viên.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-02</span></td>
+              <td><strong>CN10</strong></td>
+              <td>Học Viên (Student)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Hồ sơ KYC học viên: File scan CMND/CCCD, bằng THPT/Đại học.</td>
+              <td>Nộp hồ sơ xét duyệt danh tính trước khi tham gia học.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-03</span></td>
+              <td><strong>CN13, CN14, CN15</strong></td>
+              <td>Học Viên (Student)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Từ khóa tìm kiếm khóa học/giảng viên, yêu cầu ghi danh khóa học.</td>
+              <td>Khám phá khóa học phù hợp và tiến hành đăng ký.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-04</span></td>
+              <td><strong>CN16</strong></td>
+              <td>Học Viên (Student)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Yêu cầu thanh toán học phí qua cổng Razorpay Checkout.</td>
+              <td>Giao dịch thanh toán để mở quyền truy cập khóa học.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-05</span></td>
+              <td><strong>CN20, CN09</strong></td>
+              <td>Học Viên (Student)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Nội dung tin nhắn gửi Giảng viên; Tin nhắn phản hồi gửi Admin.</td>
+              <td>Tương tác giải đáp bài học và hỗ trợ khiếu nại học vụ.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-06</span></td>
+              <td><strong>CN07, CN08</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Học Viên (Student)</td>
+              <td>Danh mục khóa học đã phê duyệt, hồ sơ bằng cấp giảng viên minh bạch.</td>
+              <td>Cung cấp thông tin giáo trình và năng lực giảng dạy của giảng viên.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-07</span></td>
+              <td><strong>CN11</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Học Viên (Student)</td>
+              <td>Trạng thái xét duyệt KYC (`approved`, `pending`, `rejected`, `reupload`).</td>
+              <td>Thông báo kết quả thẩm định hồ sơ giấy tờ cá nhân.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-08</span></td>
+              <td><strong>CN17, CN18, CN19</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Học Viên (Student)</td>
+              <td>Danh sách khóa học đã đăng ký, lịch học tuần, link vào lớp Live Google Meet.</td>
+              <td>Theo dõi lộ trình học và tham gia lớp học trực tuyến thời gian thực.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-ST-09</span></td>
+              <td><strong>CN20</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Học Viên (Student)</td>
+              <td>Tin nhắn phản hồi từ Giảng viên.</td>
+              <td>Học viên nhận câu trả lời hướng dẫn trực tiếp từ người dạy.</td>
+            </tr>
+
+            <!-- Giảng Viên -->
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-01</span></td>
+              <td><strong>CN21</strong></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Hồ sơ thẩm định: CCCD, bằng THPT, bằng Cử nhân (UG), bằng Sau ĐH (PG).</td>
+              <td>Nộp minh chứng năng lực chuyên môn để Admin phê duyệt quyền giảng dạy.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-02</span></td>
+              <td><strong>CN23, CN25</strong></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Nội dung khóa học (đề cương, học phí), lịch buổi học và link phòng Live Meet.</td>
+              <td>Khởi tạo chương trình đào tạo và thiết lập lịch dạy tương tác.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-03</span></td>
+              <td><strong>CN28</strong></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Tin nhắn hướng dẫn / trả lời câu hỏi cho học sinh.</td>
+              <td>Trao đổi học thuật trực tiếp với người học trong hệ thống.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-04</span></td>
+              <td><strong>CN30</strong></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Yêu cầu rút tiền thù lao: Số tiền rút, số tài khoản ngân hàng thụ hưởng.</td>
+              <td>Rút doanh thu giảng dạy tích lũy về tài khoản ngân hàng cá nhân.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-05</span></td>
+              <td><strong>CN21, CN36, CN38</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td>Kết quả xét duyệt hồ sơ giảng viên và kết quả phê duyệt khóa học từ Admin.</td>
+              <td>Xác nhận quyền đứng lớp và trạng thái xuất bản khóa học.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-06</span></td>
+              <td><strong>CN26, CN27</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td>Danh sách học sinh đăng ký từng lớp, thời khóa biểu giảng dạy theo tuần.</td>
+              <td>Quản lý sĩ số lớp học và sắp xếp thời gian đứng lớp.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-07</span></td>
+              <td><strong>CN29, CN30</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td>Thống kê số dư thù lao (`balance`), xác nhận trạng thái giải ngân lệnh rút tiền.</td>
+              <td>Theo dõi thu nhập tài chính từ công việc giảng dạy.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-TC-08</span></td>
+              <td><strong>CN28</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Giảng Viên (Teacher)</td>
+              <td>Tin nhắn / thắc mắc bài giảng từ học sinh gửi đến.</td>
+              <td>Giảng viên tiếp nhận câu hỏi cần giải đáp.</td>
+            </tr>
+
+            <!-- Quản Trị Viên -->
+            <tr>
+              <td><span class="drawer-code-tag">DF-AD-01</span></td>
+              <td><strong>CN31</strong></td>
+              <td>Quản Trị Viên (Admin)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Thông tin đăng nhập tài khoản quản trị đặc quyền.</td>
+              <td>Truy cập Dashboard điều hành toàn hệ thống.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-AD-02</span></td>
+              <td><strong>CN34, CN36</strong></td>
+              <td>Quản Trị Viên (Admin)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Quyết định phê duyệt/từ chối/yêu cầu nộp lại hồ sơ KYC của học sinh & giảng viên.</td>
+              <td>Kiểm duyệt chất lượng đầu vào, ngăn ngừa gian lận danh tính.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-AD-03</span></td>
+              <td><strong>CN38</strong></td>
+              <td>Quản Trị Viên (Admin)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Quyết định phê duyệt / từ chối xuất bản khóa học mới của giảng viên.</td>
+              <td>Đảm bảo nội dung giáo trình đạt chuẩn trước khi học sinh nhìn thấy.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-AD-04</span></td>
+              <td><strong>CN40</strong></td>
+              <td>Quản Trị Viên (Admin)</td>
+              <td><span class="badge-flow in">➔ Vào</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Đánh dấu đã xử lý / phản hồi tin nhắn khiếu nại của người dùng.</td>
+              <td>Chăm sóc khách hàng và giải quyết vướng mắc học vụ.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-AD-05</span></td>
+              <td><strong>CN32, CN33, CN35</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Quản Trị Viên (Admin)</td>
+              <td>Danh sách hồ sơ chờ duyệt, file scan bằng cấp lưu trữ trên Cloudinary.</td>
+              <td>Cung cấp dữ liệu minh chứng để Admin đối soát kiểm tra.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-AD-06</span></td>
+              <td><strong>CN37, CN39</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow out">➔ Ra</span></td>
+              <td>Quản Trị Viên (Admin)</td>
+              <td>Danh sách khóa học chờ duyệt, hòm thư tin nhắn liên hệ từ người dùng.</td>
+              <td>Kiểm soát nội dung mới và tiếp nhận phản hồi từ cộng đồng.</td>
+            </tr>
+
+            <!-- Cổng Razorpay -->
+            <tr>
+              <td><span class="drawer-code-tag">DF-RZ-01</span></td>
+              <td><strong>CN16</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow svc">➔ Đồng bộ</span></td>
+              <td>Cổng Razorpay</td>
+              <td>Payload khởi tạo đơn hàng: `amount`, `currency`, `receipt_id`.</td>
+              <td>Tạo phiên giao dịch thanh toán trực tuyến an toàn.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-RZ-02</span></td>
+              <td><strong>CN16</strong></td>
+              <td>Cổng Razorpay</td>
+              <td><span class="badge-flow svc">➔ Đồng bộ</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>`razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature` (SHA256).</td>
+              <td>Xác minh chữ ký số đối xứng, đảm bảo thanh toán hợp lệ 100%.</td>
+            </tr>
+
+            <!-- Cloudinary -->
+            <tr>
+              <td><span class="drawer-code-tag">DF-CL-01</span></td>
+              <td><strong>CN10, CN21, CN22</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow svc">➔ Đồng bộ</span></td>
+              <td>Cloudinary CDN</td>
+              <td>File ảnh avatar, bản scan CCCD, bằng Cử nhân, bằng Sau ĐH (Multipart).</td>
+              <td>Lưu trữ đám mây an toàn, mã hóa và nén hình ảnh.</td>
+            </tr>
+            <tr>
+              <td><span class="drawer-code-tag">DF-CL-02</span></td>
+              <td><strong>CN08, CN33, CN35</strong></td>
+              <td>Cloudinary CDN</td>
+              <td><span class="badge-flow svc">➔ Đồng bộ</span></td>
+              <td>Hệ Thống EduPulse</td>
+              <td>Secure HTTPS CDN URL của các file đã upload thành công.</td>
+              <td>Truy xuất ảnh nhanh chóng với băng thông toàn cầu.</td>
+            </tr>
+
+            <!-- Email SMTP -->
+            <tr>
+              <td><span class="drawer-code-tag">DF-EM-01</span></td>
+              <td><strong>CN02, CN05, CN34, CN36</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow svc">➔ Đồng bộ</span></td>
+              <td>Email Service (SMTP)</td>
+              <td>Mẫu email thông báo: Mã OTP kích hoạt, liên kết reset pass, kết quả duyệt KYC.</td>
+              <td>Kích hoạt tiến trình gửi thư tự động qua giao thức SMTP.</td>
+            </tr>
+
+            <!-- Live Classroom -->
+            <tr>
+              <td><span class="drawer-code-tag">DF-LV-01</span></td>
+              <td><strong>CN19, CN25</strong></td>
+              <td>Hệ Thống EduPulse</td>
+              <td><span class="badge-flow svc">➔ Đồng bộ</span></td>
+              <td>Lớp Học Trực Tuyến</td>
+              <td>Tạo và phân phối URL phòng học, lịch học, thời lượng buổi học.</td>
+              <td>Khởi tạo không gian lớp học trực tiếp thời gian thực cho GV và HS.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW 3: AI Rendered Image View -->
+  <section class="matrix-view" id="image-container" style="display: none; padding: 2rem; max-width: 1440px; margin: 0 auto;">
+    <div class="matrix-card" style="padding: 1.5rem;">
+      <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="font-size: 1.2rem; font-weight: 800;">🖼️ Bản Vẽ Sơ Đồ Ngữ Cảnh AI (High-Tech Concept)</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+            Hình ảnh đồ họa công nghệ cao kết xuất bởi AI minh họa hệ thống trung tâm EduPulse Platform và 6 cụm thực thể ngoài.
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <a href="./so-do-ngu-canh.jpg" download="so-do-ngu-canh-edupulse.jpg" class="tab-btn" style="text-decoration: none;">
+            <span>💾</span> Tải ảnh về máy
+          </a>
+          <a href="./so-do-ngu-canh.jpg" target="_blank" class="tab-btn" style="text-decoration: none;">
+            <span>🔍</span> Xem ảnh phóng to
+          </a>
+        </div>
+      </div>
+      <div style="border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #000;">
+        <img src="./so-do-ngu-canh.jpg" alt="Sơ đồ ngữ cảnh hệ thống EduPulse Platform" style="width: 100%; max-width: 1200px; height: auto; display: block; margin: 0 auto;">
+      </div>
+    </div>
+  </section>
+
+  <!-- Side Drawer for Node Details -->
+  <aside class="detail-drawer" id="detail-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title-box">
+        <h3 id="drawer-title">Chi Tiết Thực Thể</h3>
+        <p id="drawer-sub">Thông tin kỹ thuật và dữ liệu trao đổi</p>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()" title="Đóng">✕</button>
+    </div>
+
+    <div class="drawer-content" id="drawer-body">
+      <!-- Injected by JavaScript -->
+    </div>
+  </aside>
+
+  <script>
+    // Detailed Entity Data for Drawer Inspector
+    const ENTITY_DETAILS = {
+      evaluation: {
+        title: "📋 Đánh Giá Chuẩn Hóa Sơ Đồ Ngữ Cảnh (DFD Level 0)",
+        sub: "Đối chiếu tài liệu đặc tả 41 chức năng & lý thuyết công nghệ phần mềm",
+        sections: [
+          {
+            type: "tech",
+            title: "1. Tính đúng đắn theo nguyên lý DFD Mức 0",
+            items: [
+              "<strong>Chỉ 1 Process duy nhất (Hộp đen):</strong> Toàn bộ ứng dụng EduPulse được đóng gói thành Process 0.0, không để lộ cơ sở dữ liệu hay tiến trình con.",
+              "<strong>Xung quanh là External Entities:</strong> Đầy đủ 3 tác nhân con người (Học viên, Giảng viên, Admin) và 4 hệ thống ngoài (Razorpay, Cloudinary, Email SMTP, Live Video Platform).",
+              "<strong>Không có kết nối tắt giữa 2 tác nhân ngoài:</strong> Tin nhắn giữa Học sinh và Giảng viên đều phải trung chuyển qua hệ thống EduPulse.",
+              "<strong>Tên luồng là cụm danh từ dữ liệu:</strong> Đã chuyển đổi triệt để từ dạng động từ (vd: 'Đăng ký', 'Rút tiền') sang dạng cụm danh từ thông tin (vd: 'Thông tin tài khoản', 'Yêu cầu rút tiền & số tài khoản')."
+            ]
+          },
+          {
+            type: "input",
+            title: "2. Khớp 100% các chức năng trong tài liệu đặc tả (41 CN)",
+            items: [
+              "<strong>Phân hệ chung (CN01-CN09):</strong> Xác thực tài khoản, OTP qua Email SMTP, Quên/Reset mật khẩu, Xem hồ sơ GV, Gửi tin nhắn liên hệ.",
+              "<strong>Phân hệ Học sinh (CN10-CN20):</strong> Nộp hồ sơ KYC học viên, Xem trạng thái duyệt, Mua khóa học Razorpay, Tham gia lớp Live, Nhắn tin với giảng viên.",
+              "<strong>Phân hệ Giảng viên (CN21-CN30):</strong> Nộp hồ sơ bằng cấp chuyên môn (UG/PG), Tạo khóa học & lịch Live, Nhắn tin với học sinh, Rút tiền thù lao.",
+              "<strong>Phân hệ Admin (CN31-CN41):</strong> Duyệt hồ sơ KYC cả học sinh lẫn giảng viên, Duyệt xuất bản khóa học, Xử lý tin nhắn khiếu nại."
+            ]
+          },
+          {
+            type: "output",
+            title: "3. Các cải tiến so với phiên bản sơ khai trước đó",
+            items: [
+              "Tách riêng biệt <strong>Email Service (SMTP)</strong> và <strong>Lớp học trực tuyến (Video Conference)</strong> thành 2 thực thể độc lập.",
+              "Bổ sung luồng <strong>Học viên nộp hồ sơ KYC</strong> và nhận kết quả xét duyệt.",
+              "Bổ sung luồng <strong>Nhắn tin 2 chiều</strong> giữa Học viên và Giảng viên qua hệ thống.",
+              "Phân định rõ ràng quyết định <strong>Duyệt hồ sơ</strong> và <strong>Duyệt khóa học</strong> của Admin."
+            ]
+          }
+        ]
+      },
+      system: {
+        title: "⚡ EduPulse Platform (Process 0.0)",
+        sub: "Hệ thống trung tâm quản trị & điều phối dữ liệu",
+        sections: [
+          {
+            type: "tech",
+            title: "Kiến trúc kỹ thuật cốt lõi",
+            items: [
+              "<strong>Kiến trúc:</strong> MERN Stack (MongoDB Atlas, ExpressJS, React + Vite, NodeJS).",
+              "<strong>Bảo mật:</strong> JWT Access/Refresh Token (HttpOnly Cookie), mã hóa mật khẩu Bcrypt.",
+              "<strong>Thẩm định 100% KYC:</strong> Cả học sinh và giảng viên đều phải được duyệt danh tính trước khi tham gia học thuật.",
+              "<strong>Thanh toán bảo mật:</strong> Razorpay Checkout với xác thực chữ ký SHA-256 HMAC."
+            ]
+          },
+          {
+            type: "input",
+            title: "Tập dữ liệu tiếp nhận (Inputs)",
+            items: [
+              "Hồ sơ người dùng & tài liệu scan bằng cấp, CCCD.",
+              "Yêu cầu tạo khóa học, lịch buổi học và liên kết Meet.",
+              "Thông tin thanh toán học phí & yêu cầu rút tiền.",
+              "Quyết định phê duyệt hồ sơ và phê duyệt khóa học từ Admin.",
+              "Nội dung trao đổi tin nhắn giữa các người dùng."
+            ]
+          },
+          {
+            type: "output",
+            title: "Tập dữ liệu phản hồi (Outputs)",
+            items: [
+              "Danh mục khóa học được kiểm duyệt minh bạch.",
+              "Đường link và thời khóa biểu lớp học trực tiếp thời gian thực.",
+              "Kết quả thẩm định KYC & số dư thu nhập của giảng viên.",
+              "Báo cáo thống kê toàn diện cho ban quản trị."
+            ]
+          }
+        ]
+      },
+      student: {
+        title: "🎓 Học Viên (Student Subsystem)",
+        sub: "Bao gồm 11 chức năng chuyên biệt: CN10 ➔ CN20",
+        sections: [
+          {
+            type: "input",
+            title: "Dữ liệu Học viên gửi vào hệ thống (Inputs)",
+            items: [
+              "<strong>CN01-CN03:</strong> Email, mật khẩu băm, mã OTP kích hoạt tài khoản.",
+              "<strong>CN10:</strong> Hồ sơ KYC học sinh: CMND/CCCD, bằng THPT/ĐH scan.",
+              "<strong>CN12:</strong> Cập nhật hồ sơ: Họ tên, ảnh đại diện, số điện thoại.",
+              "<strong>CN13-CN15:</strong> Từ khóa tìm kiếm khóa học/giảng viên, yêu cầu đăng ký khóa.",
+              "<strong>CN16:</strong> Thông tin thanh toán học phí trực tuyến Razorpay.",
+              "<strong>CN20, CN09:</strong> Tin nhắn hỏi bài gửi giảng viên, tin nhắn phản hồi gửi Admin."
+            ]
+          },
+          {
+            type: "output",
+            title: "Dữ liệu Hệ thống phản hồi cho Học viên (Outputs)",
+            items: [
+              "<strong>CN07, CN08:</strong> Danh mục khóa học đã duyệt, hồ sơ giảng viên công khai.",
+              "<strong>CN11:</strong> Trạng thái duyệt KYC: pending / approved / rejected / reupload.",
+              "<strong>CN17, CN18:</strong> Bảng điều khiển lộ trình, danh sách khóa học đang theo học.",
+              "<strong>CN19:</strong> Đường link phòng học trực tuyến Live Meet và lịch học tuần.",
+              "<strong>CN20:</strong> Tin nhắn giải đáp thắc mắc từ Giảng viên gửi về."
+            ]
+          }
+        ]
+      },
+      teacher: {
+        title: "👨‍🏫 Giảng Viên (Teacher Subsystem)",
+        sub: "Bao gồm 10 chức năng chuyên biệt: CN21 ➔ CN30",
+        sections: [
+          {
+            type: "input",
+            title: "Dữ liệu Giảng viên gửi vào hệ thống (Inputs)",
+            items: [
+              "<strong>CN21:</strong> Hồ sơ chuyên môn bắt buộc: CCCD, bằng THPT, bằng Cử nhân (UG), bằng Thạc sĩ/Tiến sĩ (PG).",
+              "<strong>CN22:</strong> Cập nhật thông tin: Tiểu sử giảng dạy (bio), chứng chỉ chuyên ngành, ảnh chân dung.",
+              "<strong>CN23:</strong> Đề cương khóa học mới: Tên khóa, mô tả, cấp học, lớp, môn, học phí, lịch học.",
+              "<strong>CN25:</strong> Thêm buổi học Live: Ngày giờ, thời lượng, liên kết phòng họp video.",
+              "<strong>CN28:</strong> Tin nhắn hướng dẫn bài tập, giải đáp cho học sinh.",
+              "<strong>CN30:</strong> Yêu cầu rút tiền thù lao: Số tiền rút, số tài khoản ngân hàng thụ hưởng."
+            ]
+          },
+          {
+            type: "output",
+            title: "Dữ liệu Hệ thống phản hồi cho Giảng viên (Outputs)",
+            items: [
+              "<strong>CN21, CN36:</strong> Kết quả thẩm định bằng cấp từ Admin (approved/pending/rejected).",
+              "<strong>CN38:</strong> Thông báo khóa học đã được Admin duyệt xuất bản lên trang chủ.",
+              "<strong>CN26, CN27:</strong> Danh sách học sinh đăng ký vào từng lớp, thời khóa biểu dạy theo tuần.",
+              "<strong>CN28:</strong> Tin nhắn đặt câu hỏi từ học sinh trong lớp.",
+              "<strong>CN29, CN30:</strong> Thống kê số dư thù lao (Balance) và xác nhận giải ngân lệnh rút tiền."
+            ]
+          }
+        ]
+      },
+      admin: {
+        title: "🛡️ Quản Trị Viên (Admin Subsystem)",
+        sub: "Bao gồm 11 chức năng chuyên biệt: CN31 ➔ CN41",
+        sections: [
+          {
+            type: "input",
+            title: "Dữ liệu & Quyết định Admin gửi vào hệ thống (Inputs)",
+            items: [
+              "<strong>CN31:</strong> Đăng nhập với tài khoản đặc quyền quản trị viên.",
+              "<strong>CN34:</strong> Quyết định phê duyệt / từ chối / yêu cầu nộp lại hồ sơ KYC của học sinh.",
+              "<strong>CN36:</strong> Quyết định phê duyệt / từ chối hồ sơ năng lực của giảng viên.",
+              "<strong>CN38:</strong> Quyết định phê duyệt hoặc từ chối xuất bản khóa học của giảng viên.",
+              "<strong>CN40:</strong> Đánh dấu đã đọc và phản hồi tin nhắn liên hệ khiếu nại của người dùng."
+            ]
+          },
+          {
+            type: "output",
+            title: "Dữ liệu Báo cáo hệ thống xuất cho Admin (Outputs)",
+            items: [
+              "<strong>CN32, CN33, CN35:</strong> Danh sách hồ sơ học sinh & giảng viên chờ duyệt kèm ảnh scan bằng cấp trên Cloudinary.",
+              "<strong>CN37:</strong> Danh sách toàn bộ khóa học mới do giảng viên khởi tạo đang chờ duyệt.",
+              "<strong>CN39:</strong> Hòm thư tin nhắn phản hồi, góp ý từ người dùng gửi qua form liên hệ.",
+              "Báo cáo thống kê toàn sàn: Doanh thu, số lượng thành viên, tỷ lệ duyệt KYC."
+            ]
+          }
+        ]
+      },
+      razorpay: {
+        title: "💳 Cổng Thanh Toán Trực Tuyến Razorpay",
+        sub: "Tích hợp chức năng CN16 - Thanh toán học phí",
+        sections: [
+          {
+            type: "input",
+            title: "Luồng tiếp nhận từ EduPulse",
+            items: [
+              "Yêu cầu tạo đơn hàng: Gửi số tiền học phí <span class='drawer-code-tag'>amount</span> và mã định danh <span class='drawer-code-tag'>receipt_id</span>.",
+              "Cung cấp popup thanh toán an toàn cho học viên qua thẻ tín dụng, ngân hàng, ví điện tử."
+            ]
+          },
+          {
+            type: "output",
+            title: "Luồng phản hồi xác thực",
+            items: [
+              "Trả về các mã định danh: <span class='drawer-code-tag'>razorpay_order_id</span>, <span class='drawer-code-tag'>razorpay_payment_id</span>.",
+              "Tạo chữ ký số mã hóa <span class='drawer-code-tag'>razorpay_signature</span> bằng thuật toán SHA256 HMAC để EduPulse kiểm tra tính toàn vẹn tài chính."
+            ]
+          }
+        ]
+      },
+      cloudinary: {
+        title: "☁️ Dịch Vụ Lưu Trữ Đám Mây Cloudinary CDN",
+        sub: "Tích hợp trong các chức năng upload hồ sơ (CN10, CN21, CN22)",
+        sections: [
+          {
+            type: "tech",
+            title: "Vai trò lưu trữ & phát tán dữ liệu",
+            items: [
+              "Tiếp nhận các file hình ảnh đại diện (avatar) của thành viên.",
+              "Lưu trữ bảo mật các tài liệu scan bằng cấp quan trọng: Bằng Cử nhân, Thạc sĩ, Tiến sĩ, CCCD.",
+              "Tối ưu dung lượng ảnh và trả về <span class='drawer-code-tag'>Secure HTTPS CDN URL</span> tốc độ cao trên toàn cầu."
+            ]
+          }
+        ]
+      },
+      email: {
+        title: "✉️ Email Service (Nodemailer SMTP)",
+        sub: "Tích hợp trong chức năng kích hoạt & thông báo (CN02, CN05)",
+        sections: [
+          {
+            type: "tech",
+            title: "Tiến trình gửi thư tự động",
+            items: [
+              "Tiếp nhận yêu cầu gửi email từ Backend với nội dung mã OTP kích hoạt 6 chữ số.",
+              "Gửi email đặt lại mật khẩu với token một lần có thời hạn 15 phút.",
+              "Gửi email thông báo tự động khi Admin phê duyệt hoặc từ chối hồ sơ KYC.",
+              "Phản hồi trạng thái gửi thành công hoặc lỗi qua giao thức SMTP Gmail."
+            ]
+          }
+        ]
+      },
+      live: {
+        title: "🎥 Hạ Tầng Lớp Học Trực Tuyến Live",
+        sub: "Tích hợp trong chức năng học trực tiếp (CN19, CN25)",
+        sections: [
+          {
+            type: "tech",
+            title: "Không gian lớp học 2 chiều thời gian thực",
+            items: [
+              "EduPulse quản lý và phân phối liên kết phòng học trực tuyến (Google Meet / Video Conference).",
+              "Thiết lập lịch học theo tuần và đếm ngược thời gian bắt đầu buổi dạy.",
+              "Cung cấp kênh truyền thông video, âm thanh độ nét cao và tính năng chia sẻ màn hình trực tiếp giữa Giảng viên và Học viên."
+            ]
+          }
+        ]
+      }
+    };
+
+    // Zoom & Pan state
+    let zoomLevel = 1.0;
+    const stage = document.getElementById('diagram-stage');
+
+    function zoomDiagram(delta) {
+      zoomLevel = Math.max(0.65, Math.min(1.4, zoomLevel + delta));
+      stage.style.transform = `scale(${zoomLevel})`;
+      updateConnectingLines();
+    }
+
+    function resetZoom() {
+      zoomLevel = 1.0;
+      stage.style.transform = `scale(1.0)`;
+      updateConnectingLines();
+    }
+
+    // View Switcher (Draw.io vs Visual vs Matrix vs Image)
+    function switchView(viewName) {
+      const drawioContainer = document.getElementById('drawio-container');
+      const visualContainer = document.getElementById('visual-container');
+      const matrixContainer = document.getElementById('matrix-container');
+      const imageContainer = document.getElementById('image-container');
+      const filterBar = document.getElementById('filter-bar');
+
+      const tabDrawio = document.getElementById('tab-drawio');
+      const tabVisual = document.getElementById('tab-visual');
+      const tabMatrix = document.getElementById('tab-matrix');
+      const tabImage = document.getElementById('tab-image');
+
+      // Reset all tabs
+      if (tabDrawio) tabDrawio.classList.remove('active');
+      if (tabVisual) tabVisual.classList.remove('active');
+      if (tabMatrix) tabMatrix.classList.remove('active');
+      if (tabImage) tabImage.classList.remove('active');
+
+      // Hide all containers
+      if (drawioContainer) drawioContainer.style.display = 'none';
+      if (visualContainer) visualContainer.style.display = 'none';
+      if (matrixContainer) { matrixContainer.classList.remove('active'); matrixContainer.style.display = 'none'; }
+      if (imageContainer) imageContainer.style.display = 'none';
+      if (filterBar) filterBar.style.display = 'none';
+
+      if (viewName === 'drawio') {
+        if (drawioContainer) drawioContainer.style.display = 'block';
+        if (tabDrawio) tabDrawio.classList.add('active');
+      } else if (viewName === 'visual') {
+        if (visualContainer) visualContainer.style.display = 'block';
+        if (filterBar) filterBar.style.display = 'flex';
+        if (tabVisual) tabVisual.classList.add('active');
+        setTimeout(updateConnectingLines, 60);
+      } else if (viewName === 'image') {
+        if (imageContainer) imageContainer.style.display = 'block';
+        if (tabImage) tabImage.classList.add('active');
+      } else if (viewName === 'matrix') {
+        if (matrixContainer) {
+          matrixContainer.classList.add('active');
+          matrixContainer.style.display = 'block';
+        }
+        if (tabMatrix) tabMatrix.classList.add('active');
+      }
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      document.getElementById('theme-icon').textContent = target === 'dark' ? '🌙' : '☀️';
+      updateConnectingLines();
+    }
+
+    // Filter Actors on Visual Stage
+    function filterActor(actorKey, btnElement) {
+      document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+      btnElement.classList.add('active');
+
+      const cards = document.querySelectorAll('.entity-card');
+      const paths = document.querySelectorAll('.flow-path');
+
+      if (actorKey === 'all') {
+        cards.forEach(c => c.classList.remove('dimmed', 'highlighted'));
+        paths.forEach(p => p.classList.remove('dimmed', 'highlighted'));
+      } else {
+        cards.forEach(c => {
+          const isMatch = (actorKey === 'services' && (c.id.includes('cloudinary') || c.id.includes('email') || c.id.includes('live')))
+                       || c.id.includes(actorKey);
+          if (isMatch) {
+            c.classList.remove('dimmed');
+            c.classList.add('highlighted');
+          } else {
+            c.classList.add('dimmed');
+            c.classList.remove('highlighted');
+          }
+        });
+
+        paths.forEach(p => {
+          const target = p.getAttribute('data-entity');
+          const isMatch = (actorKey === 'services' && (target === 'cloudinary' || target === 'email' || target === 'live'))
+                       || target === actorKey;
+          if (isMatch) {
+            p.classList.remove('dimmed');
+            p.classList.add('highlighted');
+          } else {
+            p.classList.add('dimmed');
+            p.classList.remove('highlighted');
+          }
+        });
+      }
+    }
+
+    // Detail Drawer Controls
+    function openDrawer(key) {
+      const data = ENTITY_DETAILS[key];
+      if (!data) return;
+
+      document.getElementById('drawer-title').textContent = data.title;
+      document.getElementById('drawer-sub').textContent = data.sub;
+
+      const body = document.getElementById('drawer-body');
+      body.innerHTML = '';
+
+      data.sections.forEach(sec => {
+        const secDiv = document.createElement('div');
+        secDiv.className = 'drawer-section';
+
+        let titleClass = 'input-title';
+        let icon = '➔';
+        if (sec.type === 'output') { titleClass = 'output-title'; icon = '⬅'; }
+        if (sec.type === 'tech') { titleClass = 'tech-title'; icon = '⚙️'; }
+
+        secDiv.innerHTML = `
+          <div class="drawer-section-title ${titleClass}">
+            <span>${icon}</span>
+            <span>${sec.title}</span>
+          </div>
+          <ul class="drawer-list">
+            ${sec.items.map(it => `<li>${it}</li>`).join('')}
+          </ul>
+        `;
+        body.appendChild(secDiv);
+      });
+
+      document.getElementById('detail-drawer').classList.add('open');
+    }
+
+    function closeDrawer() {
+      document.getElementById('detail-drawer').classList.remove('open');
+    }
+
+    // Matrix Table Search Filter
+    function filterMatrixTable() {
+      const q = document.getElementById('search-matrix').value.toLowerCase();
+      const rows = document.querySelectorAll('#data-table tbody tr');
+
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // Dynamic SVG Connectors Calculation
+    function updateConnectingLines() {
+      const svg = document.getElementById('flow-svg');
+      const core = document.getElementById('core-system');
+      if (!core || !svg) return;
+
+      const stageRect = stage.getBoundingClientRect();
+      const coreRect = core.getBoundingClientRect();
+
+      const coreCenterX = (coreRect.left + coreRect.width / 2 - stageRect.left) / zoomLevel;
+      const coreCenterY = (coreRect.top + coreRect.height / 2 - stageRect.top) / zoomLevel;
+
+      // All 6 connected entity components (7 logical entities with razorpay, cloud, email, live)
+      const entities = [
+        { id: 'card-student', key: 'student', type: 'both' },
+        { id: 'card-teacher', key: 'teacher', type: 'both' },
+        { id: 'card-admin', key: 'admin', type: 'both' },
+        { id: 'card-payment', key: 'payment', type: 'both' },
+        { id: 'card-cloudinary', key: 'cloudinary', type: 'service' },
+        { id: 'card-email', key: 'email', type: 'service' },
+        { id: 'card-live', key: 'live', type: 'service' }
+      ];
+
+      // Retain defs and reset paths
+      const defs = svg.querySelector('defs');
+      svg.innerHTML = '';
+      svg.appendChild(defs);
+
+      entities.forEach(ent => {
+        const el = document.getElementById(ent.id);
+        if (!el) return;
+
+        const elRect = el.getBoundingClientRect();
+        const elCenterX = (elRect.left + elRect.width / 2 - stageRect.left) / zoomLevel;
+        const elCenterY = (elRect.top + elRect.height / 2 - stageRect.top) / zoomLevel;
+
+        if (ent.type === 'both') {
+          const dx = coreCenterX - elCenterX;
+          const dy = coreCenterY - elCenterY;
+          const norm = Math.sqrt(dx * dx + dy * dy) || 1;
+          const perpX = (-dy / norm) * 14;
+          const perpY = (dx / norm) * 14;
+
+          // Input Path (Entity -> System)
+          const pIn = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const dIn = `M ${elCenterX + perpX} ${elCenterY + perpY} Q ${(elCenterX + coreCenterX)/2 + perpX*1.4} ${(elCenterY + coreCenterY)/2 + perpY*1.4} ${coreCenterX + perpX} ${coreCenterY + perpY}`;
+          pIn.setAttribute('d', dIn);
+          pIn.setAttribute('class', 'flow-path input-flow');
+          pIn.setAttribute('data-entity', ent.key);
+          pIn.setAttribute('marker-end', 'url(#arrow-in)');
+          svg.appendChild(pIn);
+
+          // Output Path (System -> Entity)
+          const pOut = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const dOut = `M ${coreCenterX - perpX} ${coreCenterY - perpY} Q ${(elCenterX + coreCenterX)/2 - perpX*1.4} ${(elCenterY + coreCenterY)/2 - perpY*1.4} ${elCenterX - perpX} ${elCenterY - perpY}`;
+          pOut.setAttribute('d', dOut);
+          pOut.setAttribute('class', 'flow-path output-flow');
+          pOut.setAttribute('data-entity', ent.key);
+          pOut.setAttribute('marker-end', 'url(#arrow-out)');
+          svg.appendChild(pOut);
+
+        } else {
+          // Bidirectional Service Sync Path
+          const pSvc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const dSvc = `M ${coreCenterX} ${coreCenterY} L ${elCenterX} ${elCenterY}`;
+          pSvc.setAttribute('d', dSvc);
+          pSvc.setAttribute('class', 'flow-path service-flow');
+          pSvc.setAttribute('data-entity', ent.key);
+          pSvc.setAttribute('marker-end', 'url(#arrow-svc)');
+          svg.appendChild(pSvc);
+        }
+      });
+    }
+
+    // Init & Listeners
+    window.addEventListener('resize', updateConnectingLines);
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(updateConnectingLines, 80);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  </script>
+</body>
+</html>
