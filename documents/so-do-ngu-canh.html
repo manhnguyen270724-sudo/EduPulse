@@ -965,24 +965,29 @@
         <h1>
           EduPulse Platform
           <span class="brand-badge">DFD Mức 0</span>
-          <span class="brand-badge standard">Chuẩn 41 CN</span>
+          <span class="brand-badge standard" id="lbl-badge-fc">Chuẩn 41 CN</span>
         </h1>
-        <p>Sơ đồ ngữ cảnh kiến trúc hệ thống & biên giới luồng dữ liệu (Context Diagram - Level 0)</p>
+        <p id="lbl-brand-sub">Sơ đồ ngữ cảnh kiến trúc hệ thống & biên giới luồng dữ liệu (Context Diagram - Level 0)</p>
       </div>
     </div>
 
     <div class="header-actions">
       <button class="tab-btn active" id="tab-drawio" onclick="switchView('drawio')">
-        <span>📐</span> Chuẩn Draw.io (DFD Mức 0)
+        <span id="lbl-tab-drawio">📐 Chuẩn Draw.io (DFD Mức 0)</span>
       </button>
       <button class="tab-btn" id="tab-visual" onclick="switchView('visual')">
-        <span>🎨</span> Trực quan Neon
+        <span id="lbl-tab-visual">🎨 Trực quan Neon</span>
       </button>
       <button class="tab-btn" id="tab-matrix" onclick="switchView('matrix')">
-        <span>📋</span> Ma trận dữ liệu (41 CN)
+        <span id="lbl-tab-matrix">📋 Ma trận dữ liệu (41 CN)</span>
       </button>
       <button class="tab-btn" id="tab-image" onclick="switchView('image')">
-        <span>🖼️</span> Bản vẽ AI Concept
+        <span id="lbl-tab-image">🖼️ Bản vẽ AI Concept</span>
+      </button>
+
+      <!-- Language Toggle Button -->
+      <button class="tab-btn" id="btn-lang" onclick="toggleLanguage()" title="Chuyển ngôn ngữ / Switch Language" style="font-weight: 700; border-color: #38bdf8; color: #38bdf8;">
+        <span>🌐</span> <span id="lang-label">English</span>
       </button>
 
       <button class="icon-btn" onclick="toggleTheme()" title="Chuyển chế độ sáng/tối">
@@ -998,25 +1003,25 @@
   <div class="assessment-bar">
     <div class="assessment-status">
       <span>✅</span>
-      <span>Đã chuẩn hóa & kiểm chứng 100% khớp với 41 chức năng đặc tả (CN01 ➔ CN41) và 7 thực thể tác nhân.</span>
+      <span id="lbl-assessment-msg">Đã chuẩn hóa & kiểm chứng 100% khớp với 41 chức năng đặc tả (CN01 ➔ CN41) và 7 thực thể tác nhân.</span>
     </div>
-    <button class="assessment-details-btn" onclick="openDrawer('evaluation')">Xem bảng đánh giá chi tiết ➔</button>
+    <button class="assessment-details-btn" id="lbl-assessment-btn" onclick="openDrawer('evaluation')">Xem bảng đánh giá chi tiết ➔</button>
   </div>
 
   <!-- Filter Toolbar (For Visual View) -->
   <div class="filter-bar" id="filter-bar" style="display: none;">
     <div class="filter-chips">
-      <span class="filter-label">Lọc thực thể:</span>
-      <button class="chip active" onclick="filterActor('all', this)">🌟 Tất cả thực thể (7)</button>
-      <button class="chip student" onclick="filterActor('student', this)">🎓 Học Viên</button>
-      <button class="chip teacher" onclick="filterActor('teacher', this)">👨‍🏫 Giảng Viên</button>
-      <button class="chip admin" onclick="filterActor('admin', this)">🛡️ Quản Trị Viên</button>
-      <button class="chip" onclick="filterActor('payment', this)">💳 Razorpay</button>
-      <button class="chip services" onclick="filterActor('services', this)">☁️ Dịch Vụ Đám Mây</button>
+      <span class="filter-label" id="lbl-filter-tag">Lọc thực thể:</span>
+      <button class="chip active" id="chip-all" onclick="filterActor('all', this)">🌟 Tất cả thực thể (7)</button>
+      <button class="chip student" id="chip-student" onclick="filterActor('student', this)">🎓 Học Viên</button>
+      <button class="chip teacher" id="chip-teacher" onclick="filterActor('teacher', this)">👨‍🏫 Giảng Viên</button>
+      <button class="chip admin" id="chip-admin" onclick="filterActor('admin', this)">🛡️ Quản Trị Viên</button>
+      <button class="chip" id="chip-payment" onclick="filterActor('payment', this)">💳 Razorpay</button>
+      <button class="chip services" id="chip-services" onclick="filterActor('services', this)">☁️ Dịch Vụ Đám Mây</button>
     </div>
 
     <div style="font-size: 0.78rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.5rem;">
-      <span>💡 Nhấp vào từng khối để xem chi tiết trường dữ liệu & mã chức năng!</span>
+      <span id="lbl-filter-tip">💡 Nhấp vào từng khối để xem chi tiết trường dữ liệu & mã chức năng!</span>
     </div>
   </div>
 
@@ -1025,15 +1030,15 @@
     <div class="drawio-card">
       <div class="drawio-toolbar">
         <div>
-          <h2 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;" id="lbl-drawio-title">
             <span>📐</span> Sơ Đồ Ngữ Cảnh Chuẩn Draw.io / DFD Mức 0 (Academic Standard)
           </h2>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;" id="lbl-drawio-sub">
             Phân định rõ ràng từng khối Tác nhân ngoài (Hình chữ nhật) • Hệ thống trung tâm (Hình tròn 0.0) • Nhãn dữ liệu trực tiếp trên từng mũi tên Vào / Ra.
           </p>
         </div>
         <div style="display: flex; gap: 0.6rem;">
-          <button class="tab-btn" onclick="window.print()">
+          <button class="tab-btn" id="lbl-btn-print" onclick="window.print()">
             <span>🖨️</span> In / Xuất PDF
           </button>
         </div>
@@ -1069,8 +1074,8 @@
           <!-- Label Input Học Viên -->
           <g transform="translate(305, 230)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] DỮ LIỆU VÀO TỪ HỌC VIÊN</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Đăng ký, OTP, CCCD KYC, Học phí, Tin nhắn hỏi</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7" id="txt-st-in-hdr">[INPUT] DỮ LIỆU VÀO TỪ HỌC VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-st-in-desc">Đăng ký, OTP, CCCD KYC, Học phí, Tin nhắn hỏi</text>
           </g>
 
           <!-- 1. HỆ THỐNG ➔ HỌC VIÊN (OUTPUT) -->
@@ -1078,8 +1083,8 @@
           <!-- Label Output Học Viên -->
           <g transform="translate(305, 305)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] DỮ LIỆU XUẤT CHO HỌC VIÊN</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">DS khóa học, Link Meet, Kết quả KYC, Phản hồi GV</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a" id="txt-st-out-hdr">[OUTPUT] DỮ LIỆU XUẤT CHO HỌC VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-st-out-desc">DS khóa học, Link Meet, Kết quả KYC, Phản hồi GV</text>
           </g>
 
           <!-- 2. GIẢNG VIÊN ➔ HỆ THỐNG (INPUT) -->
@@ -1087,8 +1092,8 @@
           <!-- Label Input Giảng Viên -->
           <g transform="translate(305, 545)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] DỮ LIỆU VÀO TỪ GIẢNG VIÊN</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Hồ sơ bằng cấp UG/PG, Đề cương khóa, Lịch Live, Rút tiền</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7" id="txt-tc-in-hdr">[INPUT] DỮ LIỆU VÀO TỪ GIẢNG VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-tc-in-desc">Hồ sơ bằng cấp UG/PG, Đề cương khóa, Lịch Live, Rút tiền</text>
           </g>
 
           <!-- 2. HỆ THỐNG ➔ GIẢNG VIÊN (OUTPUT) -->
@@ -1096,8 +1101,8 @@
           <!-- Label Output Giảng Viên -->
           <g transform="translate(305, 620)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] DỮ LIỆU XUẤT CHO GIẢNG VIÊN</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Trạng thái duyệt KYC/Khóa, DS học viên, Số dư thù lao</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a" id="txt-tc-out-hdr">[OUTPUT] DỮ LIỆU XUẤT CHO GIẢNG VIÊN</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-tc-out-desc">Trạng thái duyệt KYC/Khóa, DS học viên, Số dư thù lao</text>
           </g>
 
           <!-- 3. QUẢN TRỊ VIÊN ➔ HỆ THỐNG (INPUT) -->
@@ -1105,8 +1110,8 @@
           <!-- Label Input Admin -->
           <g transform="translate(775, 230)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] LỆNH & QUYẾT ĐỊNH QUẢN TRỊ</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Duyệt/từ chối KYC HS & GV, Duyệt khóa học, Xử lý khiếu nại</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7" id="txt-ad-in-hdr">[INPUT] LỆNH & QUYẾT ĐỊNH QUẢN TRỊ</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-ad-in-desc">Duyệt/từ chối KYC HS & GV, Duyệt khóa học, Xử lý khiếu nại</text>
           </g>
 
           <!-- 3. HỆ THỐNG ➔ QUẢN TRỊ VIÊN (OUTPUT) -->
@@ -1114,8 +1119,8 @@
           <!-- Label Output Admin -->
           <g transform="translate(775, 305)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] BÁO CÁO & HỒ SƠ CHỜ DUYỆT</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a" id="txt-ad-out-hdr">[OUTPUT] BÁO CÁO & HỒ SƠ CHỜ DUYỆT</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-ad-out-desc">DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống</text>
           </g>
 
           <!-- 4. CỔNG THANH TOÁN ➔ HỆ THỐNG (INPUT) -->
@@ -1123,8 +1128,8 @@
           <!-- Label Input Razorpay -->
           <g transform="translate(775, 545)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7">[INPUT] KẾT QUẢ TỪ RAZORPAY</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Payment ID, Chữ ký số mã hóa SHA256 HMAC</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#0284c7" id="txt-rz-in-hdr">[INPUT] KẾT QUẢ TỪ RAZORPAY</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-rz-in-desc">Payment ID, Chữ ký số mã hóa SHA256 HMAC</text>
           </g>
 
           <!-- 4. HỆ THỐNG ➔ CỔNG THANH TOÁN (OUTPUT) -->
@@ -1132,8 +1137,8 @@
           <!-- Label Output Razorpay -->
           <g transform="translate(775, 620)">
             <rect x="0" y="0" width="260" height="34" rx="5" fill="#ffffff" stroke="#16a34a" stroke-width="1.5" filter="url(#box-shadow)"/>
-            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a">[OUTPUT] YÊU CẦU TẠO GIAO DỊCH</text>
-            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b">Thông tin đơn hàng (amount, currency, receipt_id)</text>
+            <text x="8" y="15" font-size="10" font-weight="800" fill="#16a34a" id="txt-rz-out-hdr">[OUTPUT] YÊU CẦU TẠO GIAO DỊCH</text>
+            <text x="8" y="27" font-size="9.5" font-weight="600" fill="#1e293b" id="txt-rz-out-desc">Thông tin đơn hàng (amount, currency, receipt_id)</text>
           </g>
 
           <!-- 5. HỆ THỐNG <-> CLOUDINARY (VERTICAL TOP) -->
@@ -1144,8 +1149,8 @@
           <!-- Label Cloudinary -->
           <g transform="translate(705, 175)">
             <rect x="0" y="0" width="180" height="42" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#box-shadow)"/>
-            <text x="6" y="14" font-size="9" font-weight="700" fill="#16a34a">▲ Upload: File avatar, CCCD, bằng</text>
-            <text x="6" y="32" font-size="9" font-weight="700" fill="#0284c7">▼ Trả về: Secure HTTPS CDN URL</text>
+            <text x="6" y="14" font-size="9" font-weight="700" fill="#16a34a" id="txt-cl-up">▲ Upload: File avatar, CCCD, bằng</text>
+            <text x="6" y="32" font-size="9" font-weight="700" fill="#0284c7" id="txt-cl-down">▼ Trả về: Secure HTTPS CDN URL</text>
           </g>
 
           <!-- 6. HỆ THỐNG <-> EMAIL SMTP (BOTTOM LEFT) -->
@@ -1154,8 +1159,8 @@
           <!-- Label Email -->
           <g transform="translate(390, 680)">
             <rect x="0" y="0" width="165" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#box-shadow)"/>
-            <text x="6" y="14" font-size="8.8" font-weight="700" fill="#16a34a">▼ Gửi OTP kích hoạt, Reset pass</text>
-            <text x="6" y="30" font-size="8.8" font-weight="700" fill="#0284c7">▲ Trạng thái gửi mail thành công</text>
+            <text x="6" y="14" font-size="8.8" font-weight="700" fill="#16a34a" id="txt-em-send">▼ Gửi OTP kích hoạt, Reset pass</text>
+            <text x="6" y="30" font-size="8.8" font-weight="700" fill="#0284c7" id="txt-em-status">▲ Trạng thái gửi mail thành công</text>
           </g>
 
           <!-- 7. HỆ THỐNG <-> LIVE CLASSROOM (BOTTOM RIGHT) -->
@@ -1164,8 +1169,8 @@
           <!-- Label Live -->
           <g transform="translate(780, 680)">
             <rect x="0" y="0" width="170" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#box-shadow)"/>
-            <text x="6" y="14" font-size="8.8" font-weight="700" fill="#16a34a">▼ Link Meet, lịch học, thời lượng</text>
-            <text x="6" y="30" font-size="8.8" font-weight="700" fill="#0284c7">▲ Trạng thái phiên Live trực tuyến</text>
+            <text x="6" y="14" font-size="8.8" font-weight="700" fill="#16a34a" id="txt-lv-send">▼ Link Meet, lịch học, thời lượng</text>
+            <text x="6" y="30" font-size="8.8" font-weight="700" fill="#0284c7" id="txt-lv-status">▲ Trạng thái phiên Live trực tuyến</text>
           </g>
 
           <!-- ==================== TIẾN TRÌNH TRUNG TÂM (PROCESS 0.0) ==================== -->
@@ -1174,13 +1179,13 @@
             <circle cx="0" cy="0" r="115" fill="#f0f9ff" stroke="#0284c7" stroke-width="3.5" filter="url(#box-shadow)"/>
             <circle cx="0" cy="0" r="108" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 3"/>
             <!-- Văn bản Process -->
-            <text x="0" y="-35" text-anchor="middle" font-size="22" font-weight="900" fill="#0369a1">0.0</text>
+            <text x="0" y="-35" text-anchor="middle" font-size="22" font-weight="900" fill="#0369a1" id="txt-core-p0">0.0</text>
             <line x1="-70" y1="-20" x2="70" y2="-20" stroke="#bae6fd" stroke-width="1.5"/>
-            <text x="0" y="2" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0f172a">HỆ THỐNG QUẢN LÝ</text>
-            <text x="0" y="20" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0f172a">HỌC TRỰC TUYẾN</text>
-            <text x="0" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#0284c7">EDUPULSE PLATFORM</text>
+            <text x="0" y="2" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0f172a" id="txt-core-title1">HỆ THỐNG QUẢN LÝ</text>
+            <text x="0" y="20" text-anchor="middle" font-size="13.5" font-weight="800" fill="#0f172a" id="txt-core-title2">HỌC TRỰC TUYẾN</text>
+            <text x="0" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#0284c7" id="txt-core-title3">EDUPULSE PLATFORM</text>
             <rect x="-65" y="55" width="130" height="18" rx="9" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1"/>
-            <text x="0" y="67" text-anchor="middle" font-size="9" font-weight="700" fill="#0369a1">TIẾN TRÌNH DUY NHẤT</text>
+            <text x="0" y="67" text-anchor="middle" font-size="9" font-weight="700" fill="#0369a1" id="txt-core-tag">TIẾN TRÌNH DUY NHẤT</text>
           </g>
 
           <!-- ==================== CÁC KHỐI CHỮ NHẬT TÁC NHÂN (EXTERNAL ENTITIES) ==================== -->
@@ -1190,10 +1195,10 @@
             <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
             <rect width="240" height="26" rx="8" fill="#0284c7"/>
             <rect y="18" width="240" height="8" fill="#0284c7"/>
-            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">TÁC NHÂN BÊN NGOÀI</text>
-            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">🎓 HỌC VIÊN</text>
-            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">(Student Subsystem)</text>
-            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0284c7">11 Chức năng: CN10 ➔ CN20</text>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-st-hdr">TÁC NHÂN BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a" id="txt-st-title">🎓 HỌC VIÊN</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569" id="txt-st-sub">(Student Subsystem)</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0284c7" id="txt-st-fc">11 Chức năng: CN10 ➔ CN20</text>
           </g>
 
           <!-- ENTITY 2: GIẢNG VIÊN -->
@@ -1201,10 +1206,10 @@
             <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
             <rect width="240" height="26" rx="8" fill="#d97706"/>
             <rect y="18" width="240" height="8" fill="#d97706"/>
-            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">TÁC NHÂN BÊN NGOÀI</text>
-            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">👨‍🏫 GIẢNG VIÊN</text>
-            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">(Teacher Subsystem)</text>
-            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d97706">10 Chức năng: CN21 ➔ CN30</text>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-tc-hdr">TÁC NHÂN BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a" id="txt-tc-title">👨‍🏫 GIẢNG VIÊN</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569" id="txt-tc-sub">(Teacher Subsystem)</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d97706" id="txt-tc-fc">10 Chức năng: CN21 ➔ CN30</text>
           </g>
 
           <!-- ENTITY 3: QUẢN TRỊ VIÊN -->
@@ -1212,10 +1217,10 @@
             <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
             <rect width="240" height="26" rx="8" fill="#e11d48"/>
             <rect y="18" width="240" height="8" fill="#e11d48"/>
-            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">TÁC NHÂN BÊN NGOÀI</text>
-            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a">🛡️ QUẢN TRỊ VIÊN</text>
-            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">(Admin Subsystem)</text>
-            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e11d48">11 Chức năng: CN31 ➔ CN41</text>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-ad-hdr">TÁC NHÂN BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a" id="txt-ad-title">🛡️ QUẢN TRỊ VIÊN</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569" id="txt-ad-sub">(Admin Subsystem)</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#e11d48" id="txt-ad-fc">11 Chức năng: CN31 ➔ CN41</text>
           </g>
 
           <!-- ENTITY 4: CỔNG THANH TOÁN -->
@@ -1223,10 +1228,10 @@
             <rect width="240" height="95" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
             <rect width="240" height="26" rx="8" fill="#059669"/>
             <rect y="18" width="240" height="8" fill="#059669"/>
-            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5">HỆ THỐNG BÊN NGOÀI</text>
-            <text x="120" y="52" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a">💳 RAZORPAY GATEWAY</text>
-            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">Cổng Thanh Toán Trực Tuyến</text>
-            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#059669">Xác thực SHA-256 HMAC (CN16)</text>
+            <text x="120" y="17" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-rz-hdr">HỆ THỐNG BÊN NGOÀI</text>
+            <text x="120" y="52" text-anchor="middle" font-size="14.5" font-weight="800" fill="#0f172a" id="txt-rz-title">💳 RAZORPAY GATEWAY</text>
+            <text x="120" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#475569" id="txt-rz-sub">Cổng Thanh Toán Trực Tuyến</text>
+            <text x="120" y="85" text-anchor="middle" font-size="9.5" font-weight="700" fill="#059669" id="txt-rz-fc">Xác thực SHA-256 HMAC (CN16)</text>
           </g>
 
           <!-- ENTITY 5: CLOUDINARY CDN -->
@@ -1234,10 +1239,10 @@
             <rect width="240" height="85" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
             <rect width="240" height="24" rx="8" fill="#7c3aed"/>
             <rect y="16" width="240" height="8" fill="#7c3aed"/>
-            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">DỊCH VỤ BÊN NGOÀI</text>
-            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">☁️ CLOUDINARY CDN</text>
-            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">Lưu Trữ Avatar & Bằng Cấp</text>
-            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">HTTPS CDN URLs (CN10, CN21)</text>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-cl-hdr">DỊCH VỤ BÊN NGOÀI</text>
+            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a" id="txt-cl-title">☁️ CLOUDINARY CDN</text>
+            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569" id="txt-cl-sub">Lưu Trữ Avatar & Bằng Cấp</text>
+            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed" id="txt-cl-fc">HTTPS CDN URLs (CN10, CN21)</text>
           </g>
 
           <!-- ENTITY 6: EMAIL SMTP -->
@@ -1245,10 +1250,10 @@
             <rect width="240" height="85" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
             <rect width="240" height="24" rx="8" fill="#0284c7"/>
             <rect y="16" width="240" height="8" fill="#0284c7"/>
-            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">DỊCH VỤ BÊN NGOÀI</text>
-            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">✉️ EMAIL SMTP SERVER</text>
-            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">Gửi OTP & Thông Báo Tự Động</text>
-            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#0284c7">Gmail SMTP Gateway (CN02, CN05)</text>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-em-hdr">DỊCH VỤ BÊN NGOÀI</text>
+            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a" id="txt-em-title">✉️ EMAIL SMTP SERVER</text>
+            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569" id="txt-em-sub">Gửi OTP & Thông Báo Tự Động</text>
+            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#0284c7" id="txt-em-fc">Gmail SMTP Gateway (CN02, CN05)</text>
           </g>
 
           <!-- ENTITY 7: LIVE MEET -->
@@ -1256,10 +1261,10 @@
             <rect width="240" height="85" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2" filter="url(#box-shadow)"/>
             <rect width="240" height="24" rx="8" fill="#db2777"/>
             <rect y="16" width="240" height="8" fill="#db2777"/>
-            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">DỊCH VỤ BÊN NGOÀI</text>
-            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">🎥 LỚP HỌC LIVE MEET</text>
-            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">Video Conferencing Tương Tác</text>
-            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#db2777">Google Meet Room (CN19, CN25)</text>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-lv-hdr">DỊCH VỤ BÊN NGOÀI</text>
+            <text x="120" y="47" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a" id="txt-lv-title">🎥 LỚP HỌC LIVE MEET</text>
+            <text x="120" y="65" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569" id="txt-lv-sub">Video Conferencing Tương Tác</text>
+            <text x="120" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#db2777" id="txt-lv-fc">Google Meet Room (CN19, CN25)</text>
           </g>
 
           <!-- ==================== BẢNG CHÚ GIẢI CHUẨN DRAW.IO (LEGEND BOX) ==================== -->
@@ -1267,32 +1272,32 @@
             <rect width="240" height="185" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" filter="url(#box-shadow)"/>
             <rect width="240" height="24" rx="8" fill="#334155"/>
             <rect y="16" width="240" height="8" fill="#334155"/>
-            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5">QUY ƯỚC KÝ HIỆU DRAW.IO</text>
+            <text x="120" y="16" text-anchor="middle" font-size="10" font-weight="800" fill="#ffffff" letter-spacing="0.5" id="txt-leg-hdr">QUY ƯỚC KÝ HIỆU DRAW.IO</text>
 
             <!-- Ký hiệu hình chữ nhật -->
             <rect x="15" y="35" width="24" height="16" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
-            <text x="48" y="47" font-size="10" font-weight="700" fill="#1e293b">Hình chữ nhật:</text>
-            <text x="125" y="47" font-size="10" fill="#475569">Tác nhân ngoài</text>
+            <text x="48" y="47" font-size="10" font-weight="700" fill="#1e293b" id="txt-leg-rect1">Hình chữ nhật:</text>
+            <text x="125" y="47" font-size="10" fill="#475569" id="txt-leg-rect2">Tác nhân ngoài</text>
 
             <!-- Ký hiệu hình tròn -->
             <circle cx="27" cy="70" r="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
-            <text x="48" y="73" font-size="10" font-weight="700" fill="#1e293b">Hình tròn:</text>
-            <text x="105" y="73" font-size="10" fill="#475569">Tiến trình (Process 0.0)</text>
+            <text x="48" y="73" font-size="10" font-weight="700" fill="#1e293b" id="txt-leg-circ1">Hình tròn:</text>
+            <text x="105" y="73" font-size="10" fill="#475569" id="txt-leg-circ2">Tiến trình (Process 0.0)</text>
 
             <!-- Ký hiệu Mũi tên Xanh dương -->
             <line x1="15" y1="98" x2="36" y2="98" stroke="#0284c7" stroke-width="2.5" marker-end="url(#d-arrow-in)"/>
-            <text x="48" y="101" font-size="10" font-weight="700" fill="#0284c7">Mũi tên Xanh (In):</text>
-            <text x="150" y="101" font-size="10" fill="#475569">Dữ liệu vào</text>
+            <text x="48" y="101" font-size="10" font-weight="700" fill="#0284c7" id="txt-leg-arr-in1">Mũi tên Xanh (In):</text>
+            <text x="150" y="101" font-size="10" fill="#475569" id="txt-leg-arr-in2">Dữ liệu vào</text>
 
             <!-- Ký hiệu Mũi tên Xanh lá -->
             <line x1="15" y1="126" x2="36" y2="126" stroke="#16a34a" stroke-width="2.5" marker-end="url(#d-arrow-out)"/>
-            <text x="48" y="129" font-size="10" font-weight="700" fill="#16a34a">Mũi tên Xanh lá (Out):</text>
-            <text x="168" y="129" font-size="10" fill="#475569">Dữ liệu ra</text>
+            <text x="48" y="129" font-size="10" font-weight="700" fill="#16a34a" id="txt-leg-arr-out1">Mũi tên Xanh lá (Out):</text>
+            <text x="168" y="129" font-size="10" fill="#475569" id="txt-leg-arr-out2">Dữ liệu ra</text>
 
             <!-- Tiêu chuẩn -->
             <rect x="12" y="145" width="216" height="28" rx="4" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
-            <text x="120" y="157" text-anchor="middle" font-size="9" font-weight="600" fill="#64748b">Nguyên tắc: Không có luồng tắt giữa</text>
-            <text x="120" y="168" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">2 tác nhân ngoài, toàn bộ qua Process 0.0</text>
+            <text x="120" y="157" text-anchor="middle" font-size="9" font-weight="600" fill="#64748b" id="txt-leg-rule1">Nguyên tắc: Không có luồng tắt giữa</text>
+            <text x="120" y="168" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a" id="txt-leg-rule2">2 tác nhân ngoài, toàn bộ qua Process 0.0</text>
           </g>
 
         </svg>
@@ -1324,8 +1329,8 @@
         <div class="core-pulse"></div>
         <div class="core-icon">⚡</div>
         <div class="core-title">EDUPULSE<br>PLATFORM</div>
-        <div class="core-tag">Process 0.0 (Hệ Thống Trung Tâm)</div>
-        <div class="core-sub">NodeJS • Express • MongoDB Atlas</div>
+        <div class="core-tag" id="vis-core-tag">Process 0.0 (Hệ Thống Trung Tâm)</div>
+        <div class="core-sub" id="vis-core-sub">NodeJS • Express • MongoDB Atlas</div>
       </div>
 
       <!-- ENTITY 1: Học Viên (Student) - Top Left -->
@@ -1334,20 +1339,20 @@
           <div class="entity-title-group">
             <div class="entity-icon">🎓</div>
             <div>
-              <div class="entity-title">Học Viên</div>
-              <div class="entity-subtitle">Student (CN10 ➔ CN20)</div>
+              <div class="entity-title" id="vis-st-title">Học Viên</div>
+              <div class="entity-subtitle" id="vis-st-sub">Student (CN10 ➔ CN20)</div>
             </div>
           </div>
-          <span class="entity-badge badge-human">Tác nhân</span>
+          <span class="entity-badge badge-human" id="vis-st-badge">Tác nhân</span>
         </div>
         <div class="flow-summary">
           <div class="flow-row in">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Thông tin đăng ký, Hồ sơ KYC CCCD, Yêu cầu mua khóa, Tin nhắn hỏi bài</span>
+            <span class="flow-text" id="vis-st-in">Thông tin đăng ký, Hồ sơ KYC CCCD, Yêu cầu mua khóa, Tin nhắn hỏi bài</span>
           </div>
           <div class="flow-row out">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Danh sách khóa học, Link phòng Live, Kết quả duyệt hồ sơ, Tin nhắn GV</span>
+            <span class="flow-text" id="vis-st-out">Danh sách khóa học, Link phòng Live, Kết quả duyệt hồ sơ, Tin nhắn GV</span>
           </div>
         </div>
       </div>
@@ -1358,20 +1363,20 @@
           <div class="entity-title-group">
             <div class="entity-icon">👨‍🏫</div>
             <div>
-              <div class="entity-title">Giảng Viên</div>
-              <div class="entity-subtitle">Teacher (CN21 ➔ CN30)</div>
+              <div class="entity-title" id="vis-tc-title">Giảng Viên</div>
+              <div class="entity-subtitle" id="vis-tc-sub">Teacher (CN21 ➔ CN30)</div>
             </div>
           </div>
-          <span class="entity-badge badge-human">Tác nhân</span>
+          <span class="entity-badge badge-human" id="vis-tc-badge">Tác nhân</span>
         </div>
         <div class="flow-summary">
           <div class="flow-row in">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Hồ sơ bằng cấp (UG/PG), Đề cương khóa học, Lịch dạy Live, Lệnh rút tiền</span>
+            <span class="flow-text" id="vis-tc-in">Hồ sơ bằng cấp (UG/PG), Đề cương khóa học, Lịch dạy Live, Lệnh rút tiền</span>
           </div>
           <div class="flow-row out">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Trạng thái duyệt hồ sơ/khóa, Danh sách học sinh, Số dư thù lao (Balance)</span>
+            <span class="flow-text" id="vis-tc-out">Trạng thái duyệt hồ sơ/khóa, Danh sách học sinh, Số dư thù lao (Balance)</span>
           </div>
         </div>
       </div>
@@ -1382,20 +1387,20 @@
           <div class="entity-title-group">
             <div class="entity-icon">🛡️</div>
             <div>
-              <div class="entity-title">Quản Trị Viên</div>
-              <div class="entity-subtitle">Admin (CN31 ➔ CN41)</div>
+              <div class="entity-title" id="vis-ad-title">Quản Trị Viên</div>
+              <div class="entity-subtitle" id="vis-ad-sub">Admin (CN31 ➔ CN41)</div>
             </div>
           </div>
-          <span class="entity-badge badge-human">Tác nhân</span>
+          <span class="entity-badge badge-human" id="vis-ad-badge">Tác nhân</span>
         </div>
         <div class="flow-summary">
           <div class="flow-row in">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Quyết định duyệt/từ chối KYC, Duyệt xuất bản khóa học, Xử lý khiếu nại</span>
+            <span class="flow-text" id="vis-ad-in">Quyết định duyệt/từ chối KYC, Duyệt xuất bản khóa học, Xử lý khiếu nại</span>
           </div>
           <div class="flow-row out">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống, Tin nhắn liên hệ</span>
+            <span class="flow-text" id="vis-ad-out">DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống, Tin nhắn liên hệ</span>
           </div>
         </div>
       </div>
@@ -1406,20 +1411,20 @@
           <div class="entity-title-group">
             <div class="entity-icon">💳</div>
             <div>
-              <div class="entity-title">Cổng Razorpay</div>
-              <div class="entity-subtitle">Thanh Toán Trực Tuyến (CN16)</div>
+              <div class="entity-title" id="vis-rz-title">Cổng Razorpay</div>
+              <div class="entity-subtitle" id="vis-rz-sub">Thanh Toán Trực Tuyến (CN16)</div>
             </div>
           </div>
-          <span class="entity-badge badge-service">Payment</span>
+          <span class="entity-badge badge-service" id="vis-rz-badge">Payment</span>
         </div>
         <div class="flow-summary">
           <div class="flow-row in">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Yêu cầu tạo đơn (Order ID), Thông tin giao dịch & số tiền</span>
+            <span class="flow-text" id="vis-rz-in">Yêu cầu tạo đơn (Order ID), Thông tin giao dịch & số tiền</span>
           </div>
           <div class="flow-row out">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Chữ ký số xác thực SHA256 HMAC (Payment Signature)</span>
+            <span class="flow-text" id="vis-rz-out">Chữ ký số xác thực SHA256 HMAC (Payment Signature)</span>
           </div>
         </div>
       </div>
@@ -1430,20 +1435,20 @@
           <div class="entity-title-group">
             <div class="entity-icon">☁️</div>
             <div>
-              <div class="entity-title">Cloudinary CDN</div>
-              <div class="entity-subtitle">Lưu Trữ Ảnh & Tài Liệu</div>
+              <div class="entity-title" id="vis-cl-title">Cloudinary CDN</div>
+              <div class="entity-subtitle" id="vis-cl-sub">Lưu Trữ Ảnh & Tài Liệu</div>
             </div>
           </div>
-          <span class="entity-badge badge-service">Storage</span>
+          <span class="entity-badge badge-service" id="vis-cl-badge">Storage</span>
         </div>
         <div class="flow-summary">
           <div class="flow-row svc">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Upload file ảnh avatar, scan CCCD, bằng Cử nhân, Thạc sĩ</span>
+            <span class="flow-text" id="vis-cl-in">Upload file ảnh avatar, scan CCCD, bằng Cử nhân, Thạc sĩ</span>
           </div>
           <div class="flow-row svc">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Trả về Secure HTTPS CDN URL tối ưu tốc độ tải</span>
+            <span class="flow-text" id="vis-cl-out">Trả về Secure HTTPS CDN URL tối ưu tốc độ tải</span>
           </div>
         </div>
       </div>
@@ -1454,20 +1459,20 @@
           <div class="entity-title-group">
             <div class="entity-icon">✉️</div>
             <div>
-              <div class="entity-title">Email Service</div>
-              <div class="entity-subtitle">SMTP Gateway (CN02, CN05)</div>
+              <div class="entity-title" id="vis-em-title">Email Service</div>
+              <div class="entity-subtitle" id="vis-em-sub">SMTP Gateway (CN02, CN05)</div>
             </div>
           </div>
-          <span class="entity-badge badge-service">Email</span>
+          <span class="entity-badge badge-service" id="vis-em-badge">Email</span>
         </div>
         <div class="flow-summary">
           <div class="flow-row svc">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Yêu cầu gửi OTP kích hoạt tài khoản, liên kết reset mật khẩu</span>
+            <span class="flow-text" id="vis-em-in">Yêu cầu gửi OTP kích hoạt tài khoản, liên kết reset mật khẩu</span>
           </div>
           <div class="flow-row svc">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Trạng thái gửi thư thành công / thất bại qua Gmail SMTP</span>
+            <span class="flow-text" id="vis-em-out">Trạng thái gửi thư thành công / thất bại qua Gmail SMTP</span>
           </div>
         </div>
       </div>
@@ -1478,20 +1483,20 @@
           <div class="entity-title-group">
             <div class="entity-icon">🎥</div>
             <div>
-              <div class="entity-title">Lớp Học Trực Tuyến</div>
-              <div class="entity-subtitle">Video Meet (CN19, CN25)</div>
+              <div class="entity-title" id="vis-lv-title">Lớp Học Trực Tuyến</div>
+              <div class="entity-subtitle" id="vis-lv-sub">Video Meet (CN19, CN25)</div>
             </div>
           </div>
-          <span class="entity-badge badge-service">Video</span>
+          <span class="entity-badge badge-service" id="vis-lv-badge">Video</span>
         </div>
         <div class="flow-summary">
           <div class="flow-row svc">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Đồng bộ link phòng học trực tiếp, lịch học, thời lượng buổi</span>
+            <span class="flow-text" id="vis-lv-in">Đồng bộ link phòng học trực tiếp, lịch học, thời lượng buổi</span>
           </div>
           <div class="flow-row svc">
             <span class="flow-arrow-icon">➔</span>
-            <span class="flow-text">Kết nối luồng Video/Audio 2 chiều cho Học viên & Giảng viên</span>
+            <span class="flow-text" id="vis-lv-out">Kết nối luồng Video/Audio 2 chiều cho Học viên & Giảng viên</span>
           </div>
         </div>
       </div>
@@ -1500,19 +1505,19 @@
 
     <!-- Floating Legend -->
     <div class="diagram-legend">
-      <div class="legend-title">Quy Chuẩn Luồng Dữ Liệu DFD Mức 0</div>
+      <div class="legend-title" id="vis-leg-title">Quy Chuẩn Luồng Dữ Liệu DFD Mức 0</div>
       <div class="legend-items">
         <div class="legend-item">
           <div class="legend-line in"></div>
-          <span>Dữ liệu vào hệ thống (Inputs)</span>
+          <span id="vis-leg-in">Dữ liệu vào hệ thống (Inputs)</span>
         </div>
         <div class="legend-item">
           <div class="legend-line out"></div>
-          <span>Dữ liệu hệ thống phản hồi (Outputs)</span>
+          <span id="vis-leg-out">Dữ liệu hệ thống phản hồi (Outputs)</span>
         </div>
         <div class="legend-item">
           <div class="legend-line svc"></div>
-          <span>Đồng bộ dịch vụ ngoài (3rd Party Services)</span>
+          <span id="vis-leg-svc">Đồng bộ dịch vụ ngoài (3rd Party Services)</span>
         </div>
       </div>
     </div>
@@ -1530,8 +1535,8 @@
     <div class="matrix-card">
       <div class="matrix-card-header">
         <div>
-          <h2>Ma Trận Đặc Tả Luồng Dữ Liệu Ngữ Cảnh (Khớp 41 Chức Năng Hệ Thống)</h2>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+          <h2 id="lbl-matrix-title">Ma Trận Đặc Tả Luồng Dữ Liệu Ngữ Cảnh (Khớp 41 Chức Năng Hệ Thống)</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;" id="lbl-matrix-sub">
             Toàn bộ các luồng thông tin vào - ra đều được đối soát chuẩn xác với mã chức năng (CN01 ➔ CN41) từ tài liệu đặc tả hệ thống.
           </p>
         </div>
@@ -1542,13 +1547,13 @@
         <table class="matrix-table" id="data-table">
           <thead>
             <tr>
-              <th style="width: 110px;">Mã Luồng</th>
-              <th style="width: 140px;">Mã CN</th>
-              <th style="width: 160px;">Nguồn (Source)</th>
-              <th style="width: 80px;">Hướng</th>
-              <th style="width: 180px;">Đích (Destination)</th>
-              <th>Dữ Liệu Trao Đổi (Payload & Data Items)</th>
-              <th>Nghiệp Vụ Liên Quan</th>
+              <th style="width: 110px;" id="th-code">Mã Luồng</th>
+              <th style="width: 140px;" id="th-fn">Mã CN</th>
+              <th style="width: 160px;" id="th-src">Nguồn (Source)</th>
+              <th style="width: 80px;" id="th-dir">Hướng</th>
+              <th style="width: 180px;" id="th-dst">Đích (Destination)</th>
+              <th id="th-payload">Dữ Liệu Trao Đổi (Payload & Data Items)</th>
+              <th id="th-biz">Nghiệp Vụ Liên Quan</th>
             </tr>
           </thead>
           <tbody>
@@ -1837,17 +1842,17 @@
     <div class="matrix-card" style="padding: 1.5rem;">
       <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div>
-          <h2 style="font-size: 1.2rem; font-weight: 800;">🖼️ Bản Vẽ Sơ Đồ Ngữ Cảnh AI (High-Tech Concept)</h2>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+          <h2 style="font-size: 1.2rem; font-weight: 800;" id="lbl-img-title">🖼️ Bản Vẽ Sơ Đồ Ngữ Cảnh AI (High-Tech Concept)</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;" id="lbl-img-sub">
             Hình ảnh đồ họa công nghệ cao kết xuất bởi AI minh họa hệ thống trung tâm EduPulse Platform và 6 cụm thực thể ngoài.
           </p>
         </div>
         <div style="display: flex; gap: 0.75rem;">
-          <a href="./so-do-ngu-canh.jpg" download="so-do-ngu-canh-edupulse.jpg" class="tab-btn" style="text-decoration: none;">
-            <span>💾</span> Tải ảnh về máy
+          <a href="./so-do-ngu-canh.jpg" download="so-do-ngu-canh-edupulse.jpg" class="tab-btn" style="text-decoration: none;" id="lbl-img-dl">
+            <span>💾 Tải ảnh về máy</span>
           </a>
-          <a href="./so-do-ngu-canh.jpg" target="_blank" class="tab-btn" style="text-decoration: none;">
-            <span>🔍</span> Xem ảnh phóng to
+          <a href="./so-do-ngu-canh.jpg" target="_blank" class="tab-btn" style="text-decoration: none;" id="lbl-img-view">
+            <span>🔍 Xem ảnh phóng to</span>
           </a>
         </div>
       </div>
@@ -1873,235 +1878,883 @@
   </aside>
 
   <script>
-    // Detailed Entity Data for Drawer Inspector
-    const ENTITY_DETAILS = {
-      evaluation: {
-        title: "📋 Đánh Giá Chuẩn Hóa Sơ Đồ Ngữ Cảnh (DFD Level 0)",
-        sub: "Đối chiếu tài liệu đặc tả 41 chức năng & lý thuyết công nghệ phần mềm",
-        sections: [
-          {
-            type: "tech",
-            title: "1. Tính đúng đắn theo nguyên lý DFD Mức 0",
-            items: [
-              "<strong>Chỉ 1 Process duy nhất (Hộp đen):</strong> Toàn bộ ứng dụng EduPulse được đóng gói thành Process 0.0, không để lộ cơ sở dữ liệu hay tiến trình con.",
-              "<strong>Xung quanh là External Entities:</strong> Đầy đủ 3 tác nhân con người (Học viên, Giảng viên, Admin) và 4 hệ thống ngoài (Razorpay, Cloudinary, Email SMTP, Live Video Platform).",
-              "<strong>Không có kết nối tắt giữa 2 tác nhân ngoài:</strong> Tin nhắn giữa Học sinh và Giảng viên đều phải trung chuyển qua hệ thống EduPulse.",
-              "<strong>Tên luồng là cụm danh từ dữ liệu:</strong> Đã chuyển đổi triệt để từ dạng động từ (vd: 'Đăng ký', 'Rút tiền') sang dạng cụm danh từ thông tin (vd: 'Thông tin tài khoản', 'Yêu cầu rút tiền & số tài khoản')."
-            ]
-          },
-          {
-            type: "input",
-            title: "2. Khớp 100% các chức năng trong tài liệu đặc tả (41 CN)",
-            items: [
-              "<strong>Phân hệ chung (CN01-CN09):</strong> Xác thực tài khoản, OTP qua Email SMTP, Quên/Reset mật khẩu, Xem hồ sơ GV, Gửi tin nhắn liên hệ.",
-              "<strong>Phân hệ Học sinh (CN10-CN20):</strong> Nộp hồ sơ KYC học viên, Xem trạng thái duyệt, Mua khóa học Razorpay, Tham gia lớp Live, Nhắn tin với giảng viên.",
-              "<strong>Phân hệ Giảng viên (CN21-CN30):</strong> Nộp hồ sơ bằng cấp chuyên môn (UG/PG), Tạo khóa học & lịch Live, Nhắn tin với học sinh, Rút tiền thù lao.",
-              "<strong>Phân hệ Admin (CN31-CN41):</strong> Duyệt hồ sơ KYC cả học sinh lẫn giảng viên, Duyệt xuất bản khóa học, Xử lý tin nhắn khiếu nại."
-            ]
-          },
-          {
-            type: "output",
-            title: "3. Các cải tiến so với phiên bản sơ khai trước đó",
-            items: [
-              "Tách riêng biệt <strong>Email Service (SMTP)</strong> và <strong>Lớp học trực tuyến (Video Conference)</strong> thành 2 thực thể độc lập.",
-              "Bổ sung luồng <strong>Học viên nộp hồ sơ KYC</strong> và nhận kết quả xét duyệt.",
-              "Bổ sung luồng <strong>Nhắn tin 2 chiều</strong> giữa Học viên và Giảng viên qua hệ thống.",
-              "Phân định rõ ràng quyết định <strong>Duyệt hồ sơ</strong> và <strong>Duyệt khóa học</strong> của Admin."
-            ]
-          }
-        ]
+    // Current Active Language (Default: 'vi', persists across page reloads)
+    let currentLang = localStorage.getItem('edupulse_lang') || 'vi';
+    let currentDrawerKey = null;
+
+    // Bilingual Translations Dictionary
+    const TRANSLATIONS = {
+      vi: {
+        // Header & Badges
+        'lbl-badge-fc': 'Chuẩn 41 CN',
+        'lbl-brand-sub': 'Sơ đồ ngữ cảnh kiến trúc hệ thống & biên giới luồng dữ liệu (Context Diagram - Level 0)',
+        'lbl-tab-drawio': '📐 Chuẩn Draw.io (DFD Mức 0)',
+        'lbl-tab-visual': '🎨 Trực quan Neon',
+        'lbl-tab-matrix': '📋 Ma trận dữ liệu (41 CN)',
+        'lbl-tab-image': '🖼️ Bản vẽ AI Concept',
+        'lang-label': 'English',
+        'lbl-assessment-msg': 'Đã chuẩn hóa & kiểm chứng 100% khớp với 41 chức năng đặc tả (CN01 ➔ CN41) và 7 thực thể tác nhân.',
+        'lbl-assessment-btn': 'Xem bảng đánh giá chi tiết ➔',
+        
+        // Filter Bar
+        'lbl-filter-tag': 'Lọc thực thể:',
+        'chip-all': '🌟 Tất cả thực thể (7)',
+        'chip-student': '🎓 Học Viên',
+        'chip-teacher': '👨‍🏫 Giảng Viên',
+        'chip-admin': '🛡️ Quản Trị Viên',
+        'chip-payment': '💳 Razorpay',
+        'chip-services': '☁️ Dịch Vụ Đám Mây',
+        'lbl-filter-tip': '💡 Nhấp vào từng khối để xem chi tiết trường dữ liệu & mã chức năng!',
+
+        // Draw.io Toolbar
+        'lbl-drawio-title': '📐 Sơ Đồ Ngữ Cảnh Chuẩn Draw.io / DFD Mức 0 (Academic Standard)',
+        'lbl-drawio-sub': 'Phân định rõ ràng từng khối Tác nhân ngoài (Hình chữ nhật) • Hệ thống trung tâm (Hình tròn 0.0) • Nhãn dữ liệu trực tiếp trên từng mũi tên Vào / Ra.',
+        'lbl-btn-print': '🖨️ In / Xuất PDF',
+
+        // Draw.io SVG - Process 0.0
+        'txt-core-p0': '0.0',
+        'txt-core-title1': 'HỆ THỐNG QUẢN LÝ',
+        'txt-core-title2': 'HỌC TRỰC TUYẾN',
+        'txt-core-title3': 'EDUPULSE PLATFORM',
+        'txt-core-tag': 'TIẾN TRÌNH DUY NHẤT',
+
+        // Draw.io SVG - Student
+        'txt-st-hdr': 'TÁC NHÂN BÊN NGOÀI',
+        'txt-st-title': '🎓 HỌC VIÊN',
+        'txt-st-sub': '(Student Subsystem)',
+        'txt-st-fc': '11 Chức năng: CN10 ➔ CN20',
+        'txt-st-in-hdr': '[INPUT] DỮ LIỆU VÀO TỪ HỌC VIÊN',
+        'txt-st-in-desc': 'Đăng ký, OTP, CCCD KYC, Học phí, Tin nhắn hỏi',
+        'txt-st-out-hdr': '[OUTPUT] DỮ LIỆU XUẤT CHO HỌC VIÊN',
+        'txt-st-out-desc': 'DS khóa học, Link Meet, Kết quả KYC, Phản hồi GV',
+
+        // Draw.io SVG - Teacher
+        'txt-tc-hdr': 'TÁC NHÂN BÊN NGOÀI',
+        'txt-tc-title': '👨‍🏫 GIẢNG VIÊN',
+        'txt-tc-sub': '(Teacher Subsystem)',
+        'txt-tc-fc': '10 Chức năng: CN21 ➔ CN30',
+        'txt-tc-in-hdr': '[INPUT] DỮ LIỆU VÀO TỪ GIẢNG VIÊN',
+        'txt-tc-in-desc': 'Hồ sơ bằng cấp UG/PG, Đề cương khóa, Lịch Live, Rút tiền',
+        'txt-tc-out-hdr': '[OUTPUT] DỮ LIỆU XUẤT CHO GIẢNG VIÊN',
+        'txt-tc-out-desc': 'Trạng thái duyệt KYC/Khóa, DS học viên, Số dư thù lao',
+
+        // Draw.io SVG - Admin
+        'txt-ad-hdr': 'TÁC NHÂN BÊN NGOÀI',
+        'txt-ad-title': '🛡️ QUẢN TRỊ VIÊN',
+        'txt-ad-sub': '(Admin Subsystem)',
+        'txt-ad-fc': '11 Chức năng: CN31 ➔ CN41',
+        'txt-ad-in-hdr': '[INPUT] LỆNH & QUYẾT ĐỊNH QUẢN TRỊ',
+        'txt-ad-in-desc': 'Duyệt/từ chối KYC HS & GV, Duyệt khóa học, Xử lý khiếu nại',
+        'txt-ad-out-hdr': '[OUTPUT] BÁO CÁO & HỒ SƠ CHỜ DUYỆT',
+        'txt-ad-out-desc': 'DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống',
+
+        // Draw.io SVG - Razorpay
+        'txt-rz-hdr': 'HỆ THỐNG BÊN NGOÀI',
+        'txt-rz-title': '💳 RAZORPAY GATEWAY',
+        'txt-rz-sub': 'Cổng Thanh Toán Trực Tuyến',
+        'txt-rz-fc': 'Xác thực SHA-256 HMAC (CN16)',
+        'txt-rz-in-hdr': '[INPUT] KẾT QUẢ TỪ RAZORPAY',
+        'txt-rz-in-desc': 'Payment ID, Chữ ký số mã hóa SHA256 HMAC',
+        'txt-rz-out-hdr': '[OUTPUT] YÊU CẦU TẠO GIAO DỊCH',
+        'txt-rz-out-desc': 'Thông tin đơn hàng (amount, currency, receipt_id)',
+
+        // Draw.io SVG - Cloudinary
+        'txt-cl-hdr': 'DỊCH VỤ BÊN NGOÀI',
+        'txt-cl-title': '☁️ CLOUDINARY CDN',
+        'txt-cl-sub': 'Lưu Trữ Avatar & Bằng Cấp',
+        'txt-cl-fc': 'HTTPS CDN URLs (CN10, CN21)',
+        'txt-cl-up': '▲ Upload: File avatar, CCCD, bằng',
+        'txt-cl-down': '▼ Trả về: Secure HTTPS CDN URL',
+
+        // Draw.io SVG - Email
+        'txt-em-hdr': 'DỊCH VỤ BÊN NGOÀI',
+        'txt-em-title': '✉️ EMAIL SMTP SERVER',
+        'txt-em-sub': 'Gửi OTP & Thông Báo Tự Động',
+        'txt-em-fc': 'Gmail SMTP Gateway (CN02, CN05)',
+        'txt-em-send': '▼ Gửi OTP kích hoạt, Reset pass',
+        'txt-em-status': '▲ Trạng thái gửi mail thành công',
+
+        // Draw.io SVG - Live Meet
+        'txt-lv-hdr': 'DỊCH VỤ BÊN NGOÀI',
+        'txt-lv-title': '🎥 LỚP HỌC LIVE MEET',
+        'txt-lv-sub': 'Video Conferencing Tương Tác',
+        'txt-lv-fc': 'Google Meet Room (CN19, CN25)',
+        'txt-lv-send': '▼ Link Meet, lịch học, thời lượng',
+        'txt-lv-status': '▲ Trạng thái phiên Live trực tuyến',
+
+        // Draw.io SVG - Legend
+        'txt-leg-hdr': 'QUY ƯỚC KÝ HIỆU DRAW.IO',
+        'txt-leg-rect1': 'Hình chữ nhật:',
+        'txt-leg-rect2': 'Tác nhân ngoài',
+        'txt-leg-circ1': 'Hình tròn:',
+        'txt-leg-circ2': 'Tiến trình (Process 0.0)',
+        'txt-leg-arr-in1': 'Mũi tên Xanh (In):',
+        'txt-leg-arr-in2': 'Dữ liệu vào',
+        'txt-leg-arr-out1': 'Mũi tên Xanh lá (Out):',
+        'txt-leg-arr-out2': 'Dữ liệu ra',
+        'txt-leg-rule1': 'Nguyên tắc: Không có luồng tắt giữa',
+        'txt-leg-rule2': '2 tác nhân ngoài, toàn bộ qua Process 0.0',
+
+        // Visual View
+        'vis-core-tag': 'Process 0.0 (Hệ Thống Trung Tâm)',
+        'vis-st-title': 'Học Viên',
+        'vis-st-sub': 'Student (CN10 ➔ CN20)',
+        'vis-st-badge': 'Tác nhân',
+        'vis-st-in': 'Thông tin đăng ký, Hồ sơ KYC CCCD, Yêu cầu mua khóa, Tin nhắn hỏi bài',
+        'vis-st-out': 'Danh sách khóa học, Link phòng Live, Kết quả duyệt hồ sơ, Tin nhắn GV',
+
+        'vis-tc-title': 'Giảng Viên',
+        'vis-tc-sub': 'Teacher (CN21 ➔ CN30)',
+        'vis-tc-badge': 'Tác nhân',
+        'vis-tc-in': 'Hồ sơ bằng cấp (UG/PG), Đề cương khóa học, Lịch dạy Live, Lệnh rút tiền',
+        'vis-tc-out': 'Trạng thái duyệt hồ sơ/khóa, Danh sách học sinh, Số dư thù lao (Balance)',
+
+        'vis-ad-title': 'Quản Trị Viên',
+        'vis-ad-sub': 'Admin (CN31 ➔ CN41)',
+        'vis-ad-badge': 'Tác nhân',
+        'vis-ad-in': 'Quyết định duyệt/từ chối KYC, Duyệt xuất bản khóa học, Xử lý khiếu nại',
+        'vis-ad-out': 'DS hồ sơ chờ duyệt, File scan bằng cấp, Báo cáo hệ thống, Tin nhắn liên hệ',
+
+        'vis-rz-title': 'Cổng Razorpay',
+        'vis-rz-sub': 'Thanh Toán Trực Tuyến (CN16)',
+        'vis-rz-in': 'Yêu cầu tạo đơn (Order ID), Thông tin giao dịch & số tiền',
+        'vis-rz-out': 'Chữ ký số xác thực SHA256 HMAC (Payment Signature)',
+
+        'vis-cl-title': 'Cloudinary CDN',
+        'vis-cl-sub': 'Lưu Trữ Ảnh & Tài Liệu',
+        'vis-cl-badge': 'Storage',
+        'vis-cl-in': 'Upload file ảnh avatar, scan CCCD, bằng Cử nhân, Thạc sĩ',
+        'vis-cl-out': 'Trả về Secure HTTPS CDN URL tối ưu tốc độ tải',
+
+        'vis-em-title': 'Email Service',
+        'vis-em-sub': 'SMTP Gateway (CN02, CN05)',
+        'vis-em-badge': 'Email',
+        'vis-em-in': 'Yêu cầu gửi OTP kích hoạt tài khoản, liên kết reset mật khẩu',
+        'vis-em-out': 'Trạng thái gửi thư thành công / thất bại qua Gmail SMTP',
+
+        'vis-lv-title': 'Lớp Học Trực Tuyến',
+        'vis-lv-sub': 'Video Meet (CN19, CN25)',
+        'vis-lv-badge': 'Video',
+        'vis-lv-in': 'Đồng bộ link phòng học trực tiếp, lịch học, thời lượng buổi',
+        'vis-lv-out': 'Kết nối luồng Video/Audio 2 chiều cho Học viên & Giảng viên',
+
+        'vis-leg-title': 'Quy Chuẩn Luồng Dữ Liệu DFD Mức 0',
+        'vis-leg-in': 'Dữ liệu vào hệ thống (Inputs)',
+        'vis-leg-out': 'Dữ liệu hệ thống phản hồi (Outputs)',
+        'vis-leg-svc': 'Đồng bộ dịch vụ ngoài (3rd Party Services)',
+
+        // Matrix View
+        'lbl-matrix-title': 'Ma Trận Đặc Tả Luồng Dữ Liệu Ngữ Cảnh (Khớp 41 Chức Năng Hệ Thống)',
+        'lbl-matrix-sub': 'Toàn bộ các luồng thông tin vào - ra đều được đối soát chuẩn xác với mã chức năng (CN01 ➔ CN41) từ tài liệu đặc tả hệ thống.',
+        'search-matrix-placeholder': '🔍 Tìm kiếm luồng dữ liệu hoặc mã CN...',
+        'th-code': 'Mã Luồng',
+        'th-fn': 'Mã CN',
+        'th-src': 'Nguồn (Source)',
+        'th-dir': 'Hướng',
+        'th-dst': 'Đích (Destination)',
+        'th-payload': 'Dữ Liệu Trao Đổi (Payload & Data Items)',
+        'th-biz': 'Nghiệp Vụ Liên Quan',
+
+        // AI Image
+        'lbl-img-title': '🖼️ Bản Vẽ Sơ Đồ Ngữ Cảnh AI (High-Tech Concept)',
+        'lbl-img-sub': 'Hình ảnh đồ họa công nghệ cao kết xuất bởi AI minh họa hệ thống trung tâm EduPulse Platform và 6 cụm thực thể ngoài.',
+        'lbl-img-dl': '💾 Tải ảnh về máy',
+        'lbl-img-view': '🔍 Xem ảnh phóng to',
+
+        // Drawer Header Default
+        'drawer-title-default': 'Chi Tiết Thực Thể',
+        'drawer-sub-default': 'Thông tin kỹ thuật và dữ liệu trao đổi'
       },
-      system: {
-        title: "⚡ EduPulse Platform (Process 0.0)",
-        sub: "Hệ thống trung tâm quản trị & điều phối dữ liệu",
-        sections: [
-          {
-            type: "tech",
-            title: "Kiến trúc kỹ thuật cốt lõi",
-            items: [
-              "<strong>Kiến trúc:</strong> MERN Stack (MongoDB Atlas, ExpressJS, React + Vite, NodeJS).",
-              "<strong>Bảo mật:</strong> JWT Access/Refresh Token (HttpOnly Cookie), mã hóa mật khẩu Bcrypt.",
-              "<strong>Thẩm định 100% KYC:</strong> Cả học sinh và giảng viên đều phải được duyệt danh tính trước khi tham gia học thuật.",
-              "<strong>Thanh toán bảo mật:</strong> Razorpay Checkout với xác thực chữ ký SHA-256 HMAC."
-            ]
-          },
-          {
-            type: "input",
-            title: "Tập dữ liệu tiếp nhận (Inputs)",
-            items: [
-              "Hồ sơ người dùng & tài liệu scan bằng cấp, CCCD.",
-              "Yêu cầu tạo khóa học, lịch buổi học và liên kết Meet.",
-              "Thông tin thanh toán học phí & yêu cầu rút tiền.",
-              "Quyết định phê duyệt hồ sơ và phê duyệt khóa học từ Admin.",
-              "Nội dung trao đổi tin nhắn giữa các người dùng."
-            ]
-          },
-          {
-            type: "output",
-            title: "Tập dữ liệu phản hồi (Outputs)",
-            items: [
-              "Danh mục khóa học được kiểm duyệt minh bạch.",
-              "Đường link và thời khóa biểu lớp học trực tiếp thời gian thực.",
-              "Kết quả thẩm định KYC & số dư thu nhập của giảng viên.",
-              "Báo cáo thống kê toàn diện cho ban quản trị."
-            ]
-          }
-        ]
-      },
-      student: {
-        title: "🎓 Học Viên (Student Subsystem)",
-        sub: "Bao gồm 11 chức năng chuyên biệt: CN10 ➔ CN20",
-        sections: [
-          {
-            type: "input",
-            title: "Dữ liệu Học viên gửi vào hệ thống (Inputs)",
-            items: [
-              "<strong>CN01-CN03:</strong> Email, mật khẩu băm, mã OTP kích hoạt tài khoản.",
-              "<strong>CN10:</strong> Hồ sơ KYC học sinh: CMND/CCCD, bằng THPT/ĐH scan.",
-              "<strong>CN12:</strong> Cập nhật hồ sơ: Họ tên, ảnh đại diện, số điện thoại.",
-              "<strong>CN13-CN15:</strong> Từ khóa tìm kiếm khóa học/giảng viên, yêu cầu đăng ký khóa.",
-              "<strong>CN16:</strong> Thông tin thanh toán học phí trực tuyến Razorpay.",
-              "<strong>CN20, CN09:</strong> Tin nhắn hỏi bài gửi giảng viên, tin nhắn phản hồi gửi Admin."
-            ]
-          },
-          {
-            type: "output",
-            title: "Dữ liệu Hệ thống phản hồi cho Học viên (Outputs)",
-            items: [
-              "<strong>CN07, CN08:</strong> Danh mục khóa học đã duyệt, hồ sơ giảng viên công khai.",
-              "<strong>CN11:</strong> Trạng thái duyệt KYC: pending / approved / rejected / reupload.",
-              "<strong>CN17, CN18:</strong> Bảng điều khiển lộ trình, danh sách khóa học đang theo học.",
-              "<strong>CN19:</strong> Đường link phòng học trực tuyến Live Meet và lịch học tuần.",
-              "<strong>CN20:</strong> Tin nhắn giải đáp thắc mắc từ Giảng viên gửi về."
-            ]
-          }
-        ]
-      },
-      teacher: {
-        title: "👨‍🏫 Giảng Viên (Teacher Subsystem)",
-        sub: "Bao gồm 10 chức năng chuyên biệt: CN21 ➔ CN30",
-        sections: [
-          {
-            type: "input",
-            title: "Dữ liệu Giảng viên gửi vào hệ thống (Inputs)",
-            items: [
-              "<strong>CN21:</strong> Hồ sơ chuyên môn bắt buộc: CCCD, bằng THPT, bằng Cử nhân (UG), bằng Thạc sĩ/Tiến sĩ (PG).",
-              "<strong>CN22:</strong> Cập nhật thông tin: Tiểu sử giảng dạy (bio), chứng chỉ chuyên ngành, ảnh chân dung.",
-              "<strong>CN23:</strong> Đề cương khóa học mới: Tên khóa, mô tả, cấp học, lớp, môn, học phí, lịch học.",
-              "<strong>CN25:</strong> Thêm buổi học Live: Ngày giờ, thời lượng, liên kết phòng họp video.",
-              "<strong>CN28:</strong> Tin nhắn hướng dẫn bài tập, giải đáp cho học sinh.",
-              "<strong>CN30:</strong> Yêu cầu rút tiền thù lao: Số tiền rút, số tài khoản ngân hàng thụ hưởng."
-            ]
-          },
-          {
-            type: "output",
-            title: "Dữ liệu Hệ thống phản hồi cho Giảng viên (Outputs)",
-            items: [
-              "<strong>CN21, CN36:</strong> Kết quả thẩm định bằng cấp từ Admin (approved/pending/rejected).",
-              "<strong>CN38:</strong> Thông báo khóa học đã được Admin duyệt xuất bản lên trang chủ.",
-              "<strong>CN26, CN27:</strong> Danh sách học sinh đăng ký vào từng lớp, thời khóa biểu dạy theo tuần.",
-              "<strong>CN28:</strong> Tin nhắn đặt câu hỏi từ học sinh trong lớp.",
-              "<strong>CN29, CN30:</strong> Thống kê số dư thù lao (Balance) và xác nhận giải ngân lệnh rút tiền."
-            ]
-          }
-        ]
-      },
-      admin: {
-        title: "🛡️ Quản Trị Viên (Admin Subsystem)",
-        sub: "Bao gồm 11 chức năng chuyên biệt: CN31 ➔ CN41",
-        sections: [
-          {
-            type: "input",
-            title: "Dữ liệu & Quyết định Admin gửi vào hệ thống (Inputs)",
-            items: [
-              "<strong>CN31:</strong> Đăng nhập với tài khoản đặc quyền quản trị viên.",
-              "<strong>CN34:</strong> Quyết định phê duyệt / từ chối / yêu cầu nộp lại hồ sơ KYC của học sinh.",
-              "<strong>CN36:</strong> Quyết định phê duyệt / từ chối hồ sơ năng lực của giảng viên.",
-              "<strong>CN38:</strong> Quyết định phê duyệt hoặc từ chối xuất bản khóa học của giảng viên.",
-              "<strong>CN40:</strong> Đánh dấu đã đọc và phản hồi tin nhắn liên hệ khiếu nại của người dùng."
-            ]
-          },
-          {
-            type: "output",
-            title: "Dữ liệu Báo cáo hệ thống xuất cho Admin (Outputs)",
-            items: [
-              "<strong>CN32, CN33, CN35:</strong> Danh sách hồ sơ học sinh & giảng viên chờ duyệt kèm ảnh scan bằng cấp trên Cloudinary.",
-              "<strong>CN37:</strong> Danh sách toàn bộ khóa học mới do giảng viên khởi tạo đang chờ duyệt.",
-              "<strong>CN39:</strong> Hòm thư tin nhắn phản hồi, góp ý từ người dùng gửi qua form liên hệ.",
-              "Báo cáo thống kê toàn sàn: Doanh thu, số lượng thành viên, tỷ lệ duyệt KYC."
-            ]
-          }
-        ]
-      },
-      razorpay: {
-        title: "💳 Cổng Thanh Toán Trực Tuyến Razorpay",
-        sub: "Tích hợp chức năng CN16 - Thanh toán học phí",
-        sections: [
-          {
-            type: "input",
-            title: "Luồng tiếp nhận từ EduPulse",
-            items: [
-              "Yêu cầu tạo đơn hàng: Gửi số tiền học phí <span class='drawer-code-tag'>amount</span> và mã định danh <span class='drawer-code-tag'>receipt_id</span>.",
-              "Cung cấp popup thanh toán an toàn cho học viên qua thẻ tín dụng, ngân hàng, ví điện tử."
-            ]
-          },
-          {
-            type: "output",
-            title: "Luồng phản hồi xác thực",
-            items: [
-              "Trả về các mã định danh: <span class='drawer-code-tag'>razorpay_order_id</span>, <span class='drawer-code-tag'>razorpay_payment_id</span>.",
-              "Tạo chữ ký số mã hóa <span class='drawer-code-tag'>razorpay_signature</span> bằng thuật toán SHA256 HMAC để EduPulse kiểm tra tính toàn vẹn tài chính."
-            ]
-          }
-        ]
-      },
-      cloudinary: {
-        title: "☁️ Dịch Vụ Lưu Trữ Đám Mây Cloudinary CDN",
-        sub: "Tích hợp trong các chức năng upload hồ sơ (CN10, CN21, CN22)",
-        sections: [
-          {
-            type: "tech",
-            title: "Vai trò lưu trữ & phát tán dữ liệu",
-            items: [
-              "Tiếp nhận các file hình ảnh đại diện (avatar) của thành viên.",
-              "Lưu trữ bảo mật các tài liệu scan bằng cấp quan trọng: Bằng Cử nhân, Thạc sĩ, Tiến sĩ, CCCD.",
-              "Tối ưu dung lượng ảnh và trả về <span class='drawer-code-tag'>Secure HTTPS CDN URL</span> tốc độ cao trên toàn cầu."
-            ]
-          }
-        ]
-      },
-      email: {
-        title: "✉️ Email Service (Nodemailer SMTP)",
-        sub: "Tích hợp trong chức năng kích hoạt & thông báo (CN02, CN05)",
-        sections: [
-          {
-            type: "tech",
-            title: "Tiến trình gửi thư tự động",
-            items: [
-              "Tiếp nhận yêu cầu gửi email từ Backend với nội dung mã OTP kích hoạt 6 chữ số.",
-              "Gửi email đặt lại mật khẩu với token một lần có thời hạn 15 phút.",
-              "Gửi email thông báo tự động khi Admin phê duyệt hoặc từ chối hồ sơ KYC.",
-              "Phản hồi trạng thái gửi thành công hoặc lỗi qua giao thức SMTP Gmail."
-            ]
-          }
-        ]
-      },
-      live: {
-        title: "🎥 Hạ Tầng Lớp Học Trực Tuyến Live",
-        sub: "Tích hợp trong chức năng học trực tiếp (CN19, CN25)",
-        sections: [
-          {
-            type: "tech",
-            title: "Không gian lớp học 2 chiều thời gian thực",
-            items: [
-              "EduPulse quản lý và phân phối liên kết phòng học trực tuyến (Google Meet / Video Conference).",
-              "Thiết lập lịch học theo tuần và đếm ngược thời gian bắt đầu buổi dạy.",
-              "Cung cấp kênh truyền thông video, âm thanh độ nét cao và tính năng chia sẻ màn hình trực tiếp giữa Giảng viên và Học viên."
-            ]
-          }
-        ]
+
+      en: {
+        // Header & Badges
+        'lbl-badge-fc': 'Verified 41 Features',
+        'lbl-brand-sub': 'System Architecture Context Diagram & Data Flow Boundaries (DFD Level 0)',
+        'lbl-tab-drawio': '📐 Draw.io Standard (DFD Level 0)',
+        'lbl-tab-visual': '🎨 Interactive Neon',
+        'lbl-tab-matrix': '📋 Data Matrix (41 Features)',
+        'lbl-tab-image': '🖼️ AI Concept Render',
+        'lang-label': 'Tiếng Việt',
+        'lbl-assessment-msg': '100% standardized & verified against 41 specification features (FN01 ➔ FN41) and 7 external entities.',
+        'lbl-assessment-btn': 'View Detailed Audit ➔',
+
+        // Filter Bar
+        'lbl-filter-tag': 'Filter Entities:',
+        'chip-all': '🌟 All Entities (7)',
+        'chip-student': '🎓 Students',
+        'chip-teacher': '👨‍🏫 Teachers',
+        'chip-admin': '🛡️ Administrators',
+        'chip-payment': '💳 Razorpay',
+        'chip-services': '☁️ Cloud Services',
+        'lbl-filter-tip': '💡 Click on any block to inspect data fields & feature specifications!',
+
+        // Draw.io Toolbar
+        'lbl-drawio-title': '📐 Draw.io Context Diagram / DFD Level 0 (Academic Standard)',
+        'lbl-drawio-sub': 'Clear segregation of External Entities (Rectangles) • Core System (Process 0.0 Circle) • Explicit Data Labels on Incoming / Outgoing Connectors.',
+        'lbl-btn-print': '🖨️ Print / Export PDF',
+
+        // Draw.io SVG - Process 0.0
+        'txt-core-p0': '0.0',
+        'txt-core-title1': 'ONLINE LEARNING',
+        'txt-core-title2': 'MANAGEMENT SYSTEM',
+        'txt-core-title3': 'EDUPULSE PLATFORM',
+        'txt-core-tag': 'SINGLE PROCESS (0.0)',
+
+        // Draw.io SVG - Student
+        'txt-st-hdr': 'EXTERNAL ENTITY',
+        'txt-st-title': '🎓 STUDENT',
+        'txt-st-sub': '(Student Subsystem)',
+        'txt-st-fc': '11 Features: FN10 ➔ FN20',
+        'txt-st-in-hdr': '[INPUT] STUDENT INCOMING DATA',
+        'txt-st-in-desc': 'Registration, OTP, KYC ID Scan, Tuition fee, Inquiries',
+        'txt-st-out-hdr': '[OUTPUT] STUDENT OUTGOING DATA',
+        'txt-st-out-desc': 'Course catalog, Meet link, KYC status, Teacher reply',
+
+        // Draw.io SVG - Teacher
+        'txt-tc-hdr': 'EXTERNAL ENTITY',
+        'txt-tc-title': '👨‍🏫 TEACHER',
+        'txt-tc-sub': '(Teacher Subsystem)',
+        'txt-tc-fc': '10 Features: FN21 ➔ FN30',
+        'txt-tc-in-hdr': '[INPUT] TEACHER INCOMING DATA',
+        'txt-tc-in-desc': 'UG/PG Degrees, Course outline, Live schedule, Payout req',
+        'txt-tc-out-hdr': '[OUTPUT] TEACHER OUTGOING DATA',
+        'txt-tc-out-desc': 'KYC/Course approval, Enrolled students, Payout balance',
+
+        // Draw.io SVG - Admin
+        'txt-ad-hdr': 'EXTERNAL ENTITY',
+        'txt-ad-title': '🛡️ ADMINISTRATOR',
+        'txt-ad-sub': '(Admin Subsystem)',
+        'txt-ad-fc': '11 Features: FN31 ➔ FN41',
+        'txt-ad-in-hdr': '[INPUT] ADMIN COMMANDS & DECISIONS',
+        'txt-ad-in-desc': 'Approve/Reject KYC, Publish courses, Resolve tickets',
+        'txt-ad-out-hdr': '[OUTPUT] AUDIT QUEUE & REPORTS',
+        'txt-ad-out-desc': 'Pending KYC queue, Scanned degrees, Analytics report',
+
+        // Draw.io SVG - Razorpay
+        'txt-rz-hdr': 'EXTERNAL SYSTEM',
+        'txt-rz-title': '💳 RAZORPAY GATEWAY',
+        'txt-rz-sub': 'Online Payment Gateway',
+        'txt-rz-fc': 'SHA-256 HMAC Signature (FN16)',
+        'txt-rz-in-hdr': '[INPUT] RESPONSE FROM RAZORPAY',
+        'txt-rz-in-desc': 'Payment ID, Signed SHA256 HMAC Token',
+        'txt-rz-out-hdr': '[OUTPUT] ORDER CREATION REQUEST',
+        'txt-rz-out-desc': 'Order parameters (amount, currency, receipt_id)',
+
+        // Draw.io SVG - Cloudinary
+        'txt-cl-hdr': 'EXTERNAL SERVICE',
+        'txt-cl-title': '☁️ CLOUDINARY CDN',
+        'txt-cl-sub': 'Avatar & Diploma Cloud Storage',
+        'txt-cl-fc': 'HTTPS CDN URLs (FN10, FN21)',
+        'txt-cl-up': '▲ Upload: Avatars, IDs, Degree scans',
+        'txt-cl-down': '▼ Response: Secure HTTPS CDN URL',
+
+        // Draw.io SVG - Email
+        'txt-em-hdr': 'EXTERNAL SERVICE',
+        'txt-em-title': '✉️ EMAIL SMTP SERVER',
+        'txt-em-sub': 'Automated OTP & System Notification',
+        'txt-em-fc': 'Gmail SMTP Gateway (FN02, FN05)',
+        'txt-em-send': '▼ Dispatch: Activation OTP, Password reset',
+        'txt-em-status': '▲ Response: SMTP delivery confirmation',
+
+        // Draw.io SVG - Live Meet
+        'txt-lv-hdr': 'EXTERNAL SERVICE',
+        'txt-lv-title': '🎥 LIVE CLASSROOM MEET',
+        'txt-lv-sub': 'Interactive Video Conferencing',
+        'txt-lv-fc': 'Google Meet Room (FN19, FN25)',
+        'txt-lv-send': '▼ Dispatch: Meet link, Schedule, Duration',
+        'txt-lv-status': '▲ Status: Realtime session telemetry',
+
+        // Draw.io SVG - Legend
+        'txt-leg-hdr': 'DRAW.IO NOTATION CONVENTIONS',
+        'txt-leg-rect1': 'Rectangle:',
+        'txt-leg-rect2': 'External Entity',
+        'txt-leg-circ1': 'Circle:',
+        'txt-leg-circ2': 'System Process (0.0)',
+        'txt-leg-arr-in1': 'Blue Arrow (In):',
+        'txt-leg-arr-in2': 'Incoming Data Flow',
+        'txt-leg-arr-out1': 'Green Arrow (Out):',
+        'txt-leg-arr-out2': 'Outgoing Data Flow',
+        'txt-leg-rule1': 'Rule: No direct bypass between',
+        'txt-leg-rule2': '2 entities; all pass through Process 0.0',
+
+        // Visual View
+        'vis-core-tag': 'Process 0.0 (Central System)',
+        'vis-st-title': 'Student',
+        'vis-st-sub': 'Student (FN10 ➔ FN20)',
+        'vis-st-badge': 'Entity',
+        'vis-st-in': 'Registration info, KYC ID scan, Course purchase, Inquiries',
+        'vis-st-out': 'Course catalog, Live room link, KYC verification, Teacher replies',
+
+        'vis-tc-title': 'Teacher',
+        'vis-tc-sub': 'Teacher (FN21 ➔ FN30)',
+        'vis-tc-badge': 'Entity',
+        'vis-tc-in': 'UG/PG Degrees, Course outline, Live schedule, Payout request',
+        'vis-tc-out': 'KYC/Course status, Student roster, Payout balance',
+
+        'vis-ad-title': 'Administrator',
+        'vis-ad-sub': 'Admin (FN31 ➔ FN41)',
+        'vis-ad-badge': 'Entity',
+        'vis-ad-in': 'KYC approval/rejection, Course publish approval, Ticket resolution',
+        'vis-ad-out': 'Pending KYC queue, Scanned degrees, Analytics report, Support messages',
+
+        'vis-rz-title': 'Razorpay Gateway',
+        'vis-rz-sub': 'Online Payment (FN16)',
+        'vis-rz-in': 'Order creation (Order ID), Transaction amount & payload',
+        'vis-rz-out': 'SHA256 HMAC Digital Verification Signature',
+
+        'vis-cl-title': 'Cloudinary CDN',
+        'vis-cl-sub': 'Images & Documents Cloud Storage',
+        'vis-cl-badge': 'Storage',
+        'vis-cl-in': 'Upload avatar images, ID scans, Bachelor/Master degrees',
+        'vis-cl-out': 'Return high-speed Secure HTTPS CDN URLs',
+
+        'vis-em-title': 'Email Service',
+        'vis-em-sub': 'SMTP Gateway (FN02, FN05)',
+        'vis-em-badge': 'Email',
+        'vis-em-in': 'Dispatch activation OTP, password reset tokens',
+        'vis-em-out': 'SMTP delivery success/error telemetry',
+
+        'vis-lv-title': 'Live Classroom',
+        'vis-lv-sub': 'Video Meet (FN19, FN25)',
+        'vis-lv-badge': 'Video',
+        'vis-lv-in': 'Sync Live room URLs, class timetable, session duration',
+        'vis-lv-out': '2-way realtime high-definition video/audio stream',
+
+        'vis-leg-title': 'DFD Level 0 Data Flow Standards',
+        'vis-leg-in': 'Incoming Data Flows (Inputs)',
+        'vis-leg-out': 'System Response Flows (Outputs)',
+        'vis-leg-svc': '3rd Party Cloud Services Sync',
+
+        // Matrix View
+        'lbl-matrix-title': 'Context Data Flow Specification Matrix (Mapped to 41 Features)',
+        'lbl-matrix-sub': 'All incoming and outgoing information flows are rigorously verified against function codes (FN01 ➔ FN41) from system specifications.',
+        'search-matrix-placeholder': '🔍 Search data flow, payload or function ID...',
+        'th-code': 'Flow ID',
+        'th-fn': 'Feature ID',
+        'th-src': 'Source',
+        'th-dir': 'Direction',
+        'th-dst': 'Destination',
+        'th-payload': 'Data Payload (Exchanged Items)',
+        'th-biz': 'Related Business Function',
+
+        // AI Image
+        'lbl-img-title': '🖼️ AI Context Diagram Render (High-Tech Concept)',
+        'lbl-img-sub': 'High-tech AI graphical rendering illustrating the core EduPulse Platform and 6 external entity clusters.',
+        'lbl-img-dl': '💾 Download High-Res Image',
+        'lbl-img-view': '🔍 View Full Resolution',
+
+        // Drawer Header Default
+        'drawer-title-default': 'Entity Details',
+        'drawer-sub-default': 'Technical Architecture & Data Exchange Specs'
       }
     };
+
+    // Detailed Entity Data for Drawer Inspector (Bilingual VI & EN)
+    const ENTITY_DETAILS = {
+      vi: {
+        evaluation: {
+          title: "📋 Đánh Giá Chuẩn Hóa Sơ Đồ Ngữ Cảnh (DFD Level 0)",
+          sub: "Đối chiếu tài liệu đặc tả 41 chức năng & lý thuyết công nghệ phần mềm",
+          sections: [
+            {
+              type: "tech",
+              title: "1. Tính đúng đắn theo nguyên lý DFD Mức 0",
+              items: [
+                "<strong>Chỉ 1 Process duy nhất (Hộp đen):</strong> Toàn bộ ứng dụng EduPulse được đóng gói thành Process 0.0, không để lộ cơ sở dữ liệu hay tiến trình con.",
+                "<strong>Xung quanh là External Entities:</strong> Đầy đủ 3 tác nhân con người (Học viên, Giảng viên, Admin) và 4 hệ thống ngoài (Razorpay, Cloudinary, Email SMTP, Live Video Platform).",
+                "<strong>Không có kết nối tắt giữa 2 tác nhân ngoài:</strong> Tin nhắn giữa Học sinh và Giảng viên đều phải trung chuyển qua hệ thống EduPulse.",
+                "<strong>Tên luồng là cụm danh từ dữ liệu:</strong> Đã chuyển đổi triệt để từ dạng động từ (vd: 'Đăng ký', 'Rút tiền') sang dạng cụm danh từ thông tin (vd: 'Thông tin tài khoản', 'Yêu cầu rút tiền & số tài khoản')."
+              ]
+            },
+            {
+              type: "input",
+              title: "2. Khớp 100% các chức năng trong tài liệu đặc tả (41 CN)",
+              items: [
+                "<strong>Phân hệ chung (CN01-CN09):</strong> Xác thực tài khoản, OTP qua Email SMTP, Quên/Reset mật khẩu, Xem hồ sơ GV, Gửi tin nhắn liên hệ.",
+                "<strong>Phân hệ Học sinh (CN10-CN20):</strong> Nộp hồ sơ KYC học viên, Xem trạng thái duyệt, Mua khóa học Razorpay, Tham gia lớp Live, Nhắn tin với giảng viên.",
+                "<strong>Phân hệ Giảng viên (CN21-CN30):</strong> Nộp hồ sơ bằng cấp chuyên môn (UG/PG), Tạo khóa học & lịch Live, Nhắn tin với học sinh, Rút tiền thù lao.",
+                "<strong>Phân hệ Admin (CN31-CN41):</strong> Duyệt hồ sơ KYC cả học sinh lẫn giảng viên, Duyệt xuất bản khóa học, Xử lý tin nhắn khiếu nại."
+              ]
+            },
+            {
+              type: "output",
+              title: "3. Các cải tiến so với phiên bản sơ khai trước đó",
+              items: [
+                "Tách riêng biệt <strong>Email Service (SMTP)</strong> và <strong>Lớp học trực tuyến (Video Conference)</strong> thành 2 thực thể độc lập.",
+                "Bổ sung luồng <strong>Học viên nộp hồ sơ KYC</strong> và nhận kết quả xét duyệt.",
+                "Bổ sung luồng <strong>Nhắn tin 2 chiều</strong> giữa Học viên và Giảng viên qua hệ thống.",
+                "Phân định rõ ràng quyết định <strong>Duyệt hồ sơ</strong> và <strong>Duyệt khóa học</strong> của Admin."
+              ]
+            }
+          ]
+        },
+        system: {
+          title: "⚡ EduPulse Platform (Process 0.0)",
+          sub: "Hệ thống trung tâm quản trị & điều phối dữ liệu",
+          sections: [
+            {
+              type: "tech",
+              title: "Kiến trúc kỹ thuật cốt lõi",
+              items: [
+                "<strong>Kiến trúc:</strong> MERN Stack (MongoDB Atlas, ExpressJS, React + Vite, NodeJS).",
+                "<strong>Bảo mật:</strong> JWT Access/Refresh Token (HttpOnly Cookie), mã hóa mật khẩu Bcrypt.",
+                "<strong>Thẩm định 100% KYC:</strong> Cả học sinh và giảng viên đều phải được duyệt danh tính trước khi tham gia học thuật.",
+                "<strong>Thanh toán bảo mật:</strong> Razorpay Checkout với xác thực chữ ký SHA-256 HMAC."
+              ]
+            },
+            {
+              type: "input",
+              title: "Tập dữ liệu tiếp nhận (Inputs)",
+              items: [
+                "Hồ sơ người dùng & tài liệu scan bằng cấp, CCCD.",
+                "Yêu cầu tạo khóa học, lịch buổi học và liên kết Meet.",
+                "Thông tin thanh toán học phí & yêu cầu rút tiền.",
+                "Quyết định phê duyệt hồ sơ và phê duyệt khóa học từ Admin.",
+                "Nội dung trao đổi tin nhắn giữa các người dùng."
+              ]
+            },
+            {
+              type: "output",
+              title: "Tập dữ liệu phản hồi (Outputs)",
+              items: [
+                "Danh mục khóa học được kiểm duyệt minh bạch.",
+                "Đường link và thời khóa biểu lớp học trực tiếp thời gian thực.",
+                "Kết quả thẩm định KYC & số dư thu nhập của giảng viên.",
+                "Báo cáo thống kê toàn diện cho ban quản trị."
+              ]
+            }
+          ]
+        },
+        student: {
+          title: "🎓 Học Viên (Student Subsystem)",
+          sub: "Bao gồm 11 chức năng chuyên biệt: CN10 ➔ CN20",
+          sections: [
+            {
+              type: "input",
+              title: "Dữ liệu Học viên gửi vào hệ thống (Inputs)",
+              items: [
+                "<strong>CN01-CN03:</strong> Email, mật khẩu băm, mã OTP kích hoạt tài khoản.",
+                "<strong>CN10:</strong> Hồ sơ KYC học sinh: CMND/CCCD, bằng THPT/ĐH scan.",
+                "<strong>CN12:</strong> Cập nhật hồ sơ: Họ tên, ảnh đại diện, số điện thoại.",
+                "<strong>CN13-CN15:</strong> Từ khóa tìm kiếm khóa học/giảng viên, yêu cầu đăng ký khóa.",
+                "<strong>CN16:</strong> Thông tin thanh toán học phí trực tuyến Razorpay.",
+                "<strong>CN20, CN09:</strong> Tin nhắn hỏi bài gửi giảng viên, tin nhắn phản hồi gửi Admin."
+              ]
+            },
+            {
+              type: "output",
+              title: "Dữ liệu Hệ thống phản hồi cho Học viên (Outputs)",
+              items: [
+                "<strong>CN07, CN08:</strong> Danh mục khóa học đã duyệt, hồ sơ giảng viên công khai.",
+                "<strong>CN11:</strong> Trạng thái duyệt KYC: pending / approved / rejected / reupload.",
+                "<strong>CN17, CN18:</strong> Bảng điều khiển lộ trình, danh sách khóa học đang theo học.",
+                "<strong>CN19:</strong> Đường link phòng học trực tuyến Live Meet và lịch học tuần.",
+                "<strong>CN20:</strong> Tin nhắn giải đáp thắc mắc từ Giảng viên gửi về."
+              ]
+            }
+          ]
+        },
+        teacher: {
+          title: "👨‍🏫 Giảng Viên (Teacher Subsystem)",
+          sub: "Bao gồm 10 chức năng chuyên biệt: CN21 ➔ CN30",
+          sections: [
+            {
+              type: "input",
+              title: "Dữ liệu Giảng viên gửi vào hệ thống (Inputs)",
+              items: [
+                "<strong>CN21:</strong> Hồ sơ chuyên môn bắt buộc: CCCD, bằng THPT, bằng Cử nhân (UG), bằng Thạc sĩ/Tiến sĩ (PG).",
+                "<strong>CN22:</strong> Cập nhật thông tin: Tiểu sử giảng dạy (bio), chứng chỉ chuyên ngành, ảnh chân dung.",
+                "<strong>CN23:</strong> Đề cương khóa học mới: Tên khóa, mô tả, cấp học, lớp, môn, học phí, lịch học.",
+                "<strong>CN25:</strong> Thêm buổi học Live: Ngày giờ, thời lượng, liên kết phòng họp video.",
+                "<strong>CN28:</strong> Tin nhắn hướng dẫn bài tập, giải đáp cho học sinh.",
+                "<strong>CN30:</strong> Yêu cầu rút tiền thù lao: Số tiền rút, số tài khoản ngân hàng thụ hưởng."
+              ]
+            },
+            {
+              type: "output",
+              title: "Dữ liệu Hệ thống phản hồi cho Giảng viên (Outputs)",
+              items: [
+                "<strong>CN21, CN36:</strong> Kết quả thẩm định bằng cấp từ Admin (approved/pending/rejected).",
+                "<strong>CN38:</strong> Thông báo khóa học đã được Admin duyệt xuất bản lên trang chủ.",
+                "<strong>CN26, CN27:</strong> Danh sách học sinh đăng ký vào từng lớp, thời khóa biểu dạy theo tuần.",
+                "<strong>CN28:</strong> Tin nhắn đặt câu hỏi từ học sinh trong lớp.",
+                "<strong>CN29, CN30:</strong> Thống kê số dư thù lao (Balance) và xác nhận giải ngân lệnh rút tiền."
+              ]
+            }
+          ]
+        },
+        admin: {
+          title: "🛡️ Quản Trị Viên (Admin Subsystem)",
+          sub: "Bao gồm 11 chức năng chuyên biệt: CN31 ➔ CN41",
+          sections: [
+            {
+              type: "input",
+              title: "Dữ liệu & Quyết định Admin gửi vào hệ thống (Inputs)",
+              items: [
+                "<strong>CN31:</strong> Đăng nhập với tài khoản đặc quyền quản trị viên.",
+                "<strong>CN34:</strong> Quyết định phê duyệt / từ chối / yêu cầu nộp lại hồ sơ KYC của học sinh.",
+                "<strong>CN36:</strong> Quyết định phê duyệt / từ chối hồ sơ năng lực của giảng viên.",
+                "<strong>CN38:</strong> Quyết định phê duyệt hoặc từ chối xuất bản khóa học của giảng viên.",
+                "<strong>CN40:</strong> Đánh dấu đã đọc và phản hồi tin nhắn liên hệ khiếu nại của người dùng."
+              ]
+            },
+            {
+              type: "output",
+              title: "Dữ liệu Báo cáo hệ thống xuất cho Admin (Outputs)",
+              items: [
+                "<strong>CN32, CN33, CN35:</strong> Danh sách hồ sơ học sinh & giảng viên chờ duyệt kèm ảnh scan bằng cấp trên Cloudinary.",
+                "<strong>CN37:</strong> Danh sách toàn bộ khóa học mới do giảng viên khởi tạo đang chờ duyệt.",
+                "<strong>CN39:</strong> Hòm thư tin nhắn phản hồi, góp ý từ người dùng gửi qua form liên hệ.",
+                "Báo cáo thống kê toàn sàn: Doanh thu, số lượng thành viên, tỷ lệ duyệt KYC."
+              ]
+            }
+          ]
+        },
+        razorpay: {
+          title: "💳 Cổng Thanh Toán Trực Tuyến Razorpay",
+          sub: "Tích hợp chức năng CN16 - Thanh toán học phí",
+          sections: [
+            {
+              type: "input",
+              title: "Luồng tiếp nhận từ EduPulse",
+              items: [
+                "Yêu cầu tạo đơn hàng: Gửi số tiền học phí <span class='drawer-code-tag'>amount</span> và mã định danh <span class='drawer-code-tag'>receipt_id</span>.",
+                "Cung cấp popup thanh toán an toàn cho học viên qua thẻ tín dụng, ngân hàng, ví điện tử."
+              ]
+            },
+            {
+              type: "output",
+              title: "Luồng phản hồi xác thực",
+              items: [
+                "Trả về các mã định danh: <span class='drawer-code-tag'>razorpay_order_id</span>, <span class='drawer-code-tag'>razorpay_payment_id</span>.",
+                "Tạo chữ ký số mã hóa <span class='drawer-code-tag'>razorpay_signature</span> bằng thuật toán SHA256 HMAC để EduPulse kiểm tra tính toàn vẹn tài chính."
+              ]
+            }
+          ]
+        },
+        cloudinary: {
+          title: "☁️ Dịch Vụ Lưu Trữ Đám Mây Cloudinary CDN",
+          sub: "Tích hợp trong các chức năng upload hồ sơ (CN10, CN21, CN22)",
+          sections: [
+            {
+              type: "tech",
+              title: "Vai trò lưu trữ & phát tán dữ liệu",
+              items: [
+                "Tiếp nhận các file hình ảnh đại diện (avatar) của thành viên.",
+                "Lưu trữ bảo mật các tài liệu scan bằng cấp quan trọng: Bằng Cử nhân, Thạc sĩ, Tiến sĩ, CCCD.",
+                "Tối ưu dung lượng ảnh và trả về <span class='drawer-code-tag'>Secure HTTPS CDN URL</span> tốc độ cao trên toàn cầu."
+              ]
+            }
+          ]
+        },
+        email: {
+          title: "✉️ Email Service (Nodemailer SMTP)",
+          sub: "Tích hợp trong chức năng kích hoạt & thông báo (CN02, CN05)",
+          sections: [
+            {
+              type: "tech",
+              title: "Tiến trình gửi thư tự động",
+              items: [
+                "Tiếp nhận yêu cầu gửi email từ Backend với nội dung mã OTP kích hoạt 6 chữ số.",
+                "Gửi email đặt lại mật khẩu với token một lần có thời hạn 15 phút.",
+                "Gửi email thông báo tự động khi Admin phê duyệt hoặc từ chối hồ sơ KYC.",
+                "Phản hồi trạng thái gửi thành công hoặc lỗi qua giao thức SMTP Gmail."
+              ]
+            }
+          ]
+        },
+        live: {
+          title: "🎥 Hạ Tầng Lớp Học Trực Tuyến Live",
+          sub: "Tích hợp trong chức năng học trực tiếp (CN19, CN25)",
+          sections: [
+            {
+              type: "tech",
+              title: "Không gian lớp học 2 chiều thời gian thực",
+              items: [
+                "EduPulse quản lý và phân phối liên kết phòng học trực tuyến (Google Meet / Video Conference).",
+                "Thiết lập lịch học theo tuần và đếm ngược thời gian bắt đầu buổi dạy.",
+                "Cung cấp kênh truyền thông video, âm thanh độ nét cao và tính năng chia sẻ màn hình trực tiếp giữa Giảng viên và Học viên."
+              ]
+            }
+          ]
+        }
+      },
+
+      en: {
+        evaluation: {
+          title: "📋 Context Diagram Standardization Audit (DFD Level 0)",
+          sub: "Benchmarked against 41 Specification Features & Software Engineering Principles",
+          sections: [
+            {
+              type: "tech",
+              title: "1. Compliance with DFD Level 0 Principles",
+              items: [
+                "<strong>Single Process 0.0 (Black Box):</strong> The entire EduPulse application is encapsulated within Process 0.0, hiding internal databases and sub-processes.",
+                "<strong>Circled by External Entities:</strong> 3 human actors (Student, Teacher, Admin) and 4 external systems (Razorpay, Cloudinary, Email SMTP, Live Video Platform).",
+                "<strong>No Direct Actor-to-Actor Bypass:</strong> Messaging between Students and Teachers strictly routes through the EduPulse core platform.",
+                "<strong>Noun-Phrase Data Flows:</strong> All flows use clear informational noun phrases instead of verb actions (e.g., 'Account Credentials', 'Payout Request & Bank Details')."
+              ]
+            },
+            {
+              type: "input",
+              title: "2. 100% Alignment with System Specification (41 Features)",
+              items: [
+                "<strong>Common Subsystem (FN01-FN09):</strong> Authentication, Email OTP, Password Reset, Teacher Profiles, Contact/Support messages.",
+                "<strong>Student Subsystem (FN10-FN20):</strong> KYC verification, Audit status, Razorpay checkout, Live classes, Teacher messaging.",
+                "<strong>Teacher Subsystem (FN21-FN30):</strong> Degree credential submission (UG/PG), Course & Live scheduling, Student Q&A, Payout requests.",
+                "<strong>Admin Subsystem (FN31-FN41):</strong> KYC approval for students & teachers, Course publishing approval, Support ticket resolution."
+              ]
+            },
+            {
+              type: "output",
+              title: "3. Key Improvements over Legacy Diagrams",
+              items: [
+                "Decoupled <strong>Email Service (SMTP)</strong> and <strong>Live Classroom (Video Conference)</strong> into two distinct external entities.",
+                "Added <strong>Student KYC Submission</strong> and verification feedback loop.",
+                "Added <strong>Bi-directional Messaging Flow</strong> between Students and Teachers via the system.",
+                "Explicitly distinguished Admin's <strong>KYC Approval</strong> and <strong>Course Publishing Approval</strong>."
+              ]
+            }
+          ]
+        },
+        system: {
+          title: "⚡ EduPulse Platform (Process 0.0)",
+          sub: "Central Core Orchestration & Data Flow Dispatcher",
+          sections: [
+            {
+              type: "tech",
+              title: "Core Technical Architecture",
+              items: [
+                "<strong>Stack:</strong> MERN Stack (MongoDB Atlas, ExpressJS, React + Vite, NodeJS).",
+                "<strong>Security:</strong> JWT Access/Refresh Tokens (HttpOnly Cookies), Bcrypt password hashing.",
+                "<strong>100% KYC Audit:</strong> Both students and teachers undergo identity verification before academic participation.",
+                "<strong>Secure Payments:</strong> Razorpay Checkout with SHA-256 HMAC cryptographic signature verification."
+              ]
+            },
+            {
+              type: "input",
+              title: "Incoming Data Flows (Inputs)",
+              items: [
+                "User credentials & scanned identity documents (National ID, Degrees).",
+                "Course curriculum proposals, class timetables, and Meet video links.",
+                "Tuition checkout requests and instructor payout disbursements.",
+                "Admin audit decisions for KYC verification and course publishing.",
+                "Realtime messaging exchange between registered platform users."
+              ]
+            },
+            {
+              type: "output",
+              title: "Outgoing Data Flows (Outputs)",
+              items: [
+                "Transparent, verified catalog of published courses.",
+                "Realtime live classroom links and weekly schedules.",
+                "KYC audit status notifications & instructor wallet balance.",
+                "Comprehensive platform metrics and analytics reports for administrators."
+              ]
+            }
+          ]
+        },
+        student: {
+          title: "🎓 Student Subsystem",
+          sub: "Encompasses 11 Dedicated Features: FN10 ➔ FN20",
+          sections: [
+            {
+              type: "input",
+              title: "Student Incoming Data (Inputs)",
+              items: [
+                "<strong>FN01-FN03:</strong> Email, hashed password, 6-digit activation OTP.",
+                "<strong>FN10:</strong> Student KYC dossier: Scanned National ID, High school / College diploma.",
+                "<strong>FN12:</strong> Profile update: Full name, avatar picture, phone number.",
+                "<strong>FN13-FN15:</strong> Course search keywords, enrollment requests.",
+                "<strong>FN16:</strong> Online tuition checkout payload via Razorpay.",
+                "<strong>FN20, FN09:</strong> Lesson inquiries sent to teachers, feedback/support tickets sent to Admin."
+              ]
+            },
+            {
+              type: "output",
+              title: "System Outgoing Data for Students (Outputs)",
+              items: [
+                "<strong>FN07, FN08:</strong> Approved course catalog, transparent instructor profiles.",
+                "<strong>FN11:</strong> KYC approval status: pending / approved / rejected / reupload.",
+                "<strong>FN17, FN18:</strong> Learning roadmap dashboard, enrolled course list.",
+                "<strong>FN19:</strong> Live Meet video room URL and weekly class timetable.",
+                "<strong>FN20:</strong> Direct query responses and guidance from instructors."
+              ]
+            }
+          ]
+        },
+        teacher: {
+          title: "👨‍🏫 Teacher Subsystem",
+          sub: "Encompasses 10 Dedicated Features: FN21 ➔ FN30",
+          sections: [
+            {
+              type: "input",
+              title: "Teacher Incoming Data (Inputs)",
+              items: [
+                "<strong>FN21:</strong> Mandatory professional credentials: National ID, Bachelor degree (UG), Master/PhD diploma (PG).",
+                "<strong>FN22:</strong> Profile update: Teaching biography, specialized certificates, portrait photo.",
+                "<strong>FN23:</strong> New course curriculum: Title, description, grade level, subject, tuition fee, schedule.",
+                "<strong>FN25:</strong> Live lecture session: Date, time, duration, video conference room link.",
+                "<strong>FN28:</strong> Academic assistance messages and homework guidance for students.",
+                "<strong>FN30:</strong> Instructor payout request: Amount, recipient banking account details."
+              ]
+            },
+            {
+              type: "output",
+              title: "System Outgoing Data for Teachers (Outputs)",
+              items: [
+                "<strong>FN21, FN36:</strong> Admin credential verification outcome (approved / pending / rejected).",
+                "<strong>FN38:</strong> Official notification that course has been approved and published.",
+                "<strong>FN26, FN27:</strong> Class enrollment rosters, weekly teaching timetable.",
+                "<strong>FN28:</strong> Inquiries and academic questions from enrolled students.",
+                "<strong>FN29, FN30:</strong> Instructor compensation balance and payout disbursement confirmation."
+              ]
+            }
+          ]
+        },
+        admin: {
+          title: "🛡️ Administrator Subsystem",
+          sub: "Encompasses 11 Dedicated Features: FN31 ➔ FN41",
+          sections: [
+            {
+              type: "input",
+              title: "Admin Commands & Audit Decisions (Inputs)",
+              items: [
+                "<strong>FN31:</strong> Privileged administrative login credentials.",
+                "<strong>FN34:</strong> KYC decision for students: approve / reject / request reupload.",
+                "<strong>FN36:</strong> Professional credential approval or rejection for instructors.",
+                "<strong>FN38:</strong> Course publishing decision: approve to publish or reject.",
+                "<strong>FN40:</strong> Mark as resolved and reply to user feedback/complaint messages."
+              ]
+            },
+            {
+              type: "output",
+              title: "Audit Queues & Analytics Exported for Admin (Outputs)",
+              items: [
+                "<strong>FN32, FN33, FN35:</strong> Pending student & teacher KYC queue with Cloudinary-hosted document scans.",
+                "<strong>FN37:</strong> Full list of newly proposed courses awaiting publication review.",
+                "<strong>FN39:</strong> User inquiries and support inbox submitted via contact forms.",
+                "Platform-wide analytics: Revenue, active member count, KYC approval rate."
+              ]
+            }
+          ]
+        },
+        razorpay: {
+          title: "💳 Razorpay Online Payment Gateway",
+          sub: "Integrated in Feature FN16 - Tuition Checkout",
+          sections: [
+            {
+              type: "input",
+              title: "Inbound Request from EduPulse",
+              items: [
+                "Order creation payload: Tuition <span class='drawer-code-tag'>amount</span>, currency, and <span class='drawer-code-tag'>receipt_id</span>.",
+                "Renders secure checkout popup for students (Credit card, NetBanking, UPI/Wallets)."
+              ]
+            },
+            {
+              type: "output",
+              title: "Cryptographic Verification Response",
+              items: [
+                "Returns transaction identifiers: <span class='drawer-code-tag'>razorpay_order_id</span>, <span class='drawer-code-tag'>razorpay_payment_id</span>.",
+                "Generates symmetrical <span class='drawer-code-tag'>razorpay_signature</span> using SHA-256 HMAC to ensure zero financial tampering."
+              ]
+            }
+          ]
+        },
+        cloudinary: {
+          title: "☁️ Cloudinary CDN Media Storage",
+          sub: "Integrated across file upload features (FN10, FN21, FN22)",
+          sections: [
+            {
+              type: "tech",
+              title: "Cloud Storage & Global Distribution Role",
+              items: [
+                "Receives member profile avatar images.",
+                "Securely stores critical scanned diplomas: Bachelor, Master, PhD, and National IDs.",
+                "Optimizes image resolution and delivers high-performance <span class='drawer-code-tag'>Secure HTTPS CDN URLs</span> worldwide."
+              ]
+            }
+          ]
+        },
+        email: {
+          title: "✉️ Email Service (Nodemailer SMTP)",
+          sub: "Integrated in activation & notification flows (FN02, FN05)",
+          sections: [
+            {
+              type: "tech",
+              title: "Automated Notification Processing",
+              items: [
+                "Receives dispatch requests from Backend with 6-digit OTP verification codes.",
+                "Sends single-use password reset tokens valid for 15 minutes.",
+                "Dispatches automated email notifications upon Admin KYC approval or rejection.",
+                "Returns delivery success or failure telemetry via Gmail SMTP protocol."
+              ]
+            }
+          ]
+        },
+        live: {
+          title: "🎥 Live Classroom Video Infrastructure",
+          sub: "Integrated in synchronous learning features (FN19, FN25)",
+          sections: [
+            {
+              type: "tech",
+              title: "Two-way Realtime Interactive Classroom",
+              items: [
+                "EduPulse manages and distributes live video room links (Google Meet / WebRTC).",
+                "Configures weekly schedules with real-time class countdown timers.",
+                "Provides high-definition video, crystal audio, and live screen sharing between Teachers and Students."
+              ]
+            }
+          ]
+        }
+      }
+    };
+
+    // Apply Language Function
+    function applyLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      localStorage.setItem('edupulse_lang', lang);
+
+      const t = TRANSLATIONS[lang];
+      if (!t) return;
+
+      // Update text in elements with IDs
+      Object.keys(t).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = t[id];
+        }
+      });
+
+      // Update placeholder for search box
+      const searchBox = document.getElementById('search-matrix');
+      if (searchBox && t['search-matrix-placeholder']) {
+        searchBox.placeholder = t['search-matrix-placeholder'];
+      }
+
+      // Update direction badges in matrix table
+      document.querySelectorAll('#data-table .badge-flow').forEach(badge => {
+        if (badge.classList.contains('in')) {
+          badge.textContent = lang === 'en' ? '➔ In' : '➔ Vào';
+        } else if (badge.classList.contains('out')) {
+          badge.textContent = lang === 'en' ? '➔ Out' : '➔ Ra';
+        } else if (badge.classList.contains('svc')) {
+          badge.textContent = lang === 'en' ? '➔ Sync' : '➔ Đồng bộ';
+        }
+      });
+
+      // Re-render open drawer if it's currently visible
+      if (document.getElementById('detail-drawer').classList.contains('open') && currentDrawerKey) {
+        openDrawer(currentDrawerKey);
+      }
+    }
+
+    // Toggle Language Function
+    function toggleLanguage() {
+      const targetLang = currentLang === 'vi' ? 'en' : 'vi';
+      applyLanguage(targetLang);
+    }
 
     // Zoom & Pan state
     let zoomLevel = 1.0;
@@ -2215,7 +2868,9 @@
 
     // Detail Drawer Controls
     function openDrawer(key) {
-      const data = ENTITY_DETAILS[key];
+      currentDrawerKey = key;
+      const langDict = ENTITY_DETAILS[currentLang] || ENTITY_DETAILS['vi'];
+      const data = langDict[key];
       if (!data) return;
 
       document.getElementById('drawer-title').textContent = data.title;
@@ -2249,6 +2904,7 @@
     }
 
     function closeDrawer() {
+      currentDrawerKey = null;
       document.getElementById('detail-drawer').classList.remove('open');
     }
 
@@ -2340,6 +2996,8 @@
     // Init & Listeners
     window.addEventListener('resize', updateConnectingLines);
     window.addEventListener('DOMContentLoaded', () => {
+      // Apply initial saved language
+      applyLanguage(currentLang);
       setTimeout(updateConnectingLines, 80);
     });
 
