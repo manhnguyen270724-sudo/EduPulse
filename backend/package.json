@@ -1,15 +1,15 @@
 {
-  "name": "elearning",
+  "name": "edupulse-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "EduPulse E-Learning Platform Backend API",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon  -r dotenv/config --experimental-json-modules src/index.js",
     "seed": "node src/seed.js"
   },
-  "github": "https://github.com/Pika003/e-Learning-Platform.git",
-  "author": "Parag, Satyajit, Gopi, Aditya",
+  "github": "https://github.com/manhnguyen270724-sudo/EduPulse.git",
+  "author": "EduPulse Team",
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
