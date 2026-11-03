@@ -127,35 +127,157 @@ const teacherAmount = asyncHandler(async(req,res)=>{
 })
 
 
+import { CourseCompletionFeedback } from "../models/courseCompletionFeedback.model.js";
+import { WithdrawalRequest } from "../models/withdrawalRequest.model.js";
+import { course } from "../models/course.model.js";
+
+/**
+ * RÀNG BUỘC RÚT TIỀN CỦA GIẢNG VIÊN:
+ * 1. Admin phải xác nhận khóa học đã hoàn thành
+ * 2. Học viên trong lớp học phải hoàn thành form xác nhận kết thúc khóa học (tối thiểu 80%)
+ */
 const withdrawAmount = asyncHandler(async(req,res)=>{
+  const teacherId = req.teacher._id;
+  const { amount, courseId, bankName, accountNumber, accountHolderName, ifscOrBranch } = req.body;
 
-  const teacherId = req.teacher._id
-  const amount = req.body.amount
-
-  console.log(amount);
+  if (!amount || Number(amount) <= 0) {
+    throw new ApiError(400, "Vui lòng nhập số tiền rút hợp lệ (lớn hơn 0)");
+  }
 
   const teacher = await Teacher.findById(teacherId);
-
   if (!teacher) {
-    return res.status(404).json({ message: "Teacher not found" });
+    throw new ApiError(404, "Không tìm thấy giảng viên");
+  }
+
+  // Nếu giáo viên chỉ định rút theo khóa học cụ thể, kiểm tra điều kiện nghiêm ngặt
+  if (courseId) {
+    const targetCourse = await course.findById(courseId);
+    if (!targetCourse) {
+      throw new ApiError(404, "Không tìm thấy khóa học cần rút tiền");
+    }
+
+    if (targetCourse.enrolledteacher.toString() !== teacherId.toString()) {
+      throw new ApiError(403, "Bạn không phải là giảng viên của khóa học này");
+    }
+
+    // Điều kiện 1: Admin phải duyệt hoàn thành khóa học
+    if (!targetCourse.completionRequest?.adminApproved) {
+      throw new ApiError(
+        400,
+        "ĐIỀU KIỆN RÚT TIỀN CHƯA THỎA MÃN: Khóa học này chưa được Admin phê duyệt nghiệm thu hoàn thành. Vui lòng gửi yêu cầu nghiệm thu và đợi Admin xác nhận."
+      );
+    }
+
+    // Điều kiện 2: Học viên phải hoàn thành form xác nhận kết thúc khóa học
+    const totalStudents = targetCourse.enrolledStudent?.length || 0;
+    const confirmedCount = await CourseCompletionFeedback.countDocuments({
+      courseId,
+      isConfirmedEndCourse: true,
+    });
+
+    const completionRate =
+      totalStudents > 0 ? (confirmedCount / totalStudents) * 100 : 100;
+
+    if (totalStudents > 0 && completionRate < 80) {
+      throw new ApiError(
+        400,
+        `ĐIỀU KIỆN RÚT TIỀN CHƯA THỎA MÃN: Mới có ${confirmedCount}/${totalStudents} (${Math.round(
+          completionRate
+        )}%) học viên hoàn thành form xác nhận kết thúc khóa học. Yêu cầu tối thiểu đạt 80% học viên xác nhận mới được phép rút tiền.`
+      );
+    }
   }
 
   if (teacher.Balance < amount) {
-    return res.status(400).json({ message: "Insufficient balance" });
+    throw new ApiError(400, `Số dư khả dụng không đủ. Số dư hiện tại: ${teacher.Balance.toLocaleString('vi-VN')}đ`);
   }
 
-  teacher.Balance -= amount;
-  teacher.WithdrawalHistory.push({ amount });
-  await teacher.save();
+  // Tạo yêu cầu rút tiền minh bạch để Admin đối soát giải ngân
+  const newWithdrawalReq = await WithdrawalRequest.create({
+    teacherId,
+    courseId: courseId || null,
+    amount: Number(amount),
+    bankInfo: {
+      bankName: bankName || "Ngân hàng",
+      accountNumber: accountNumber || "STK",
+      accountHolderName: accountHolderName || `${teacher.Firstname} ${teacher.Lastname}`,
+      ifscOrBranch: ifscOrBranch || "",
+    },
+    status: "pending",
+  });
 
-  const newTeacher = await Teacher.findById(teacherId)
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        withdrawalRequest: newWithdrawalReq,
+        currentBalance: teacher.Balance,
+      },
+      "Đã tạo yêu cầu rút tiền thành công. Tiền sẽ được Admin giải ngân sau khi đối soát."
+    )
+  );
+});
 
-  return res
-  .status(200)
-  .json(new ApiResponse(200, {newTeacher}, "balance"))
-  
-})
+/**
+ * Lấy chi tiết thu nhập, tiền ký quỹ, trạng thái khóa học của giảng viên
+ */
+const getTeacherEarningsOverview = asyncHandler(async(req, res) => {
+  const teacherId = req.teacher._id;
 
+  const teacher = await Teacher.findById(teacherId);
+  const teacherCourses = await course.find({ enrolledteacher: teacherId });
 
+  // Phân tích trạng thái từng khóa học
+  const coursesBreakdown = await Promise.all(
+    teacherCourses.map(async (c) => {
+      const totalStudents = c.enrolledStudent?.length || 0;
+      const confirmedCount = await CourseCompletionFeedback.countDocuments({
+        courseId: c._id,
+        isConfirmedEndCourse: true,
+      });
 
-export {coursePayment, getkey, coursePaymentConfirmation, teacherAmount, withdrawAmount}
+      const completionRate =
+        totalStudents > 0 ? Math.round((confirmedCount / totalStudents) * 100) : 100;
+
+      const adminApproved = c.completionRequest?.adminApproved || false;
+      const isEligibleToWithdraw = adminApproved && (completionRate >= 80 || totalStudents === 0);
+
+      const courseGross = (c.fees || 0) * totalStudents;
+      const courseEarned = Math.round(courseGross * 0.85); // 85% cho GV
+
+      return {
+        _id: c._id,
+        coursename: c.coursename,
+        fees: c.fees,
+        status: c.status,
+        totalStudents,
+        confirmedCount,
+        completionRate,
+        adminApproved,
+        isEligibleToWithdraw,
+        courseEarned,
+        isSuspended: c.suspensionInfo?.isSuspended || false,
+        suspensionReason: c.suspensionInfo?.reason || "",
+      };
+    })
+  );
+
+  // Lịch sử các lệnh rút tiền
+  const withdrawalHistory = await WithdrawalRequest.find({ teacherId })
+    .populate("courseId", "coursename")
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        balance: teacher.Balance || 0,
+        coursesBreakdown,
+        withdrawalHistory,
+      },
+      "Teacher earnings overview fetched"
+    )
+  );
+});
+
+export { coursePayment, getkey, coursePaymentConfirmation, teacherAmount, withdrawAmount, getTeacherEarningsOverview };

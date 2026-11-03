@@ -220,11 +220,27 @@ function TeacherCourses() {
                     <span className={`dt-badge-status ${course.isapproved ? 'dt-badge-status--approved' : 'dt-badge-status--pending'}`}>
                       {course.isapproved ? 'Đã duyệt' : 'Chờ duyệt'}
                     </span>
+                    {course.suspensionInfo?.isSuspended && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                        ⚠️ TẠM DỪNG
+                      </span>
+                    )}
+                    {course.completionRequest?.adminApproved && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        ✓ HOÀN THÀNH
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="tc-course-name">{course.subject || course.description}</h3>
                   <p className="tc-course-desc">{course.description}</p>
                 </div>
+
+                {course.suspensionInfo?.isSuspended && (
+                  <div style={{ padding: '8px 12px', background: 'rgba(244, 63, 94, 0.1)', border: '1px solid rgba(244, 63, 94, 0.2)', borderRadius: '8px', color: '#f43f5e', fontSize: '0.8rem', marginTop: '6px' }}>
+                    <strong>Cảnh báo Admin:</strong> {course.suspensionInfo.reason}
+                  </div>
+                )}
 
                 <div className="tc-card-meta-list">
                   <div className="tc-card-meta-item">
@@ -243,7 +259,7 @@ function TeacherCourses() {
                   )}
                 </div>
 
-                <div className="tc-card-footer">
+                <div className="tc-card-footer" style={{ flexWrap: 'wrap', gap: '8px' }}>
                   <NavLink
                     to={`/courses/${course._id}`}
                     target="_blank"
@@ -253,6 +269,39 @@ function TeacherCourses() {
                     <span>Xem trang học sinh</span>
                     <FaExternalLinkAlt size={10} />
                   </NavLink>
+
+                  {/* Nút Nghiệm thu hoàn thành */}
+                  {!course.completionRequest?.adminApproved && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/api/course/${course._id}/request-completion`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' }
+                          });
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data.message || 'Không thể gửi yêu cầu');
+                          alert('Đã gửi yêu cầu nghiệm thu hoàn thành tới Admin! Vui lòng đợi phê duyệt.');
+                          fetchCourses();
+                        } catch (err) {
+                          alert(err.message);
+                        }
+                      }}
+                      style={{
+                        padding: '7px 12px',
+                        background: course.completionRequest?.isRequested ? 'rgba(234, 179, 8, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                        border: course.completionRequest?.isRequested ? '1px solid rgba(234, 179, 8, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
+                        borderRadius: '8px',
+                        color: course.completionRequest?.isRequested ? '#eab308' : '#10b981',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {course.completionRequest?.isRequested ? '⏳ Chờ Admin Duyệt' : '🎓 Xin Nghiệm Thu Hoàn Thành'}
+                    </button>
+                  )}
 
                   <button
                     onClick={() => setShowAddClass(true)}

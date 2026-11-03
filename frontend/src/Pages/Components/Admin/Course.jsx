@@ -1,228 +1,201 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { IoIosNotificationsOutline } from "react-icons/io";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
-import logo from '../../Images/logo.svg'
+import { FaArrowLeft, FaCheckCircle, FaTimesCircle, FaCalendarAlt, FaClock, FaChalkboardTeacher } from "react-icons/fa";
+import toast from "react-hot-toast";
+import "./Admin.css";
 
 const Course = () => {
   const [courseReq, setCourseReq] = useState([]);
-
+  const [loading, setLoading] = useState(false);
   const { data } = useParams();
-  const navigator = useNavigate();
+  const navigate = useNavigate();
 
-
-    // useEffect((data)=>{
-    //     const Postrequest=async()=>{
-    //         try{
-    //          const response=await axios.post(`api/admin/${data}/approve/student/:studentID`)
-    //         //  console.log(response);
-    //      }catch(error){
-    //         console.error('Error fetching course requests:', error);
-    //      }
-    //     }
-    //     Postrequest();
-    // },[])
- 
-
-
-
-
+  const daysOfWeek = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
 
   const formatDay = (day) => {
-    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    return daysOfWeek[day];
+    return daysOfWeek[day] || `Thứ ${day}`;
   };
 
   const formatTime = (time) => {
     const hours = Math.floor(time / 60);
     const minutes = time % 60;
-
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  
-  useEffect(() => {
-    const fetchCourseRequests = async () => {
-      try {
-        const response = await axios.get(`/api/admin/${data}/approve/course`);
-        console.log("dtat",response.data.data);
-        setCourseReq(response.data.data);
-      } catch (error) {
-        console.error('Error fetching course requests:', error);
-      }
-    };
+  const fetchCourseRequests = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/admin/${data}/approve/course`);
+      setCourseReq(response.data?.data || []);
+    } catch (error) {
+      console.error('Lỗi tải danh sách yêu cầu mở khóa học:', error);
+      toast.error('Không thể tải danh sách khóa học');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCourseRequests();
   }, [data]);
 
-
-  // const handleAccept = async (id,info) => {
-  //   console.log(id);
-  //   try {
-  //     const response = await fetch(`/api/admin/${data}/approve/course/${id}`, {
-  //       method: 'POST',
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ 
-  //             Isapproved: true,
-  //              Email:info.Email,
-  //              Firstname:info.enrolledteacher,
-  //        }),
-  //     });
-      
-  //     console.log(response);
-   
-  //     if (response.ok) {
-  //       setCourseReq(courseReq.filter(req => req._id !== id));
-        
-  //     }
-  //   } catch (error) {
-  //     console.error('Error approving course request:', error);
-  //   }
-  // };
   const handleAccept = async (id, info) => {
-    console.log(id);
-    console.log(info.Email)
     try {
       const response = await axios.post(`/api/admin/${data}/approve/course/${id}`, {
         Isapproved: true,
         email: info.Email,
         Firstname: info.enrolledteacher,
       }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
-      
-      console.log(response);
-     
+
       if (response.status === 200) {
-        setCourseReq(courseReq.filter(req => req._id !== id));
-        alert(response.data.message);
+        setCourseReq(prev => prev.filter(req => req._id !== id));
+        toast.success(response.data.message || "Đã phê duyệt khóa học thành công!");
       }
     } catch (error) {
-      console.error('Error approving course request:', error);
+      console.error('Lỗi duyệt khóa học:', error);
+      toast.error(error.response?.data?.message || 'Phê duyệt thất bại');
     }
   };
-  
-  
+
   const handleReject = async (id, info) => {
-    console.log(id, info);
     try {
       const response = await axios.post(`/api/admin/${data}/approve/course/${id}`, {
         Isapproved: false,
         email: info.Email,
         Firstname: info.enrolledteacher,
       }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
-      
-      console.log(response);
-      
+
       if (response.status === 200) {
-        setCourseReq(courseReq.filter(req => req._id !== id));
-        alert(response.data.message);
+        setCourseReq(prev => prev.filter(req => req._id !== id));
+        toast.success(response.data.message || "Đã từ chối khóa học!");
       }
     } catch (error) {
-      console.error('Error rejecting course request:', error);
+      console.error('Lỗi từ chối khóa học:', error);
+      toast.error(error.response?.data?.message || 'Từ chối thất bại');
     }
   };
 
-  // const handleReject = async (id,info) => {
-  //   console.log(id,info);
-  //   try {
-  //     const response = await fetch(`/api/admin/${data}/approve/course/${id}`, {
-  //       method: 'POST',
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ Isapproved: false,
-  //              Email:info.Email,
-  //              Firstname:info.enrolledteacher,
-  //        }),
-  //     });
-  //    console.log(response);
-  //     if (response.ok) {
-  //       setCourseReq(courseReq.filter(req => req._id !== id));
-  //     }
-  //   } catch (error) {
-  //     console.error('Error rejecting course request:', error);
-  //   }
-  // };
-
-
-
-
-
   return (
-    <div className='h-[100vh]'>
-           {/* Navbar */}
-      <nav className="h-16 sm:h-20 md:h-24 lg:h-24  w-full bg-[#042439] flex justify-between items-center px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
-     
-        <div className="flex items-center gap-4">
-          <div className="flex items-center">
-            <h1 onClick={()=>  navigator(`/admin/${data}`)} className="text-lg sm:text-xl md:text-2xl lg:text-3xl  text-blue-700 font-bold font-mono ml-2">
-            ◀ Back
-            </h1>
-          </div>
+    <div className="ap-shell">
+      {/* Topbar */}
+      <header className="ap-topbar">
+        <div className="ap-brand-group">
+          <NavLink to="/" className="ap-brand-link">
+            <img
+              src="https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924695/edupulse/branding/edupulse_logo.jpg"
+              alt="EduPulse Logo"
+              className="ap-brand-logo"
+            />
+            <span className="ap-brand-text">EduPulse</span>
+          </NavLink>
+          <span className="ap-portal-badge">Quản Trị Khóa Học</span>
         </div>
 
-        <div className="flex items-center">
-          <div className="relative mr-4">
-            <IoIosNotificationsOutline className="h-8 w-8 text-white" />
-            <span className="absolute top-1 right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-          </div>
-          <button onClick={() => navigator('/')} className="bg-blue-500 text-white px-4 py-2 rounded-md">
-            Logout
+        <div className="ap-topbar-right">
+          <button
+            onClick={() => navigate(`/admin/${data}`)}
+            className="ap-btn-secondary"
+          >
+            <FaArrowLeft />
+            <span>Về Bảng Điều Khiển</span>
           </button>
         </div>
-      </nav>
+      </header>
 
-      {courseReq.length > 0 && (
-        <div className="mt-3  text-gray-100 p-5">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {courseReq.map((req, index) => (
-              <div key={index} className="bg-gray-800 p-4 rounded-md shadow-[0_0_10px_white]">
-                <h2 className="text-lg text-yellow-500 font-bold">{req.coursename.toUpperCase()}</h2>
-                <p className="text-yellow-700 font-semibold">{req.description}</p>
-                <div className="flex items-center mt-2">
-                  <p className="text-yellow-300">Enrolled Teacher : </p>
-                  <p className="text-white font-semibold pl-1"> {req.enrolledteacher.Firstname}  {req.enrolledteacher.Lastname}</p>
-                 
-                </div>
-                <div className="flex  flex-col justify-start mt-2">
-                  <p className="text-gray-400 text-xl font-bold mr-2">Timing:</p>
-                  <div className="text-white">
-                    {req.schedule.map((scheduleItem, idx) => (
-                      <div key={idx}>
-                        <p className="text-yellow-800">Day: {formatDay(scheduleItem.day)}</p>
-                        <p className="text-yellow-300">Start Time: {formatTime(scheduleItem.starttime)}</p>
-                        <p className="text-yellow-300">End Time: {formatTime(scheduleItem.endtime)}</p>
+      {/* Main Content */}
+      <main className="ap-main-viewport" style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+        <div className="ap-view-header">
+          <div>
+            <h1 className="ap-view-title">Yêu Cầu Phê Duyệt Khóa Học Mới</h1>
+            <p className="ap-view-subtitle">
+              Xem xét lịch trình, nội dung giảng dạy và phê duyệt khóa học trước khi mở bán công khai
+            </p>
+          </div>
+        </div>
+
+        {courseReq.length === 0 ? (
+          <div className="ap-content-card text-center py-16 text-[var(--text-muted)]">
+            <FaCheckCircle className="text-4xl text-emerald-500 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[var(--text-main)]">Không có yêu cầu mở khóa học nào</h3>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Tất cả các khóa học mới đã được xem xét và xử lý.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courseReq.map((req) => (
+              <div key={req._id} className="ap-content-card flex flex-col justify-between">
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h3 className="font-bold text-base text-[var(--text-main)]">
+                      {req.coursename}
+                    </h3>
+                    <span className={`ap-badge ${req.isapproved ? 'ap-badge-success' : 'ap-badge-warning'}`}>
+                      {req.isapproved ? 'Đã duyệt' : 'Chờ duyệt'}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[var(--text-muted)] line-clamp-3 mb-4">
+                    {req.description}
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-[var(--bg-surface-secondary)] border border-[var(--card-border)] mb-4 text-xs space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FaChalkboardTeacher className="text-[var(--primary)]" />
+                      <span className="text-[var(--text-muted)]">Giảng viên:</span>
+                      <strong className="text-[var(--text-main)]">
+                        {req.enrolledteacher?.Firstname} {req.enrolledteacher?.Lastname}
+                      </strong>
+                    </div>
+
+                    <div className="space-y-1 pt-1 border-t border-[var(--card-border)]">
+                      <div className="flex items-center gap-1 font-semibold text-[var(--text-muted)]">
+                        <FaCalendarAlt /> Lịch học trong tuần:
                       </div>
-                    ))}
+                      {req.schedule?.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-[11px] text-[var(--text-main)] pl-4">
+                          <span>{formatDay(item.day)}</span>
+                          <span className="font-mono text-[var(--primary)]">
+                            {formatTime(item.starttime)} - {formatTime(item.endtime)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center mt-2">
-                  <p className="text-yellow-300 mr-2">Approval Status:</p>
-                  <p className={`text-white ${req.isapproved ? 'text-green-500' : 'text-red-500'}`}>
-                    {req.isapproved ? 'Approved' : 'Pending'}
-                  </p>
-                </div>
-                <div className='flex flex-row gap-3 mt-2'>
-                  <button className='text-white bg-green-500'onClick={()=>handleAccept(req._id,{Email:req.enrolledteacher.Email,enrolledteacher:req.enrolledteacher.Firstname})}>Approve</button>
-                  <button className='text-white bg-red-500' onClick={()=>handleReject(req._id,{Email:req.enrolledteacher.Email,enrolledteacher:req.enrolledteacher.Firstname})}>Reject</button>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-[var(--card-border)]">
+                  <button
+                    onClick={() => handleAccept(req._id, {
+                      Email: req.enrolledteacher?.Email,
+                      enrolledteacher: req.enrolledteacher?.Firstname
+                    })}
+                    className="ap-btn-primary flex-1 justify-center"
+                    style={{ padding: "8px 12px", fontSize: "0.8rem" }}
+                  >
+                    <FaCheckCircle /> Duyệt
+                  </button>
+                  <button
+                    onClick={() => handleReject(req._id, {
+                      Email: req.enrolledteacher?.Email,
+                      enrolledteacher: req.enrolledteacher?.Firstname
+                    })}
+                    className="ap-btn-secondary flex-1 justify-center text-rose-500"
+                    style={{ padding: "8px 12px", fontSize: "0.8rem" }}
+                  >
+                    <FaTimesCircle /> Từ chối
+                  </button>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 };
 
 export default Course;
-

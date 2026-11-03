@@ -17,6 +17,37 @@ const courseSchema = new mongoose.Schema({
     default: false
   },
 
+  // === VÒNG ĐỜI KHÓA HỌC ===
+  status: {
+    type: String,
+    enum: ['draft', 'pending_approval', 'active', 'completed_pending', 'completed', 'suspended'],
+    default: 'active'
+  },
+
+  // === YÊU CẦU DUYỆT HOÀN THÀNH (ĐỂ GIẢNG VIÊN RÚT TIỀN) ===
+  completionRequest: {
+    isRequested: { type: Boolean, default: false },
+    requestedAt: { type: Date },
+    adminApproved: { type: Boolean, default: false },
+    approvedAt: { type: Date },
+    adminNote: { type: String, default: '' }
+  },
+
+  // === TẠM DỪNG KHÓA HỌC DO ĐÁNH GIÁ XẤU / KHIẾU NẠI ===
+  suspensionInfo: {
+    isSuspended: { type: Boolean, default: false },
+    reason: { type: String, default: '' },
+    suspendedAt: { type: Date },
+    warningSentAt: { type: Date }
+  },
+
+  // === THỐNG KÊ ĐÁNH GIÁ HỌC VIÊN ===
+  ratingStats: {
+    averageRating: { type: Number, default: 5.0 },
+    totalReviews: { type: Number, default: 0 },
+    badReviewCount: { type: Number, default: 0 } // Số review <= 2 sao
+  },
+
   // === PHÂN CẤP MÔN HỌC 3 TẦNG ===
   // Cấp học: primary | secondary | highschool | language | university
   educationLevel: {

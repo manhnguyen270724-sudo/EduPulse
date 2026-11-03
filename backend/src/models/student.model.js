@@ -47,6 +47,17 @@ const studentSchema = new mongoose.Schema({
     Remarks:{
         type:String
     },
+
+    accountStatus: {
+        type: String,
+        enum: ['active', 'suspended', 'banned'],
+        default: 'active',
+    },
+
+    statusReason: {
+        type: String,
+        default: '',
+    },
     
     Refreshtoken:{
         type:String,

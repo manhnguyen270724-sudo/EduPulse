@@ -3,11 +3,13 @@ import { useParams, NavLink } from 'react-router-dom';
 import { FaBookOpen, FaCalendarAlt, FaArrowRight, FaClock } from 'react-icons/fa';
 import { getCourseSubjectLabel, DAYS_VI, formatTime } from '../../../data/subjectTaxonomy';
 import './StudentCourses.css';
+import CourseCompletionModal from './CourseCompletionModal';
 
 function StudentCourses() {
   const { ID } = useParams();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCourseForCompletion, setSelectedCourseForCompletion] = useState(null);
 
   useEffect(() => {
     const getData = async () => {
@@ -97,10 +99,26 @@ function StudentCourses() {
                   </div>
                 )}
 
-                <div className="sc-card-footer">
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Trạng thái: Hoạt động
-                  </span>
+                <div className="sc-card-footer" style={{ flexWrap: 'wrap', gap: '8px' }}>
+                  <button
+                    onClick={() => setSelectedCourseForCompletion(sub)}
+                    style={{
+                      padding: '7px 12px',
+                      background: 'rgba(14, 165, 233, 0.15)',
+                      border: '1px solid rgba(14, 165, 233, 0.3)',
+                      borderRadius: '8px',
+                      color: '#0ea5e9',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>🎓 Xác Nhận Kết Thúc & Đánh Giá</span>
+                  </button>
+
                   <NavLink to={`/courses/${sub._id}`} className="sc-btn-detail">
                     <span>Xem chi tiết khóa</span>
                     <FaArrowRight size={11} />
@@ -110,6 +128,15 @@ function StudentCourses() {
             );
           })}
         </div>
+      )}
+
+      {/* Modal xác nhận kết thúc khóa học & đánh giá */}
+      {selectedCourseForCompletion && (
+        <CourseCompletionModal
+          course={selectedCourseForCompletion}
+          onClose={() => setSelectedCourseForCompletion(null)}
+          onSuccess={() => {}}
+        />
       )}
     </div>
   );

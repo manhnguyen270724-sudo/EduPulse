@@ -4,6 +4,7 @@ import Admin from "./Images/Admin.svg";
 import { useNavigate } from "react-router-dom";
 import Header from "../Home/Header/Header";
 import { FaShieldAlt } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AdminLogin() {
   const [User, setUser] = useState("");
@@ -12,6 +13,7 @@ export default function AdminLogin() {
   const [err, setErr] = useState("");
 
   const navigate = useNavigate();
+  const { loginUser } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,6 +53,13 @@ export default function AdminLogin() {
       const userid = responseData.data?.admin?._id;
 
       if (response.ok) {
+        if (loginUser) {
+          loginUser({
+            id: userid,
+            username: User,
+            role: "admin",
+          });
+        }
         navigate(`/admin/${userid}`);
       } else if (response.status === 401) {
         setErrors({ password: responseData.message || "Mật khẩu không chính xác" });

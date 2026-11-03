@@ -1,161 +1,291 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { FaArrowLeft, FaCheckCircle, FaTimesCircle, FaRedo, FaUser, FaPhone, FaMapMarkerAlt, FaGraduationCap } from 'react-icons/fa';
+import toast from 'react-hot-toast';
+import "./Admin.css";
 
 function VarifyDoc() {
-    const { type, adminID, ID } = useParams();
-    const [data, setData] = useState(null);
-    const navigator = useNavigate();
-    const [value, setValue] = useState("");
+  const { type, adminID, ID } = useParams();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [value, setValue] = useState("");
 
-    const handleMessage = (event) => {
-        setValue(event.target.value);
-    };
+  const handleMessage = (event) => {
+    setValue(event.target.value);
+  };
 
-    const Approval = async(id, type, approve, email)=>{
-        try {
-          const data = {
-            Isapproved : approve,
-            remarks : value,
-            email: email,
-          }
-    
-          const response = await fetch(`/api/admin/${adminID}/approve/${type}/${id}`, {
-            method: 'POST',
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-          });
-        
-          navigator(`/admin/${adminID}`);
-    
-        } catch (error) {
-          console.log(error.message);
-        }
+  const Approval = async (id, userType, approve, email) => {
+    try {
+      const payload = {
+        Isapproved: approve,
+        remarks: value,
+        email: email,
+      };
+
+      const response = await fetch(`/api/admin/${adminID}/approve/${userType}/${id}`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        toast.success(`Đã cập nhật trạng thái hồ sơ: ${approve}`);
+        navigate(`/admin/${adminID}`);
+      } else {
+        toast.error('Cập nhật trạng thái thất bại');
       }
+    } catch (error) {
+      console.error(error.message);
+      toast.error('Lỗi kết nối khi duyệt hồ sơ');
+    }
+  };
 
-    useEffect(() => {
-        const getData = async () => {
-            try {
-                const docData = await fetch(`/api/admin/${adminID}/documents/${type}/${ID}`);
-                const response = await docData.json();
-                setData(response.data);
-                console.log(response.data);
-            } catch (err) {
-                console.log(err.message);
-            }
-        };
-        getData();
-    }, []);
+  useEffect(() => {
+    const getData = async () => {
+      setLoading(true);
+      try {
+        const docData = await fetch(`/api/admin/${adminID}/documents/${type}/${ID}`);
+        const response = await docData.json();
+        setData(response.data);
+      } catch (err) {
+        console.error(err.message);
+        toast.error('Không thể tải chi tiết hồ sơ');
+      } finally {
+        setLoading(false);
+      }
+    };
+    getData();
+  }, [adminID, type, ID]);
 
-    return (
-        <>
-            <nav className="h-16 sm:h-20 md:h-24 lg:h-24  w-full bg-[#042439] flex justify-between items-center px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20">
-                <div className="flex items-center">
-                    <h1 onClick={()=>  navigator(`/admin/${adminID}`)} className="text-lg sm:text-xl md:text-2xl lg:text-3xl  text-blue-700 font-bold font-mono ml-2">
-                    ◀ Back
-                    </h1>
+  return (
+    <div className="ap-shell">
+      {/* Topbar */}
+      <header className="ap-topbar">
+        <div className="ap-brand-group">
+          <NavLink to="/" className="ap-brand-link">
+            <img
+              src="https://res.cloudinary.com/elearning-platform-vn/image/upload/v1789924695/edupulse/branding/edupulse_logo.jpg"
+              alt="EduPulse Logo"
+              className="ap-brand-logo"
+            />
+            <span className="ap-brand-text">EduPulse</span>
+          </NavLink>
+          <span className="ap-portal-badge">Kiểm Duyệt Hồ Sơ</span>
+        </div>
+
+        <div className="ap-topbar-right">
+          <button
+            onClick={() => navigate(`/admin/${adminID}`)}
+            className="ap-btn-secondary"
+          >
+            <FaArrowLeft />
+            <span>Về Bảng Điều Khiển</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="ap-main-viewport" style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+        <div className="ap-view-header">
+          <div>
+            <h1 className="ap-view-title">
+              Chi Tiết Hồ Sơ & Chứng Chỉ {type === "teacher" ? "Giảng Viên" : "Học Viên"}
+            </h1>
+            <p className="ap-view-subtitle">
+              Đối soát bằng cấp, căn cước công dân và xác thực tư cách người dùng
+            </p>
+          </div>
+        </div>
+
+        {/* Học viên */}
+        {type === "student" && data && data.theStudent && (
+          <div className="space-y-6">
+            <div className="ap-content-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Họ và tên:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaUser className="text-[var(--primary)]" />
+                  {data.theStudent.Firstname} {data.theStudent.Lastname}
                 </div>
-                <div><h2 className='text-2xl text-white font-bold'>Document  Details</h2></div>
-                <div className="flex items-center">
-                    <button onClick={() => navigator('/')} className="bg-blue-500 text-white px-4 py-2 rounded-md">
-                        Logout
-                    </button>
+              </div>
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Số điện thoại:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaPhone className="text-emerald-500" />
+                  {data.studentDocs?.Phone || "Chưa cập nhật"}
                 </div>
-            </nav>
+              </div>
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Trình độ học vấn:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaGraduationCap className="text-sky-500" />
+                  {data.studentDocs?.Highesteducation || "THPT"}
+                </div>
+              </div>
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Địa chỉ cư trú:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaMapMarkerAlt className="text-rose-500" />
+                  {data.studentDocs?.Address || "Chưa cập nhật"}
+                </div>
+              </div>
+            </div>
 
-            {type === "student" && data && data.theStudent && (
-                <>
-                    <div className='flex gap-10 text-gray-200 justify-center mt-5 text-[1.3rem]'>
-                        <p>Full Name : {data.theStudent.Firstname} {data.theStudent.Lastname}</p>
-                        <p>Phone No : {data.studentDocs.Phone}</p>
-                        <p>Highest Education : {data.studentDocs.Highesteducation}</p>
-                        <p>Address : {data.studentDocs.Address}</p>
-                    </div>
+            {/* Giấy tờ */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {data.studentDocs?.Secondary && (
+                <div className="ap-content-card">
+                  <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">Học bạ / Bằng THCS</h4>
+                  <img src={data.studentDocs.Secondary} alt="Học bạ THCS" className="rounded-xl w-full h-56 object-cover border border-[var(--card-border)] mb-2" />
+                  <p className="text-xs text-emerald-500 font-bold">Điểm số: {data.studentDocs.SecondaryMarks}%</p>
+                </div>
+              )}
+              {data.studentDocs?.Higher && (
+                <div className="ap-content-card">
+                  <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">Học bạ / Bằng THPT</h4>
+                  <img src={data.studentDocs.Higher} alt="Học bạ THPT" className="rounded-xl w-full h-56 object-cover border border-[var(--card-border)] mb-2" />
+                  <p className="text-xs text-emerald-500 font-bold">Điểm số: {data.studentDocs.HigherMarks}%</p>
+                </div>
+              )}
+              {data.studentDocs?.Aadhaar && (
+                <div className="ap-content-card">
+                  <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">CCCD / Định Danh</h4>
+                  <img src={data.studentDocs.Aadhaar} alt="CCCD" className="rounded-xl w-full h-56 object-cover border border-[var(--card-border)] mb-2" />
+                  <p className="text-xs text-[var(--text-muted)]">Giấy tờ tùy thân hợp lệ</p>
+                </div>
+              )}
+            </div>
 
-                    <div className='flex mt-10 justify-center gap-20 flex-wrap text-gray-200  font-bold'>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.studentDocs.Secondary} alt="Secondary" width={500}/>
-                            <p>10th Marksheet  <span className='text-[#8DE855]'>: {data.studentDocs.SecondaryMarks}%</span></p>
-                        </div>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.studentDocs.Higher} alt="Secondary" width={500}/>
-                            <p>12th Marksheet  <span className='text-[#8DE855]'>: {data.studentDocs.HigherMarks}%</span></p>
-                        </div>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.studentDocs.Aadhaar} alt="Secondary" width={500}/>
-                            <p>Aadhar Card </p>
-                        </div>
-                        <div className='flex items-end mb-10 flex-col gap-10'>
-                            <textarea value={value} onChange={handleMessage} className='w-96 h-60 mt-6 text-black p-5' placeholder='Write reason for rejecting application ...'/>
-                            <div className="flex items-center gap-3">
-                                <div className="px-5 py-1  bg-green-600 text-lg font-bold text-white ring-1 ring-inset ring-white rounded-lg hover:scale-95 hover:bg-green-900" onClick={()=>Approval(data.theStudent._id, "student", "approved",data.theStudent.Email)}>
-                                Approve !
-                                </div>
-                                <div className="px-5 py-1  bg-red-600 text-lg font-bold text-white ring-1   ring-inset ring-white rounded-lg hover:scale-95 hover:bg-red-900" onClick={()=>Approval(data.theStudent._id, "student", "rejected",data.theStudent.Email)}>
-                                Reject !
-                                </div>
+            {/* Ghi chú & Thao tác */}
+            <div className="ap-content-card">
+              <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">Ghi Chú Phản Hồi Khi Duyệt / Từ Chối</h4>
+              <textarea
+                value={value}
+                onChange={handleMessage}
+                rows={3}
+                className="ap-search-input w-full mb-4"
+                placeholder="Nhập lý do nếu từ chối hoặc yêu cầu tải lại hồ sơ..."
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => Approval(data.theStudent._id, "student", "approved", data.theStudent.Email)}
+                  className="ap-btn-primary"
+                >
+                  <FaCheckCircle /> Phê Duyệt Hồ Sơ
+                </button>
+                <button
+                  onClick={() => Approval(data.theStudent._id, "student", "rejected", data.theStudent.Email)}
+                  className="ap-btn-secondary text-rose-500"
+                >
+                  <FaTimesCircle /> Từ Chối
+                </button>
+                <button
+                  onClick={() => Approval(data.theStudent._id, "student", "reupload", data.theStudent.Email)}
+                  className="ap-btn-secondary text-amber-500"
+                >
+                  <FaRedo /> Yêu Cầu Nộp Lại
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-                                <div className="px-5 py-1  bg-blue-600 text-lg font-bold text-white ring-1   ring-inset ring-white rounded-lg hover:scale-95 hover:bg-blue-900" onClick={()=>Approval(data.theStudent._id, "student", "reupload", data.theStudent.Email)}>
-                                Reupload !
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </>
-            )}
+        {/* Giảng viên */}
+        {type === "teacher" && data && data.theTeacher && (
+          <div className="space-y-6">
+            <div className="ap-content-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Họ và tên:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaUser className="text-[var(--primary)]" />
+                  {data.theTeacher.Firstname} {data.theTeacher.Lastname}
+                </div>
+              </div>
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Số điện thoại:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaPhone className="text-emerald-500" />
+                  {data.teacherDocs?.Phone || "Chưa cập nhật"}
+                </div>
+              </div>
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Kinh nghiệm:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaGraduationCap className="text-sky-500" />
+                  {data.teacherDocs?.Experience || 0} năm giảng dạy
+                </div>
+              </div>
+              <div>
+                <span className="text-xs text-[var(--text-muted)]">Địa chỉ cư trú:</span>
+                <div className="font-bold text-[var(--text-main)] flex items-center gap-2 mt-1">
+                  <FaMapMarkerAlt className="text-rose-500" />
+                  {data.teacherDocs?.Address || "Chưa cập nhật"}
+                </div>
+              </div>
+            </div>
 
-            {type === "teacher" && data && data.theTeacher &&  (
-                <>
-                    <div className='flex gap-10 text-gray-200 justify-center mt-5 text-[1.3rem]'>
-                        <p>Full Name : {data.theTeacher.Firstname} {data.theTeacher.Lastname}</p>
-                        <p>Phone No : {data.teacherDocs.Phone}</p>
-                        <p>Experience : {data.teacherDocs.Experience} years</p>
-                        <p>Address : {data.teacherDocs.Address}</p>
-                    </div>
+            {/* Giấy tờ chứng chỉ */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {data.teacherDocs?.UG && (
+                <div className="ap-content-card">
+                  <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">Bằng Cử Nhân (Đại Học)</h4>
+                  <img src={data.teacherDocs.UG} alt="Bằng ĐH" className="rounded-xl w-full h-56 object-cover border border-[var(--card-border)] mb-2" />
+                  <p className="text-xs text-emerald-500 font-bold">Điểm / Xếp loại: {data.teacherDocs.UGmarks}</p>
+                </div>
+              )}
+              {data.teacherDocs?.PG && (
+                <div className="ap-content-card">
+                  <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">Bằng Thạc Sĩ / Tiến Sĩ</h4>
+                  <img src={data.teacherDocs.PG} alt="Bằng Thạc sĩ" className="rounded-xl w-full h-56 object-cover border border-[var(--card-border)] mb-2" />
+                  <p className="text-xs text-emerald-500 font-bold">Điểm / Xếp loại: {data.teacherDocs.PGmarks}</p>
+                </div>
+              )}
+              {data.teacherDocs?.Aadhaar && (
+                <div className="ap-content-card">
+                  <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">CCCD / Định Danh</h4>
+                  <img src={data.teacherDocs.Aadhaar} alt="CCCD" className="rounded-xl w-full h-56 object-cover border border-[var(--card-border)] mb-2" />
+                  <p className="text-xs text-[var(--text-muted)]">Giấy tờ tùy thân hợp lệ</p>
+                </div>
+              )}
+            </div>
 
-                    <div className='flex mt-10 justify-center gap-20 flex-wrap text-gray-200 font-bold'>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.teacherDocs.Secondary} alt="Secondary" width={500}/>
-                            <p>10th Marksheet  <span className='text-[#8DE855]'>: {data.teacherDocs.SecondaryMarks}%</span></p>
-                        </div>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.teacherDocs.Higher} alt="Secondary" width={500}/>
-                            <p>12th Marksheet  <span className='text-[#8DE855]'>: {data.teacherDocs.HigherMarks}%</span></p>
-                        </div>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.teacherDocs.UG} alt="Secondary" width={500}/>
-                            <p>U.G. Marksheet  <span className='text-[#8DE855]'>: {data.teacherDocs.UGmarks}</span></p>
-                        </div>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.teacherDocs.PG} alt="Secondary" width={500}/>
-                            <p>P.G. Marksheet  <span className='text-[#8DE855]'>: {data.teacherDocs.PGmarks}</span></p>
-                        </div>
-                        <div className='m-5 flex flex-col gap-3'>
-                            <img src={data.teacherDocs.Aadhaar} alt="Secondary" width={500}/>
-                            <p>Aadhar Card </p>
-                        </div>
-                        <div className='flex items-end mb-10 flex-col gap-10'>
-                            <textarea value={value} onChange={handleMessage} className='w-96 h-60 mt-6 text-black p-5' placeholder='Write reason for rejecting application ...'/>
-
-                            <div className="flex items-center gap-3">
-                                <div className="px-5 py-1  bg-green-600 text-lg font-bold text-white ring-1 ring-inset ring-white rounded-lg hover:scale-95 hover:bg-green-900" onClick={()=>Approval(data.theTeacher._id, "teacher", "approved",data.theTeacher.Email)}>
-                                Approve !
-                                </div>
-                                <div className="px-5 py-1  bg-red-600 text-lg font-bold text-white ring-1   ring-inset ring-white rounded-lg hover:scale-95 hover:bg-red-900" onClick={()=>Approval(data.theTeacher._id, "teacher", "rejected",data.theTeacher.Email)}>
-                                Reject !
-                                </div>
-
-                                <div className="px-5 py-1  bg-blue-600 text-lg font-bold text-white ring-1   ring-inset ring-white rounded-lg hover:scale-95 hover:bg-blue-900" onClick={()=>Approval(data.theTeacher._id, "teacher", "reupload", data.theTeacher.Email)}>
-                                Reupload !
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </>
-            )}
-        </>
-    );
+            {/* Ghi chú & Thao tác */}
+            <div className="ap-content-card">
+              <h4 className="font-bold text-sm text-[var(--text-main)] mb-2">Ghi Chú Phản Hồi Khi Duyệt / Từ Chối</h4>
+              <textarea
+                value={value}
+                onChange={handleMessage}
+                rows={3}
+                className="ap-search-input w-full mb-4"
+                placeholder="Nhập lý do nếu từ chối hoặc yêu cầu bổ sung bằng cấp..."
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => Approval(data.theTeacher._id, "teacher", "approved", data.theTeacher.Email)}
+                  className="ap-btn-primary"
+                >
+                  <FaCheckCircle /> Phê Duyệt Hồ Sơ
+                </button>
+                <button
+                  onClick={() => Approval(data.theTeacher._id, "teacher", "rejected", data.theTeacher.Email)}
+                  className="ap-btn-secondary text-rose-500"
+                >
+                  <FaTimesCircle /> Từ Chối
+                </button>
+                <button
+                  onClick={() => Approval(data.theTeacher._id, "teacher", "reupload", data.theTeacher.Email)}
+                  className="ap-btn-secondary text-amber-500"
+                >
+                  <FaRedo /> Yêu Cầu Nộp Lại
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }
 
 export default VarifyDoc;
