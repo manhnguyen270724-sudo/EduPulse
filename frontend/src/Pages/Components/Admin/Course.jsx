@@ -26,7 +26,9 @@ const Course = () => {
   const fetchCourseRequests = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/admin/${data}/approve/course`);
+      const response = await axios.get(`/api/admin/${data}/approve/course`, {
+        withCredentials: true,
+      });
       setCourseReq(response.data?.data || []);
     } catch (error) {
       console.error('Lỗi tải danh sách yêu cầu mở khóa học:', error);
@@ -47,6 +49,7 @@ const Course = () => {
         email: info.Email,
         Firstname: info.enrolledteacher,
       }, {
+        withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
 
@@ -67,6 +70,7 @@ const Course = () => {
         email: info.Email,
         Firstname: info.enrolledteacher,
       }, {
+        withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
 

@@ -25,6 +25,9 @@ import {
   FaShieldAlt,
   FaUserGraduate,
   FaChalkboardTeacher,
+  FaBook,
+  FaCalendarAlt,
+  FaClock,
 } from "react-icons/fa";
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
@@ -38,7 +41,7 @@ const Admin = () => {
   const { user: authUser, logoutUser } = useAuth();
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState("revenue"); // revenue | completion | badReviews | users | legacyApprovals | messages
+  const [activeTab, setActiveTab] = useState("revenue"); // revenue | completion | courseRequests | badReviews | users | legacyApprovals | messages
 
   // Dark / Light Mode State
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -72,6 +75,20 @@ const Admin = () => {
   const [pendingCourses, setPendingCourses] = useState([]);
   const [loadingCompletion, setLoadingCompletion] = useState(false);
   const [approvingCourseId, setApprovingCourseId] = useState(null);
+
+  // ── 2b. NEW COURSE REQUESTS (DUYỆT YÊU CẦU MỞ KHÓA HỌC MỚI) ──
+  const [courseRequests, setCourseRequests] = useState([]);
+  const [loadingCourseRequests, setLoadingCourseRequests] = useState(false);
+  const [processingCourseId, setProcessingCourseId] = useState(null);
+
+  const daysOfWeek = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const formatDay = (d) => daysOfWeek[d] || `Thứ ${d}`;
+  const formatTime = (time) => {
+    if (time === undefined || time === null) return "--:--";
+    const hours = Math.floor(time / 60);
+    const minutes = time % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
 
   // ── 3. BAD REVIEWS & SUSPEND STATE ──
   const [badReviews, setBadReviews] = useState([]);
@@ -141,6 +158,25 @@ const Admin = () => {
       toast.error("Không thể tải danh sách khóa học chờ nghiệm thu");
     } finally {
       setLoadingCompletion(false);
+    }
+  };
+
+  // Fetch Course Requests (Khóa học mới do GV tạo chờ duyệt)
+  const fetchCourseRequests = async () => {
+    setLoadingCourseRequests(true);
+    try {
+      const res = await fetch("/api/admin/approve/course", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setCourseRequests(d.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Không thể tải danh sách khóa học chờ phê duyệt");
+    } finally {
+      setLoadingCourseRequests(false);
     }
   };
 
@@ -215,10 +251,18 @@ const Admin = () => {
   useEffect(() => {
     fetchRevenue();
     fetchCompletionPending();
+    fetchCourseRequests();
     fetchBadReviews();
     fetchUsers();
     fetchLegacy();
   }, [data]);
+
+  // Refetch when switching to courseRequests tab
+  useEffect(() => {
+    if (activeTab === "courseRequests") {
+      fetchCourseRequests();
+    }
+  }, [activeTab]);
 
   // Refetch users on filter changes
   useEffect(() => {
@@ -293,6 +337,39 @@ const Admin = () => {
       toast.error(err.message);
     } finally {
       setApprovingCourseId(null);
+    }
+  };
+
+  // Phê duyệt hoặc từ chối tạo khóa học mới của giảng viên
+  const handleApproveNewCourse = async (courseId, teacherInfo, isApproved) => {
+    setProcessingCourseId(courseId);
+    try {
+      const res = await fetch(`/api/admin/approve/course/${courseId}`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Isapproved: isApproved,
+          email: teacherInfo?.Email,
+          Firstname: teacherInfo?.Firstname,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(
+          isApproved
+            ? "Đã phê duyệt khóa học thành công! Khóa học đã mở tuyển sinh."
+            : "Đã từ chối khóa học!"
+        );
+        setCourseRequests((prev) => prev.filter((c) => c._id !== courseId));
+      } else {
+        toast.error(data.message || "Xử lý thất bại");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Lỗi kết nối máy chủ");
+    } finally {
+      setProcessingCourseId(null);
     }
   };
 
@@ -565,6 +642,23 @@ const Admin = () => {
               {pendingCompletionCount > 0 && (
                 <span className="ap-menu-count-badge">
                   {pendingCompletionCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("courseRequests")}
+              className={`ap-menu-item ${
+                activeTab === "courseRequests" ? "active" : ""
+              }`}
+            >
+              <div className="ap-menu-item-content">
+                <FaBook className="ap-menu-icon" />
+                <span>Duyệt Khóa Học Mới</span>
+              </div>
+              {courseRequests.length > 0 && (
+                <span className="ap-menu-count-badge">
+                  {courseRequests.length}
                 </span>
               )}
             </button>
@@ -954,6 +1048,149 @@ const Admin = () => {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* =================================================================== */}
+          {/* TAB 2B: DUYỆT KHÓA HỌC MỚI (NEW COURSE REQUESTS) */}
+          {/* =================================================================== */}
+          {activeTab === "courseRequests" && (
+            <div>
+              <div className="ap-view-header">
+                <div>
+                  <h1 className="ap-view-title">Yêu Cầu Phê Duyệt Khóa Học Mới</h1>
+                  <p className="ap-view-subtitle">
+                    Xem xét lịch trình, nội dung và phê duyệt các khóa học do giảng viên tạo trước khi mở tuyển sinh công khai
+                  </p>
+                </div>
+                <button
+                  onClick={fetchCourseRequests}
+                  className="ap-btn-secondary"
+                  disabled={loadingCourseRequests}
+                >
+                  {loadingCourseRequests ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : (
+                    <FaExchangeAlt />
+                  )}
+                  <span>Làm Mới</span>
+                </button>
+              </div>
+
+              <div className="ap-content-card">
+                <div className="ap-card-header">
+                  <h3 className="ap-card-title">
+                    <FaBook className="text-sky-500" />
+                    Khóa Học Đang Chờ Phê Duyệt ({courseRequests.length})
+                  </h3>
+                </div>
+
+                {loadingCourseRequests ? (
+                  <div className="text-center py-12 text-[var(--text-muted)] text-sm">
+                    <FaSpinner className="animate-spin inline mr-2 text-primary" /> Đang tải danh sách khóa học...
+                  </div>
+                ) : courseRequests.length === 0 ? (
+                  <div className="text-center py-14 text-[var(--text-muted)] text-sm">
+                    <FaCheckCircle className="text-4xl text-emerald-500 mx-auto mb-3" />
+                    <p className="font-semibold text-base text-[var(--text-main)]">Không có yêu cầu mở khóa học nào đang chờ</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Tất cả các khóa học do giảng viên gửi lên đã được xem xét và xử lý.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {courseRequests.map((req) => (
+                      <div
+                        key={req._id}
+                        className="p-5 rounded-2xl bg-[var(--bg-surface-secondary)] border border-[var(--card-border)] flex flex-col justify-between"
+                        style={{ boxShadow: "var(--card-shadow)" }}
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <h3 className="font-bold text-base text-[var(--text-main)]">
+                              {req.subject || req.coursename}
+                            </h3>
+                            <span className="ap-badge ap-badge-warning">Chờ duyệt</span>
+                          </div>
+
+                          <p className="text-xs text-[var(--text-muted)] line-clamp-3 mb-4 leading-relaxed">
+                            {req.description}
+                          </p>
+
+                          <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--card-border)] mb-4 text-xs space-y-2.5">
+                            <div className="flex items-center gap-2">
+                              <FaChalkboardTeacher className="text-sky-500" />
+                              <span className="text-[var(--text-muted)]">Giảng viên:</span>
+                              <strong className="text-[var(--text-main)]">
+                                {req.enrolledteacher?.Firstname} {req.enrolledteacher?.Lastname}
+                              </strong>
+                            </div>
+
+                            {req.enrolledteacher?.Email && (
+                              <div className="text-[11px] text-[var(--text-muted)] pl-6">
+                                {req.enrolledteacher.Email}
+                              </div>
+                            )}
+
+                            {req.educationLevel && (
+                              <div className="text-[11px] text-[var(--text-muted)]">
+                                Phân loại: <strong className="text-[var(--text-main)]">{req.educationLevel}</strong> {req.grade ? `· Lớp ${req.grade}` : ''}
+                              </div>
+                            )}
+
+                            <div className="space-y-1 pt-2 border-t border-[var(--card-border)]">
+                              <div className="flex items-center gap-1 font-semibold text-[var(--text-muted)]">
+                                <FaCalendarAlt /> Lịch học trong tuần:
+                              </div>
+                              {req.schedule && req.schedule.length > 0 ? (
+                                req.schedule.map((item, idx) => (
+                                  <div key={idx} className="flex items-center justify-between text-[11px] text-[var(--text-main)] pl-4">
+                                    <span>{formatDay(item.day)}</span>
+                                    <span className="font-mono text-sky-500 font-semibold">
+                                      {formatTime(item.starttime)} - {formatTime(item.endtime)}
+                                    </span>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-[11px] text-[var(--text-muted)] pl-4 italic">Chưa cài đặt lịch học</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-3 border-t border-[var(--card-border)]">
+                          <button
+                            onClick={() => handleApproveNewCourse(req._id, req.enrolledteacher, true)}
+                            disabled={processingCourseId === req._id}
+                            className="ap-btn-primary flex-1 justify-center"
+                            style={{ padding: "8px 12px", fontSize: "0.82rem" }}
+                          >
+                            {processingCourseId === req._id ? (
+                              <FaSpinner className="animate-spin" />
+                            ) : (
+                              <>
+                                <FaCheckCircle /> Phê Duyệt
+                              </>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleApproveNewCourse(req._id, req.enrolledteacher, false)}
+                            disabled={processingCourseId === req._id}
+                            className="ap-btn-secondary flex-1 justify-center text-rose-500 hover:bg-rose-500/10"
+                            style={{ padding: "8px 12px", fontSize: "0.82rem" }}
+                          >
+                            {processingCourseId === req._id ? (
+                              <FaSpinner className="animate-spin" />
+                            ) : (
+                              <>
+                                <FaTimesCircle /> Từ Chối
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

@@ -42,31 +42,39 @@ const getcourseTeacher = asyncHandler(async(req,res)=>{
 
 
 const addCourseTeacher = asyncHandler(async(req,res)=>{
-    const loggedTeacher = req.teacher
+    const loggedTeacher = req.teacher;
 
-    const teacherParams = req.params.id
-
-    if(!teacherParams){
-      throw new ApiError(400,"Invalid user")
-    }
- 
-    if(String(loggedTeacher._id) !== String(teacherParams)){
-      throw new ApiError(403,"Không có quyền tạo khóa học cho giảng viên khác")
+    if (!loggedTeacher) {
+      throw new ApiError(401, "Vui lòng đăng nhập với tư cách giảng viên");
     }
 
-    
-
-    const{coursename,description, schedule} = req.body
-
-    console.log(schedule)
-
-
-    if(!schedule){
-      throw new ApiError(400, "Schedule of the course is required.")
+    const teacherParams = req.params.id;
+    if (teacherParams && String(loggedTeacher._id) !== String(teacherParams)) {
+      throw new ApiError(403, "Không có quyền tạo khóa học cho giảng viên khác");
     }
 
-    if ([coursename,description].some((field) => field?.trim() === "")) {
-      throw new ApiError(400, "All fields are required");
+    const {
+      coursename,
+      description,
+      schedule,
+      educationLevel,
+      grade,
+      subject,
+      fees,
+      maxStudents,
+      startDate,
+      outcomes,
+      prerequisites,
+      syllabus,
+      liveClasses
+    } = req.body;
+
+    if (!schedule || !Array.isArray(schedule) || schedule.length === 0) {
+      throw new ApiError(400, "Lịch học của khóa học là bắt buộc.");
+    }
+
+    if ([coursename, description].some((field) => !field || field.trim() === "")) {
+      throw new ApiError(400, "Tên khóa học và mô tả là bắt buộc.");
     }
 
     const schedules = await course.aggregate([
@@ -101,26 +109,43 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
     }
     
     if(isconflict){
-      throw new ApiError(400, "Already enrolled in a course with the same timing.")
+      throw new ApiError(400, "Lịch giảng dạy bị trùng với một khóa học khác của bạn.");
     }
 
-
     const newCourse = await course.create({
-      coursename,
+      coursename: coursename.toLowerCase(),
       description,
       schedule,
       enrolledteacher: loggedTeacher._id,
-    })
-
-    console.log(newCourse)
+      educationLevel: educationLevel || 'university',
+      grade: grade || '',
+      subject: subject || coursename,
+      fees: Number(fees) || 0,
+      maxStudents: Number(maxStudents) || 20,
+      startDate: startDate ? new Date(startDate) : new Date(Date.now() + 7 * 86400000),
+      outcomes: Array.isArray(outcomes) ? outcomes.filter(o => o && o.trim()) : [],
+      prerequisites: prerequisites || '',
+      syllabus: Array.isArray(syllabus) ? syllabus : [],
+      liveClasses: Array.isArray(liveClasses) && liveClasses.length > 0 ? liveClasses : [
+        {
+          title: `${subject || coursename} - Buổi 1: Định hướng & Nền tảng`,
+          timing: 90,
+          date: startDate ? new Date(startDate) : new Date(Date.now() + 86400000),
+          link: "https://meet.google.com/edu-vietnam-live",
+          status: "upcoming"
+        }
+      ],
+      isapproved: false,
+      status: 'pending_approval'
+    });
 
     if(!newCourse){
-      throw new ApiError(400, "couldnt create course")
+      throw new ApiError(400, "Không thể tạo khóa học, vui lòng thử lại.");
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200, {newCourse, loggedTeacher}, "new course created"))
+    .json(new ApiResponse(200, { newCourse, loggedTeacher }, "Tạo khóa học thành công! Đang chờ Admin xét duyệt."))
     
 })
 

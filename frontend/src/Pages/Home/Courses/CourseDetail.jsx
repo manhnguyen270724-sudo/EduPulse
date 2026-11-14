@@ -88,6 +88,18 @@ function CourseDetail() {
     }
   })();
 
+  const studentId = activeStudentId || (currentUser?.role === 'student' ? currentUser.id : null);
+
+  // Kiểm tra xem học viên hiện tại đã tham gia khóa học này chưa
+  const isAlreadyEnrolled = Boolean(
+    studentId &&
+    courseData?.enrolledStudent &&
+    courseData.enrolledStudent.some(s => {
+      const sId = typeof s === 'object' ? (s._id || s.id) : s;
+      return String(sId) === String(studentId);
+    })
+  );
+
   const handleEnroll = async (specificClass = null) => {
     if (currentUser?.role === 'teacher') {
       return; // Giáo viên không đăng ký học chính khóa học
@@ -105,7 +117,7 @@ function CourseDetail() {
       return;
     }
 
-    // Nếu chưa đăng nhập hoặc không có session
+    // Nếu chưa đăng nhập hoặc không có session trong localStorage, thử check session cookie
     try {
       const checkRes = await fetch('/api/student/StudentDocument/me', {
         credentials: 'include',
@@ -113,9 +125,9 @@ function CourseDetail() {
       });
       if (checkRes.ok) {
         const studentData = await checkRes.json();
-        const studentId = studentData.data?._id;
-        if (studentId) {
-          setActiveStudentId(studentId);
+        const sId = studentData.data?._id;
+        if (sId) {
+          setActiveStudentId(sId);
           setShowEnrollModal(true);
           return;
         }
@@ -147,15 +159,12 @@ function CourseDetail() {
           setEnrollMsg({ type: 'error', text: result.message || 'Đăng ký lớp học thất bại.' });
         }
       } else {
-        // Đăng ký chung vào khóa học
-        const checkRes = await fetch('/api/student/StudentDocument/me', {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const studentData = await checkRes.json();
-        const studentId = studentData.data?._id;
+        // Đăng ký chung vào khóa học - route hỗ trợ cả có param và không param
+        const enrollUrl = studentId 
+          ? `/api/public/course/${courseId}/enroll/${studentId}`
+          : `/api/public/course/${courseId}/enroll`;
 
-        const res = await fetch(`/api/public/course/${courseId}/enroll/${studentId}`, {
+        const res = await fetch(enrollUrl, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -546,10 +555,27 @@ function CourseDetail() {
               >
                 Vào Cổng Giảng Viên →
               </NavLink>
+            ) : isAlreadyEnrolled ? (
+              <NavLink
+                to={`/Student/Dashboard/${studentId}/Courses`}
+                className="cd-enroll-btn"
+                style={{
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  background: 'linear-gradient(135deg, #059669, #10b981)',
+                  color: '#ffffff',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)'
+                }}
+              >
+                <FaCheckCircle style={{ marginRight: 8 }} /> Đã Tham Gia · Vào Học →
+              </NavLink>
             ) : (
               <button
                 className={`cd-enroll-btn ${isFull ? 'cd-enroll-btn--disabled' : ''}`}
-                onClick={handleEnroll}
+                onClick={() => handleEnroll()}
                 disabled={isFull}
               >
                 {isFull ? 'Lớp Đã Đầy' : 'Đăng Ký Khóa Học'}
@@ -559,6 +585,8 @@ function CourseDetail() {
             <p className="cd-enroll-note">
               {currentUser?.role === 'teacher' 
                 ? 'Bạn đang xem môn học với tư cách Giảng viên.' 
+                : isAlreadyEnrolled
+                ? 'Bạn đã là học viên của khóa học này. Bấm vào học để xem lịch và link Meet.'
                 : 'Khóa học học trực tuyến qua Google Meet với giảng viên uy tín.'}
             </p>
           </div>
@@ -584,6 +612,7 @@ function CourseDetail() {
             <div className="cd-modal-actions" style={{ flexDirection: 'column', gap: 10, marginTop: 20 }}>
               <NavLink
                 to="/login"
+                state={{ from: `/courses/${courseId}` }}
                 className="btn-primary"
                 style={{ width: '100%', textAlign: 'center', textDecoration: 'none' }}
               >
@@ -591,6 +620,7 @@ function CourseDetail() {
               </NavLink>
               <NavLink
                 to="/signup"
+                state={{ from: `/courses/${courseId}` }}
                 className="btn-ghost"
                 style={{ width: '100%', textAlign: 'center', textDecoration: 'none' }}
               >
@@ -711,13 +741,30 @@ function CourseDetail() {
             </span>
             <span className="cd-mobile-sticky-spots">Còn {spotsLeft} chỗ</span>
           </div>
-          <button
-            className="cd-mobile-sticky-btn"
-            onClick={handleEnroll}
-            disabled={isFull}
-          >
-            {isFull ? 'Lớp Đầy' : 'Đăng Ký'}
-          </button>
+          {isAlreadyEnrolled ? (
+            <NavLink
+              to={`/Student/Dashboard/${studentId}/Courses`}
+              className="cd-mobile-sticky-btn"
+              style={{
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#059669',
+                color: '#ffffff'
+              }}
+            >
+              Vào Học →
+            </NavLink>
+          ) : (
+            <button
+              className="cd-mobile-sticky-btn"
+              onClick={() => handleEnroll()}
+              disabled={isFull}
+            >
+              {isFull ? 'Lớp Đầy' : 'Đăng Ký'}
+            </button>
+          )}
         </div>
       )}
     </div>

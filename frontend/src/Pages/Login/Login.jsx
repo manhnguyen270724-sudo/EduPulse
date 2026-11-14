@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import HR from "../Login/Images/HR.svg";
 import "./Login.css";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Radiobtn from "../Components/RadioBtn/Radiobtn";
 import Header from "../Home/Header/Header";
 
@@ -13,8 +13,8 @@ export default function Login() {
   const [userType, setUserType] = useState('');
   const [err, setErr] = useState('');
 
-
-  const navigate=useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Function to handle form submission
   const handleSubmit = async (e) => {
@@ -89,9 +89,12 @@ export default function Login() {
             }
           }
         }else if(responesData.data.user.Isapproved === "approved"){
-          if(userType === 'student'){
+          const redirectTarget = location.state?.from;
+          if (redirectTarget) {
+            navigate(redirectTarget);
+          } else if(userType === 'student'){
             navigate(`/Student/Dashboard/${userid}/Search`)
-          }else if(userType === 'teacher'){
+          } else if(userType === 'teacher'){
             navigate(`/Teacher/Dashboard/${userid}/Home`)
           }
         }else if(responesData.data.user.Isapproved === "reupload"){

@@ -15,6 +15,8 @@ const router = Router();
 
 router.route("/all").get(getCourse);
 router.route("/:coursename").get(getcourseTeacher);
+router.route("/create").post(authTeacher, addCourseTeacher);
+router.route("/create/:id").post(authTeacher, addCourseTeacher);
 router.route("/:coursename/create/:id").post(authTeacher, addCourseTeacher);
 router.route("/:coursename/:courseID/add/student/:id").post(authSTD, addCourseStudent);
 router.route("/:coursename/:courseID/verify/student/:id").post(authSTD, canStudentEnroll);

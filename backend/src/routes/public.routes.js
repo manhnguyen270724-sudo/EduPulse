@@ -16,7 +16,9 @@ router.route("/course/:courseId").get(getCourseDetail);
 // GET /api/public/teacher/:teacherId
 router.route("/teacher/:teacherId").get(getTeacherProfile);
 
-// POST /api/public/course/:courseId/enroll/:studentId (yêu cầu đăng nhập student)
+// POST /api/public/course/:courseId/enroll (yêu cầu đăng nhập student, trích xuất ID từ session)
+// POST /api/public/course/:courseId/enroll/:studentId (tương thích backward)
+router.route("/course/:courseId/enroll").post(authSTD, enrollStudentFree);
 router.route("/course/:courseId/enroll/:studentId").post(authSTD, enrollStudentFree);
 
 export default router;

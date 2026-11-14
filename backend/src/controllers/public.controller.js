@@ -104,7 +104,7 @@ const getTeacherProfile = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { teacher, courses, stats }, "Teacher profile fetched"));
 });
 
-// POST /api/public/course/:courseId/enroll/:studentId
+// POST /api/public/course/:courseId/enroll hoặc /course/:courseId/enroll/:studentId
 // Luồng đăng ký miễn phí (beta) - không qua payment gateway
 const enrollStudentFree = asyncHandler(async (req, res) => {
   const { courseId, studentId } = req.params;
@@ -114,7 +114,8 @@ const enrollStudentFree = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Vui lòng đăng nhập để đăng ký khóa học");
   }
 
-  if (loggedStudent._id.toString() !== studentId) {
+  const targetStudentId = studentId || loggedStudent._id.toString();
+  if (loggedStudent._id.toString() !== targetStudentId) {
     throw new ApiError(403, "Không có quyền truy cập");
   }
 
@@ -125,11 +126,13 @@ const enrollStudentFree = asyncHandler(async (req, res) => {
   const targetCourse = await course.findOne({ _id: courseId, isapproved: true });
 
   if (!targetCourse) {
-    throw new ApiError(404, "Khóa học không tồn tại");
+    throw new ApiError(404, "Khóa học không tồn tại hoặc chưa được duyệt");
   }
 
-  // Kiểm tra đã đăng ký chưa
-  const alreadyEnrolled = targetCourse.enrolledStudent.includes(loggedStudent._id);
+  // Kiểm tra đã đăng ký chưa (so sánh chuỗi ObjectId an toàn)
+  const alreadyEnrolled = targetCourse.enrolledStudent.some(
+    id => String(id) === String(loggedStudent._id)
+  );
   if (alreadyEnrolled) {
     throw new ApiError(400, "Bạn đã đăng ký khóa học này rồi");
   }
@@ -148,7 +151,7 @@ const enrollStudentFree = asyncHandler(async (req, res) => {
   ]);
 
   let isconflict = false;
-  for (const sch of targetCourse.schedule) {
+  for (const sch of (targetCourse.schedule || [])) {
     for (const existing of studentCourses) {
       if (sch.day === existing.schedule.day) {
         if (
@@ -175,11 +178,13 @@ const enrollStudentFree = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  // Cộng balance cho giảng viên
-  await Teacher.findByIdAndUpdate(
-    targetCourse.enrolledteacher,
-    { $inc: { Balance: 500 } }
-  );
+  // Cộng balance cho giảng viên nếu có
+  if (targetCourse.enrolledteacher) {
+    await Teacher.findByIdAndUpdate(
+      targetCourse.enrolledteacher,
+      { $inc: { Balance: 500 } }
+    );
+  }
 
   return res.status(200).json(new ApiResponse(200, {
     courseId: updatedCourse._id,

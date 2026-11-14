@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import './Popup.css';
 
 function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
@@ -14,6 +15,15 @@ function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
 
   const { ID } = useParams();
   const dateGap = 3; // 3 giờ
+
+  const teacherId = ID || (() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('edupulse_user') || '{}');
+      return u.id;
+    } catch {
+      return null;
+    }
+  })();
 
   const [day, setDay] = useState({
     sun: false, mon: false, tue: false,
@@ -95,20 +105,26 @@ function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
     };
 
     try {
-      const response = await fetch(`/api/course/${subject}/create/${ID}`, {
+      const targetId = teacherId || ID;
+      const response = await fetch(`/api/course/${subject}/create/${targetId}`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       const responseData = await response.json();
 
       if (response.ok) {
+        toast.success('Tạo khóa học thành công! Đang chờ Admin phê duyệt.');
         setStatusMsg('✅ Tạo khóa học thành công! Đang chờ Admin phê duyệt.');
-        setTimeout(() => onClose(), 2000);
+        setTimeout(() => onClose(), 1500);
       } else {
-        setStatusMsg(`❌ Lỗi: ${responseData.message || 'Tạo khóa học thất bại.'}`);
+        const errorText = responseData.message || 'Tạo khóa học thất bại.';
+        toast.error(errorText);
+        setStatusMsg(`❌ Lỗi: ${errorText}`);
       }
     } catch (err) {
+      toast.error('Lỗi kết nối máy chủ. Vui lòng thử lại.');
       setStatusMsg('❌ Lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setSubmitting(false);

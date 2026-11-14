@@ -415,110 +415,91 @@ const readMessage = asyncHandler(async(req,res)=>{
 })
 
 const toapproveCourse = asyncHandler(async(req,res)=>{
-
-    const adminID = req.params.adminID
-
-    if(!adminID){
-        throw new ApiError(400, "not authorized")
-    }
-
-    const loggedAdmin = await admin.findById(adminID)
+    const loggedAdmin = req.Admin || (req.params.adminID ? await admin.findById(req.params.adminID) : null);
 
     if(!loggedAdmin){
-        throw new ApiError(400, "admin not found")
+        throw new ApiError(401, "Admin not authorized");
     }
-
-   
     
-    const courseForApproval = await course.find({isapproved:false}).populate("enrolledteacher") 
+    const courseForApproval = await course.find({isapproved:false}).populate("enrolledteacher", "-Password -Refreshtoken").sort({ createdAt: -1 });
 
-    return res.status(200).json(new ApiResponse(200, courseForApproval,"fetched successfully"))
-
-})
-
-
+    return res.status(200).json(new ApiResponse(200, courseForApproval, "fetched successfully"));
+});
 
 const approveCourse = asyncHandler(async(req,res)=>{
-
-    const adminID = req.params.adminID
-
-    if(!adminID){
-        throw new ApiError(400, "not authorized")
-    }
-
-    const loggedAdmin = await admin.findById(adminID)
+    const loggedAdmin = req.Admin || (req.params.adminID ? await admin.findById(req.params.adminID) : null);
 
     if(!loggedAdmin){
-        throw new ApiError(400, "admin not found")
+        throw new ApiError(401, "Admin not authorized");
     }
 
-
-    const courseID = req.params.courseID
+    const courseID = req.params.courseID;
 
     if(!courseID){
-        throw new ApiError(400, "course id is required")
+        throw new ApiError(400, "course id is required");
     }
 
-    const toApprove = req.body.Isapproved
-    // const remarks = req.body.remarks || null
-    // console.log(remarks)
-    
+    const toApprove = req.body.Isapproved !== undefined ? req.body.Isapproved : req.body.isapproved;
 
-    // if (!toApprove || (toApprove != "approved" && toApprove != "rejected" && toApprove !== "reupload")) {
-    //     throw new ApiError(400, "Please choose 'approve' or 'reject' or 'reupload'");
-    // }
-
-    // const theCourse = await student.findOneAndUpdate({_id: courseID}, {$set: {Isapproved:toApprove, Remarks: remarks}},  { new: true })
-
-    if(toApprove){
-        const theCourse = await course.findOneAndUpdate({_id: courseID}, {$set: {isapproved:toApprove}},  { new: true })
+    if(toApprove === true || toApprove === 'true' || toApprove === 'approved'){
+        const theCourse = await course.findByIdAndUpdate(
+            courseID,
+            { $set: { isapproved: true, status: 'active' } },
+            { new: true }
+        ).populate("enrolledteacher", "Email Firstname Lastname");
 
         if(!theCourse){
-            throw new ApiError(400,"faild to approve or reject")
+            throw new ApiError(404, "Khóa học không tồn tại");
         }
 
-        const Fname = req.body.Firstname;
+        const teacherEmail = req.body.email || theCourse.enrolledteacher?.Email;
+        const teacherName = req.body.Firstname || theCourse.enrolledteacher?.Firstname || "Giảng viên";
 
-        Sendmail(req.body.email, `Course Approval Update`, 
-            `<html>
-                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                <h1 style="color: #4CAF50; text-align: center;">Congratulations!</h1>
-                <p style="font-size: 16px; text-align: center;">Dear ${Fname},</p>
-                <p style="font-size: 16px; text-align: center;">We are delighted to inform you that your course ( ${theCourse.coursename} ) submission has been reviewed and approved by our team.</p>
-                <p style="font-size: 16px;">Thank you for being a part of our educational community. We look forward to seeing your course make a positive impact on learners around the world.</p>
-                <p style="font-size: 16px;">Best regards,</p>
-                <p style="font-size: 16px;"><strong>The EduPulse Team</strong></p>
-                <p style="font-size: 14px;">&copy; 2024 EduPulse. All rights reserved.</p>
-                </body>
-            </html>
-        `)
+        if (teacherEmail) {
+            Sendmail(teacherEmail, `EduPulse - Khóa học [${theCourse.coursename}] đã được phê duyệt`, 
+                `<html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <h1 style="color: #4CAF50; text-align: center;">Chúc Mừng!</h1>
+                    <p style="font-size: 16px;">Kính gửi Thầy/Cô ${teacherName},</p>
+                    <p style="font-size: 16px;">Khóa học <strong>${theCourse.coursename}</strong> của Thầy/Cô đã được Ban Quản Trị EduPulse xem xét và phê duyệt thành công.</p>
+                    <p style="font-size: 16px;">Khóa học hiện đã được công khai trên nền tảng để học viên có thể đăng ký tham gia.</p>
+                    <p style="font-size: 16px;">Trân trọng,<br/><strong>Đội ngũ EduPulse</strong></p>
+                    </body>
+                </html>`
+            );
+        }
 
         return res
         .status(200)
-        .json(new ApiResponse(200, theCourse, `Course approved successfully`))
+        .json(new ApiResponse(200, theCourse, `Phê duyệt khóa học thành công`));
     }
-
     else{
-        const theCourse = await course.findByIdAndDelete({_id: courseID}, {new:true})
-        const Fname = req.body.Firstname;
+        const theCourse = await course.findByIdAndDelete(courseID).populate("enrolledteacher", "Email Firstname Lastname");
+        
+        if(!theCourse){
+            throw new ApiError(404, "Khóa học không tồn tại");
+        }
 
-        Sendmail(req.body.email, `Course Approval Update`, 
-            `<html>
-                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                <h1 style="color: #4CAF50; text-align: center;">Course Submission Update!</h1>
-                <p style="font-size: 16px; text-align: center;">Dear ${Fname},</p>
-                <p style="font-size: 16px; text-align: center;">After a thorough evaluation, we regret to inform you that your course, <strong>( ${theCourse.coursename} )</strong>, does not meet the requirements for approval at this time.</p>
-                <p style="font-size: 16px;">Thank you for your understanding and continued commitment to providing quality education.</p>
-                <p style="font-size: 16px;">Best regards,</p>
-                <p style="font-size: 16px;"><strong>The EduPulse Team</strong></p>
-                <p style="font-size: 14px;">&copy; 2024 EduPulse. All rights reserved.</p>
-                </body>
-            </html>
-        `)
+        const teacherEmail = req.body.email || theCourse.enrolledteacher?.Email;
+        const teacherName = req.body.Firstname || theCourse.enrolledteacher?.Firstname || "Giảng viên";
+
+        if (teacherEmail) {
+            Sendmail(teacherEmail, `EduPulse - Thông báo về yêu cầu mở khóa học [${theCourse.coursename}]`, 
+                `<html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <h1 style="color: #e11d48; text-align: center;">Thông Báo Xét Duyệt Khóa Học</h1>
+                    <p style="font-size: 16px;">Kính gửi Thầy/Cô ${teacherName},</p>
+                    <p style="font-size: 16px;">Sau khi xem xét kỹ lưỡng, chúng tôi rất tiếc phải thông báo khóa học <strong>${theCourse.coursename}</strong> hiện chưa đáp ứng đầy đủ tiêu chí của nền tảng tại thời điểm này.</p>
+                    <p style="font-size: 16px;">Thầy/Cô có thể cập nhật thông tin và nộp lại yêu cầu mở khóa học mới.</p>
+                    <p style="font-size: 16px;">Trân trọng,<br/><strong>Đội ngũ EduPulse</strong></p>
+                    </body>
+                </html>`
+            );
+        }
 
         return res
         .status(200)
-        .json(new ApiResponse(200,{},`Course rejected successfully`))
+        .json(new ApiResponse(200, {}, `Đã từ chối khóa học thành công`));
     }
     
 

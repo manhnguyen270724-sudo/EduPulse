@@ -33,7 +33,9 @@ router.route("/messages/all").get(authAdmin, allmessages);
 router.route("/message/read").patch(authAdmin, readMessage);
 
 // Duyệt phát hành khóa học ban đầu
+router.route("/approve/course").get(authAdmin, toapproveCourse);
 router.route("/:adminID/approve/course").get(authAdmin, toapproveCourse);
+router.route("/approve/course/:courseID").post(authAdmin, approveCourse);
 router.route("/:adminID/approve/course/:courseID").post(authAdmin, approveCourse);
 
 // =========================================================================

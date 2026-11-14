@@ -75,6 +75,10 @@ const seedData = async () => {
                     { chapter: "Chương 3", content: "Phương pháp Tọa độ hóa trong Hình học không gian" },
                     { chapter: "Chương 4", content: "Nguyên hàm, Tích phân và Ứng dụng thực tế" }
                 ],
+                schedule: [
+                    { day: 1, starttime: 19 * 60 + 30, endtime: 21 * 60 + 30 },
+                    { day: 4, starttime: 19 * 60 + 30, endtime: 21 * 60 + 30 }
+                ],
                 docs: {
                     Phone: 901234501,
                     Address: "Cầu Giấy, Hà Nội",
@@ -118,6 +122,10 @@ const seedData = async () => {
                     { chapter: "Chương 2", content: "Dòng điện không đổi và Định luật Ôm cho toàn mạch" },
                     { chapter: "Chương 3", content: "Từ trường, Lực từ và Cảm ứng điện từ" },
                     { chapter: "Chương 4", content: "Khúc xạ ánh sáng và bài toán Thấu kính mỏng" }
+                ],
+                schedule: [
+                    { day: 2, starttime: 19 * 60 + 30, endtime: 21 * 60 + 30 },
+                    { day: 5, starttime: 19 * 60 + 30, endtime: 21 * 60 + 30 }
                 ],
                 docs: {
                     Phone: 901234502,
@@ -163,6 +171,10 @@ const seedData = async () => {
                     { chapter: "Chương 3", content: "Phi kim, Bảng tuần hoàn các nguyên tố hóa học" },
                     { chapter: "Chương 4", content: "Sơ lược về Hóa học hữu cơ: Metan, Etilen, Rượu etylic" }
                 ],
+                schedule: [
+                    { day: 3, starttime: 19 * 60 + 30, endtime: 21 * 60 + 30 },
+                    { day: 6, starttime: 9 * 60, endtime: 11 * 60 }
+                ],
                 docs: {
                     Phone: 901234503,
                     Address: "Quận 1, TP. Hồ Chí Minh",
@@ -206,6 +218,10 @@ const seedData = async () => {
                     { chapter: "Chương 2", content: "Cấu trúc tế bào: Màng sinh chất và các bào quan" },
                     { chapter: "Chương 3", content: "Chuyển hóa vật chất và năng lượng trong tế bào" },
                     { chapter: "Chương 4", content: "Chu kỳ tế bào, Nguyên phân và Giảm phân" }
+                ],
+                schedule: [
+                    { day: 1, starttime: 17 * 60 + 30, endtime: 19 * 60 },
+                    { day: 3, starttime: 17 * 60 + 30, endtime: 19 * 60 }
                 ],
                 docs: {
                     Phone: 901234504,
@@ -251,6 +267,10 @@ const seedData = async () => {
                     { chapter: "Module 3", content: "Xác thực JWT, Bảo mật và Quản lý State" },
                     { chapter: "Module 4", content: "Container hóa Docker và Deploy hệ thống lên Cloud" }
                 ],
+                schedule: [
+                    { day: 6, starttime: 14 * 60, endtime: 16 * 60 },
+                    { day: 0, starttime: 14 * 60, endtime: 16 * 60 }
+                ],
                 docs: {
                     Phone: 901234505,
                     Address: "Hoàn Kiếm, Hà Nội",
@@ -294,6 +314,10 @@ const seedData = async () => {
                     { chapter: "Tuần 4-6", content: "Speaking Part 1, 2, 3: Phản xạ lưu loát và ngữ điệu tự nhiên" },
                     { chapter: "Tuần 7-9", content: "Listening: Bắt key, dự đoán từ và bẫy phát âm phổ biến" },
                     { chapter: "Tuần 10-12", content: "Reading: Kỹ thuật Skimming, Scanning và Matching Headings" }
+                ],
+                schedule: [
+                    { day: 2, starttime: 17 * 60 + 30, endtime: 19 * 60 },
+                    { day: 4, starttime: 17 * 60 + 30, endtime: 19 * 60 }
                 ],
                 docs: {
                     Phone: 901234506,
@@ -339,6 +363,10 @@ const seedData = async () => {
                     { chapter: "Phần 3", content: "Deep Learning với PyTorch: Xử lý ảnh và Xử lý ngôn ngữ tự nhiên" },
                     { chapter: "Phần 4", content: "Xây dựng AI Agent và triển khai mô hình lên production" }
                 ],
+                schedule: [
+                    { day: 6, starttime: 19 * 60 + 30, endtime: 21 * 60 + 30 },
+                    { day: 0, starttime: 19 * 60 + 30, endtime: 21 * 60 + 30 }
+                ],
                 docs: {
                     Phone: 901234507,
                     Address: "Sơn Trà, Đà Nẵng",
@@ -382,6 +410,10 @@ const seedData = async () => {
                     { chapter: "Chuyên đề 2", content: "Mô hình hồi quy kinh tế lượng và kiểm định giả thuyết" },
                     { chapter: "Chuyên đề 3", content: "Đo lường rủi ro VaR và kiểm tra sức chịu đựng danh mục" },
                     { chapter: "Chuyên đề 4", content: "Ứng dụng Python trong backtest chiến lược giao dịch" }
+                ],
+                schedule: [
+                    { day: 5, starttime: 17 * 60 + 30, endtime: 19 * 60 },
+                    { day: 0, starttime: 17 * 60 + 30, endtime: 19 * 60 }
                 ],
                 docs: {
                     Phone: 901234508,
@@ -448,7 +480,7 @@ const seedData = async () => {
                         status: "upcoming"
                     }
                 ],
-                schedule: [
+                schedule: t.schedule || [
                     { day: 1, starttime: 19 * 60, endtime: 21 * 60 },
                     { day: 4, starttime: 19 * 60, endtime: 21 * 60 }
                 ]
