@@ -19,6 +19,13 @@ const authTeacher = asyncHandler(async(req,_,next)=>{
         throw new ApiError(401, "invalid access token")
     }
 
+    if (teacher.accountStatus === 'suspended') {
+        throw new ApiError(403, `Tài khoản giảng viên của bạn đang bị tạm khóa. Lý do: ${teacher.statusReason || "Vi phạm chính sách nền tảng"}`);
+    }
+
+    if (teacher.accountStatus === 'banned') {
+        throw new ApiError(403, `Tài khoản giảng viên của bạn đã bị cấm vĩnh viễn khỏi hệ thống. Lý do: ${teacher.statusReason || "Vi phạm nghiêm trọng điều khoản dịch vụ"}`);
+    }
 
     req.teacher = teacher
     next()
