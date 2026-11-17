@@ -23,7 +23,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["class_reminder", "chat_message", "class_enrolled", "system", "course_warning", "course_completed", "payout"],
+    enum: ["class_reminder", "chat_message", "class_enrolled", "system", "course_warning", "course_completed", "payout", "course_approval"],
     default: "class_reminder"
   },
   relatedClass: {

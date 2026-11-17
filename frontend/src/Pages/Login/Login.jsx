@@ -4,6 +4,7 @@ import "./Login.css";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import Radiobtn from "../Components/RadioBtn/Radiobtn";
 import Header from "../Home/Header/Header";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   // State to hold user input and errors
@@ -15,6 +16,7 @@ export default function Login() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { loginUser } = useAuth();
 
   // Function to handle form submission
   const handleSubmit = async (e) => {
@@ -56,25 +58,26 @@ export default function Login() {
         body: JSON.stringify(data),
       });
 
-      const responesData = await response.json()
-      if(responesData.message != 'Logged in'){
-        setErr(responesData.message);
+      const responesData = await response.json();
+
+      if (!response.ok || !responesData.data?.user) {
+        setErr(responesData.message || "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.");
+        return;
       }
-      const userid = responesData.data.user._id
- 
-      // Handle response
-      if (response.ok) {
-        // Authentication successful, you can redirect or do something else
-        console.log("Login successful");
-        const uData = responesData.data.user;
-        localStorage.setItem('edupulse_user', JSON.stringify({
-          role: userType,
-          id: userid,
-          name: uData.Lastname ? `${uData.Lastname} ${uData.Firstname}` : (uData.Firstname || 'Người dùng'),
-          avatar: uData.Avatar || '',
-          email: uData.Email || ''
-        }));
-        window.dispatchEvent(new Event('edupulse-auth-change'));
+
+      setErr('');
+      const uData = responesData.data.user;
+      const userid = uData._id;
+
+      loginUser({
+        role: userType,
+        id: userid,
+        name: uData.Lastname ? `${uData.Lastname} ${uData.Firstname}` : (uData.Firstname || 'Người dùng'),
+        avatar: uData.Avatar || '',
+        email: uData.Email || ''
+      });
+
+      console.log("Login successful");
         console.log(responesData.data.user.Isapproved);
         
         
@@ -104,29 +107,10 @@ export default function Login() {
             navigate(`/rejected/${userType}/${userid}`)
           }
         }else{
-          setErr('You are ban from our platform!');
+          setErr('Tài khoản của bạn đã bị khóa hoặc cấm truy cập!');
         }
-
-      } else if (response.status === 401) {
-        // Incorrect password
-        setErrors({ password: responesData.message || "Incorrect password" });
-      } else if (response.status === 403) {
-        // Account locked, disabled, or other authentication issues
-
-        setErrors({ general: responesData.message || "Login failed" });
-      } else if (response.status === 400) {
-        setErrors({ general: responesData.message || "User does not exist" });
-      } else if (response.status === 422) {
-        setErrors({
-          general: responesData.message || '"Email" must be a valid email',
-        });
-      } else {
-        // Other unexpected errors
-        setErrors({ general: "An unexpected error occurred" });
-      }
     } catch (error) {
-   
-      setErrors(error.message);
+      setErrors({ general: error.message });
     }
   };
 

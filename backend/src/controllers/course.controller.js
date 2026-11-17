@@ -53,6 +53,10 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
       throw new ApiError(403, "Không có quyền tạo khóa học cho giảng viên khác");
     }
 
+    if (loggedTeacher.Isapproved !== 'approved') {
+      throw new ApiError(403, "Hồ sơ của bạn chưa được duyệt. Chỉ giảng viên đã xác thực KYC thành công mới được tạo khóa học.");
+    }
+
     const {
       coursename,
       description,
@@ -61,6 +65,7 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
       grade,
       subject,
       fees,
+      coverImage,
       maxStudents,
       startDate,
       outcomes,
@@ -68,6 +73,11 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
       syllabus,
       liveClasses
     } = req.body;
+
+    const validLevels = ['primary', 'secondary', 'highschool', 'language', 'university'];
+    if (educationLevel && !validLevels.includes(educationLevel)) {
+      throw new ApiError(400, "Cấp học không hợp lệ. Vui lòng chọn một trong các cấp bậc hợp lệ.");
+    }
 
     if (!schedule || !Array.isArray(schedule) || schedule.length === 0) {
       throw new ApiError(400, "Lịch học của khóa học là bắt buộc.");
@@ -120,7 +130,8 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
       educationLevel: educationLevel || 'university',
       grade: grade || '',
       subject: subject || coursename,
-      fees: Number(fees) || 0,
+      fees: Number(fees) >= 0 ? Number(fees) : 0,
+      coverImage: coverImage || '',
       maxStudents: Number(maxStudents) || 20,
       startDate: startDate ? new Date(startDate) : new Date(Date.now() + 7 * 86400000),
       outcomes: Array.isArray(outcomes) ? outcomes.filter(o => o && o.trim()) : [],
@@ -144,8 +155,8 @@ const addCourseTeacher = asyncHandler(async(req,res)=>{
     }
 
     return res
-    .status(200)
-    .json(new ApiResponse(200, { newCourse, loggedTeacher }, "Tạo khóa học thành công! Đang chờ Admin xét duyệt."))
+    .status(201)
+    .json(new ApiResponse(201, { newCourse, loggedTeacher }, "Tạo khóa học thành công! Đang chờ Admin xét duyệt."))
     
 })
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, adminLogout, adminSignUp, approveStudent, approveTeacher, checkStudentDocuments, checkTeacherDocuments, forApproval, sendmessage, allmessages, readMessage, toapproveCourse, approveCourse } from "../controllers/admin.controller.js";
+import { adminLogin, adminLogout, adminSignUp, approveStudent, approveTeacher, checkStudentDocuments, checkTeacherDocuments, forApproval, sendmessage, allmessages, readMessage, deleteMessage, replySupportMessage, toapproveCourse, approveCourse } from "../controllers/admin.controller.js";
 import {
   getRevenueOverview,
   getAllWithdrawalRequests,
@@ -31,6 +31,8 @@ router.route("/:adminID/documents/teacher/:teacherID").get(authAdmin, checkTeach
 router.route("/contact-us").post(sendmessage);
 router.route("/messages/all").get(authAdmin, allmessages);
 router.route("/message/read").patch(authAdmin, readMessage);
+router.route("/message/:id").delete(authAdmin, deleteMessage);
+router.route("/message/:id/reply").post(authAdmin, replySupportMessage);
 
 // Duyệt phát hành khóa học ban đầu
 router.route("/approve/course").get(authAdmin, toapproveCourse);
@@ -49,7 +51,7 @@ router.route("/withdrawals/:requestId/process").post(authAdmin, handleWithdrawal
 
 // 2. Quản lý Tài khoản người dùng (Học viên & Giảng viên)
 router.route("/users/all").get(authAdmin, getAllUsers);
-router.route("/users/:role/:userId/status").patch(authAdmin, toggleUserStatus);
+router.route("/users/:role/:userId/status").patch(authAdmin, toggleUserStatus).post(authAdmin, toggleUserStatus);
 
 // 3. Quản lý Nghiệm thu Hoàn thành khóa học (Để mở khóa rút tiền cho GV)
 router.route("/course-completion/pending").get(authAdmin, getCompletionPendingCourses);
@@ -58,6 +60,8 @@ router.route("/course-completion/:courseId/approve").post(authAdmin, approveCour
 // 4. Cảnh báo Đánh giá xấu & Tạm dừng khóa học
 router.route("/reviews/bad-alerts").get(authAdmin, getBadReviewsAlerts);
 router.route("/course/:courseId/suspend-warning").post(authAdmin, suspendCourseWithWarning);
+router.route("/courses/:courseId/suspend-warning").post(authAdmin, suspendCourseWithWarning);
 router.route("/course/:courseId/unsuspend").post(authAdmin, liftCourseSuspension);
+router.route("/courses/:courseId/unsuspend").post(authAdmin, liftCourseSuspension);
 
 export default router;

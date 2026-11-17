@@ -8,8 +8,12 @@ import {
   FaExternalLinkAlt,
   FaComments,
   FaUsers,
-  FaUserGraduate
+  FaUserGraduate,
+  FaBan,
+  FaThLarge,
+  FaList
 } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import { getCourseSubjectLabel } from '../../../data/subjectTaxonomy';
 import './TeacherClasses.css';
 
@@ -19,6 +23,47 @@ function TeacherClasses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
+
+  const isSessionJoinable = (s) => {
+    if (s.status === 'cancelled') return false;
+    if (!s.date) return true;
+    const now = new Date();
+    const sessionDate = new Date(s.date);
+    if (s.startTime) {
+      const [h, m] = s.startTime.split(':').map(Number);
+      sessionDate.setHours(h || 0, m || 0, 0, 0);
+    }
+    const diffMinutes = (sessionDate - now) / (1000 * 60);
+    return diffMinutes <= 30 && diffMinutes >= -180;
+  };
+
+  const handleCancelSession = async (classroomId, sessionId) => {
+    if (!classroomId || !sessionId) {
+      toast.error("Không tìm thấy thông tin định danh của buổi học");
+      return;
+    }
+    const reason = window.prompt("Nhập lý do hủy buổi học này (thông báo sẽ được gửi tới tất cả học viên trong lớp):");
+    if (reason === null) return;
+
+    try {
+      const res = await fetch(`/api/classrooms/${classroomId}/sessions/${sessionId}/cancel`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason.trim() || "Giảng viên có việc bận đột xuất" })
+      });
+      if (res.ok) {
+        toast.success("Đã hủy buổi học thành công!");
+        fetchSchedule();
+      } else {
+        const err = await res.json();
+        toast.error(err.message || "Hủy buổi học thất bại");
+      }
+    } catch (e) {
+      toast.error("Lỗi kết nối khi hủy buổi học");
+    }
+  };
 
   const fetchSchedule = async () => {
     try {
@@ -119,10 +164,32 @@ function TeacherClasses() {
             Lịch giảng dạy tổng hợp các lớp nhóm và lớp 1 kèm 1 trong tuần
           </p>
         </div>
-        <NavLink to={`/Teacher/Dashboard/${ID}/Classrooms`} className="tclass-btn-add">
-          <FaPlus />
-          <span>Quản Lý & Mở Lớp Mới</span>
-        </NavLink>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/50">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                viewMode === 'list' ? 'bg-sky-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FaList />
+              <span>Danh Sách</span>
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                viewMode === 'grid' ? 'bg-sky-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FaThLarge />
+              <span>Lịch Tuần</span>
+            </button>
+          </div>
+          <NavLink to={`/Teacher/Dashboard/${ID}/Classrooms`} className="tclass-btn-add">
+            <FaPlus />
+            <span>Quản Lý & Mở Lớp Mới</span>
+          </NavLink>
+        </div>
       </div>
 
       <div className="tclass-grid">
@@ -141,10 +208,65 @@ function TeacherClasses() {
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
               Chưa có buổi học nào được lên lịch trong thời gian tới.
             </div>
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-1">
+              {['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'].map((dayName, dayIdx) => {
+                const targetDayIndex = dayIdx === 6 ? 0 : dayIdx + 1;
+                const daySessions = upcomingSessions.filter(s => s.date && new Date(s.date).getDay() === targetDayIndex);
+                return (
+                  <div key={dayName} className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 flex flex-col">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                      <span className="font-bold text-xs text-sky-400">{dayName}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                        {daySessions.length} buổi
+                      </span>
+                    </div>
+                    {daySessions.length === 0 ? (
+                      <div className="text-[11px] text-slate-500 italic py-4 text-center">Không có lịch</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {daySessions.map((session, sIdx) => {
+                          const isJoinable = isSessionJoinable(session);
+                          return (
+                            <div key={sIdx} className="bg-slate-800/90 border border-slate-700/60 rounded-lg p-2.5 text-xs space-y-1.5">
+                              <div className="font-semibold text-slate-100 line-clamp-1">{session.title}</div>
+                              <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                                <FaClock className="text-sky-400" />
+                                <span>{session.startTime || '19:30'} - {session.endTime || '21:00'}</span>
+                              </div>
+                              <div className="flex items-center justify-between pt-1">
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${session.status === 'cancelled' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-700 text-slate-300'}`}>
+                                  {session.status === 'cancelled' ? 'Đã hủy' : session.status === 'upcoming' ? 'Sắp tới' : session.status}
+                                </span>
+                                {session.roomLink && session.status !== 'cancelled' && (
+                                  isJoinable ? (
+                                    <a
+                                      href={session.roomLink}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-[11px] font-bold text-emerald-400 hover:underline flex items-center gap-1"
+                                    >
+                                      <FaVideo /> Vào Meet
+                                    </a>
+                                  ) : (
+                                    <span className="text-[10px] text-slate-500">Chưa mở</span>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ) : (
             <div className="tclass-list">
               {upcomingSessions.map((session, idx) => {
                 const is1on1 = session.classType === 'one-on-one';
+                const isJoinable = isSessionJoinable(session);
 
                 return (
                   <div key={idx} className="tclass-item">
@@ -171,8 +293,8 @@ function TeacherClasses() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                      <span className="tclass-status-badge">
-                        {session.status === 'upcoming' ? 'Sắp diễn ra' : session.status}
+                      <span className={`tclass-status-badge ${session.status === 'cancelled' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : ''}`}>
+                        {session.status === 'cancelled' ? 'Đã hủy' : session.status === 'upcoming' ? 'Sắp diễn ra' : session.status}
                       </span>
 
                       <div className="flex items-center gap-2">
@@ -186,17 +308,38 @@ function TeacherClasses() {
                           </NavLink>
                         )}
 
-                        {session.roomLink && (
-                          <a
-                            href={session.roomLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-sky-400 hover:underline flex items-center gap-1 font-medium bg-sky-500/10 px-2.5 py-1.5 rounded-lg border border-sky-500/20"
+                        {session.classroomId && (session.sessionId || session._id) && session.status !== 'cancelled' && (
+                          <button
+                            onClick={() => handleCancelSession(session.classroomId, session.sessionId || session._id)}
+                            className="text-xs text-rose-400 hover:bg-rose-500/20 flex items-center gap-1 font-medium bg-rose-500/10 px-2 py-1.5 rounded-lg border border-rose-500/30 transition-all"
+                            title="Hủy buổi học này"
                           >
-                            <FaVideo />
-                            <span>Vào Meet</span>
-                            <FaExternalLinkAlt style={{ fontSize: '0.65rem' }} />
-                          </a>
+                            <FaBan />
+                            <span>Hủy</span>
+                          </button>
+                        )}
+
+                        {session.roomLink && session.status !== 'cancelled' && (
+                          isJoinable ? (
+                            <a
+                              href={session.roomLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-white bg-emerald-600 hover:bg-emerald-500 flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg shadow-sm transition-all"
+                            >
+                              <FaVideo />
+                              <span>Vào Meet</span>
+                              <FaExternalLinkAlt style={{ fontSize: '0.65rem' }} />
+                            </a>
+                          ) : (
+                            <span
+                              className="text-xs text-slate-400 bg-slate-800/60 px-2.5 py-1.5 rounded-lg border border-slate-700/40 flex items-center gap-1 cursor-not-allowed"
+                              title="Phòng học sẽ mở trước 30 phút so với giờ bắt đầu"
+                            >
+                              <FaVideo />
+                              <span>Chưa Đến Giờ</span>
+                            </span>
+                          )
                         )}
                       </div>
                     </div>

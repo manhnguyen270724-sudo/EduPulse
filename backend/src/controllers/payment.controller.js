@@ -140,8 +140,12 @@ const withdrawAmount = asyncHandler(async(req,res)=>{
   const teacherId = req.teacher._id;
   const { amount, courseId, bankName, accountNumber, accountHolderName, ifscOrBranch } = req.body;
 
-  if (!amount || Number(amount) <= 0) {
-    throw new ApiError(400, "Vui lòng nhập số tiền rút hợp lệ (lớn hơn 0)");
+  if (!amount || Number(amount) < 100000) {
+    throw new ApiError(400, "Số tiền rút tối thiểu là 100.000 VNĐ.");
+  }
+
+  if (!bankName || !accountNumber || !accountHolderName) {
+    throw new ApiError(400, "Vui lòng điền đầy đủ tên ngân hàng, số tài khoản và tên chủ tài khoản.");
   }
 
   const teacher = await Teacher.findById(teacherId);
@@ -178,12 +182,13 @@ const withdrawAmount = asyncHandler(async(req,res)=>{
     const completionRate =
       totalStudents > 0 ? (confirmedCount / totalStudents) * 100 : 100;
 
-    if (totalStudents > 0 && completionRate < 80) {
+    const requiredRate = totalStudents < 3 ? 100 : 80;
+    if (totalStudents > 0 && completionRate < requiredRate) {
       throw new ApiError(
         400,
         `ĐIỀU KIỆN RÚT TIỀN CHƯA THỎA MÃN: Mới có ${confirmedCount}/${totalStudents} (${Math.round(
           completionRate
-        )}%) học viên hoàn thành form xác nhận kết thúc khóa học. Yêu cầu tối thiểu đạt 80% học viên xác nhận mới được phép rút tiền.`
+        )}%) học viên hoàn thành form xác nhận kết thúc khóa học. Yêu cầu tối thiểu đạt ${requiredRate}% (${totalStudents < 3 ? "100% đối với lớp dưới 3 học viên" : "80% đối với lớp từ 3 học viên trở lên"}) mới được phép rút tiền.`
       );
     }
   }

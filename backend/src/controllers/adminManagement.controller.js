@@ -360,7 +360,7 @@ export const getCompletionPendingCourses = asyncHandler(async (req, res) => {
  */
 export const approveCourseCompletion = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const { adminNote } = req.body;
+  const { action = "approve", adminNote } = req.body;
 
   const targetCourse = await course
     .findById(courseId)
@@ -369,6 +369,31 @@ export const approveCourseCompletion = asyncHandler(async (req, res) => {
 
   if (!targetCourse) {
     throw new ApiError(404, "Không tìm thấy khóa học");
+  }
+
+  // Xử lý từ chối nghiệm thu
+  if (action === "reject") {
+    targetCourse.status = "active";
+    targetCourse.completionRequest.isRequested = false;
+    targetCourse.completionRequest.adminApproved = false;
+    targetCourse.completionRequest.adminNote = adminNote || "Admin từ chối nghiệm thu hoàn thành";
+    await targetCourse.save();
+
+    const teacher = await Teacher.findById(targetCourse.enrolledteacher._id);
+    if (teacher) {
+      await Notification.create({
+        recipient: teacher._id,
+        recipientType: "teacher",
+        title: "Yêu cầu nghiệm thu khóa học chưa được chấp thuận",
+        message: `Yêu cầu nghiệm thu hoàn thành khóa học "${targetCourse.coursename}" đã bị từ chối. Lý do: ${targetCourse.completionRequest.adminNote}.`,
+        type: "course_warning",
+        link: `/Teacher/Dashboard/${teacher._id}/Courses`,
+      });
+    }
+
+    return res.status(200).json(
+      new ApiResponse(200, targetCourse, "Đã từ chối nghiệm thu khóa học")
+    );
   }
 
   const totalEnrolled = targetCourse.enrolledStudent?.length || 0;
@@ -380,13 +405,13 @@ export const approveCourseCompletion = asyncHandler(async (req, res) => {
   const completionRate =
     totalEnrolled > 0 ? (confirmedFeedbackCount / totalEnrolled) * 100 : 100;
 
-  // Cảnh báo nếu tỷ lệ xác nhận quá thấp (< 50%) trừ khi lớp không có học viên
-  if (totalEnrolled > 0 && completionRate < 50) {
+  const requiredRate = totalEnrolled < 3 ? 100 : 80;
+  if (totalEnrolled > 0 && completionRate < requiredRate) {
     throw new ApiError(
       400,
       `Tỷ lệ học viên xác nhận kết thúc mới đạt ${Math.round(
         completionRate
-      )}% (dưới 50%). Chưa đủ điều kiện nghiệm thu hoàn thành.`
+      )}% (${confirmedFeedbackCount}/${totalEnrolled} học viên). Chưa đủ điều kiện nghiệm thu hoàn thành (yêu cầu tối thiểu ${requiredRate}%).`
     );
   }
 

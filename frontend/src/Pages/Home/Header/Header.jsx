@@ -3,6 +3,7 @@ import './Header.css';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FaSun, FaMoon, FaChevronDown, FaHome, FaBookOpen, FaCalendarAlt, FaUserEdit, FaSignOutAlt, FaSearch } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
+import NotificationBell from '../../Components/NotificationBell/NotificationBell';
 
 function Header() {
   const navigate = useNavigate();
@@ -125,7 +126,9 @@ function Header() {
 
             {/* Khi ĐÃ ĐĂNG NHẬP: Hiển thị Profile Pill + Dropdown menu */}
             {isLoggedIn && user ? (
-              <div className="edupulse-user-menu-wrap" ref={dropdownRef}>
+              <>
+                <NotificationBell role={role} userId={user.id} />
+                <div className="edupulse-user-menu-wrap" ref={dropdownRef}>
                 <button
                   type="button"
                   className="edupulse-user-btn"
@@ -236,6 +239,7 @@ function Header() {
                   </div>
                 )}
               </div>
+              </>
             ) : (
               /* Khi CHƯA ĐĂNG NHẬP: 2 nút tiêu chuẩn */
               <>

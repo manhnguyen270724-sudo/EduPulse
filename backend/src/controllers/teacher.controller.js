@@ -4,7 +4,7 @@ import { Teacher, Teacherdocs } from "../models/teacher.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Sendmail } from "../utils/Nodemailer.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { student } from "../models/student.model.js";
+import { student, studentdocs } from "../models/student.model.js";
 import nodemailer from "nodemailer";
 
 const verifyEmail = async (Email, Firstname, createdTeacherId) => {
@@ -101,23 +101,40 @@ const signup = asyncHandler(async (req, res) => {
 const mailVerified = asyncHandler(async (req, res) => {
     try {
         const id = req.query.id;
-    
-        const updatedInfo = await Teacher.updateOne({ _id: id }, { $set: { Isverified: true } });
-    
-        if (updatedInfo.nModified === 0) {
-            throw new ApiError(404, "Teacher not found or already verified");
+        if (!id) {
+            throw new ApiError(400, "Mã xác thực không hợp lệ hoặc thiếu thông tin.");
         }
     
+        const teacher = await Teacher.findById(id);
+        if (!teacher) {
+            throw new ApiError(404, "Không tìm thấy giảng viên hoặc liên kết xác thực không hợp lệ.");
+        }
+
+        if (teacher.Isverified) {
+            return res.send(`
+            <div style="text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif;">
+                <img src="https://cdn-icons-png.flaticon.com/128/4436/4436481.png" alt="Verify Email Icon" style="width: 100px; height: 100px;">
+                <h1 style="font-size: 32px; font-weight: bold; padding: 20px; color: #16a34a;">Email đã được xác thực</h1>
+                <h4>Tài khoản giảng viên của bạn đã được kích hoạt trước đó. Bạn có thể đăng nhập ngay.</h4>
+                <button style="padding: 10px 20px; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 20px;" onclick="window.location.href = 'http://localhost:5173/login';">Về trang Đăng nhập</button>
+            </div>
+            `);
+        }
+    
+        teacher.Isverified = true;
+        teacher.varifyToken = undefined;
+        await teacher.save({ validateBeforeSave: false });
+    
         return res.send(`
-        <div style="text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif;">
             <img src="https://cdn-icons-png.flaticon.com/128/4436/4436481.png" alt="Verify Email Icon" style="width: 100px; height: 100px;">
-            <h1 style="font-size: 36px; font-weight: bold; padding: 20px;">Email Verified</h1>
-            <h4>Your email address was successfully verified.</h4>
-            <button style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; margin: 20px;" onclick="window.location.href = 'http://localhost:5173';">Go Back Home</button>
+            <h1 style="font-size: 32px; font-weight: bold; padding: 20px; color: #16a34a;">Xác thực Email thành công!</h1>
+            <h4>Địa chỉ email giảng viên của bạn đã được xác minh thành công. Chào mừng bạn gia nhập đội ngũ EduPulse!</h4>
+            <button style="padding: 10px 20px; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 20px;" onclick="window.location.href = 'http://localhost:5173/login';">Về trang Đăng nhập</button>
         </div>`
         );
     } catch (error) {
-        throw new ApiError(509, "something went wrong while verifying User")
+        throw new ApiError(error.statusCode || 500, error.message || "Xác thực email giảng viên thất bại.");
     }
 });
 
@@ -141,6 +158,14 @@ const login = asyncHandler(async (req, res) => {
 
     if (!teacher.Isverified) {
         throw new ApiError(401, "Email is not verified");
+    }
+
+    if (teacher.accountStatus === 'suspended') {
+        throw new ApiError(403, `Tài khoản giảng viên của bạn đang bị tạm khóa. Lý do: ${teacher.statusReason || "Vi phạm chính sách nền tảng"}`);
+    }
+
+    if (teacher.accountStatus === 'banned') {
+        throw new ApiError(403, `Tài khoản giảng viên của bạn đã bị cấm vĩnh viễn khỏi hệ thống. Lý do: ${teacher.statusReason || "Vi phạm nghiêm trọng điều khoản dịch vụ"}`);
     }
     
     const isPasswordCorrect = await teacher.isPasswordCorrect(Password);
@@ -205,19 +230,25 @@ const addTeacherDetails = asyncHandler(async(req,res)=>{
 
     const id = req.params.id
     if(String(req.teacher._id) !== String(id)){
-        throw new ApiError(403, "unauthorized access")
+        throw new ApiError(403, "Không có quyền thực hiện hành động này")
     }
 
     const{Phone, Address, Experience, SecondarySchool, HigherSchool,UGcollege, PGcollege, SecondaryMarks, HigherMarks, UGmarks, PGmarks} = req.body
 
-    if([Phone, Address, Experience, SecondarySchool, HigherSchool,UGcollege, PGcollege, SecondaryMarks, HigherMarks, UGmarks, PGmarks].some((field)=> field?.trim() === "")){
-        throw new ApiError(400, "All fields are required")
+    if([Phone, Address, Experience, SecondarySchool, HigherSchool,UGcollege, PGcollege, SecondaryMarks, HigherMarks, UGmarks, PGmarks].some((field)=> String(field ?? "").trim() === "")){
+        throw new ApiError(400, "Vui lòng điền đầy đủ tất cả các trường thông tin")
     }
 
-    const alreadyExist = await Teacherdocs.findOne({Phone})
+    const phoneClean = String(Phone).replace(/[^0-9]/g, '');
+    if (phoneClean.length < 9 || phoneClean.length > 11) {
+        throw new ApiError(400, "Số điện thoại không hợp lệ. Vui lòng nhập từ 9 đến 11 chữ số");
+    }
 
-    if(alreadyExist){
-        throw new ApiError(400, "Phone number already exist")
+    const alreadyExistInTeacher = await Teacherdocs.findOne({Phone: phoneClean});
+    const alreadyExistInStudent = await studentdocs.findOne({Phone: phoneClean});
+
+    if(alreadyExistInTeacher || alreadyExistInStudent){
+        throw new ApiError(400, "Số điện thoại này đã được sử dụng trong hệ thống")
     }
 
     const AadhaarLocalPath = req.files?.Aadhaar?.[0]?.path;
@@ -232,19 +263,19 @@ const addTeacherDetails = asyncHandler(async(req,res)=>{
 
 
     if(!AadhaarLocalPath){
-        throw new ApiError(400, "Aadhaar is required")
+        throw new ApiError(400, "Tệp CCCD / CMND (Aadhaar) là bắt buộc")
     }
     if(!SecondaryLocalPath){
-        throw new ApiError(400, "Secondary marksheet is required")
+        throw new ApiError(400, "Bằng tốt nghiệp / Học bạ THCS là bắt buộc")
     }
     if(!HigherLocalPath){
-        throw new ApiError(400, "Higher marksheet is required")
+        throw new ApiError(400, "Bằng tốt nghiệp / Học bạ THPT là bắt buộc")
     }
     if(!UGLocalPath){
-        throw new ApiError(400, "UG marksheet is required")
+        throw new ApiError(400, "Bằng cử nhân đại học (UG) là bắt buộc")
     }
     if(!PGLocalPath){
-        throw new ApiError(400, "PG marksheet is required")
+        throw new ApiError(400, "Bằng thạc sĩ / chứng chỉ sau đại học (PG) là bắt buộc")
     }
 
 
@@ -254,8 +285,12 @@ const addTeacherDetails = asyncHandler(async(req,res)=>{
     const UG = await uploadOnCloudinary(UGLocalPath)
     const PG = await uploadOnCloudinary(PGLocalPath)
 
+    if (!Aadhaar?.url || !Secondary?.url || !Higher?.url || !UG?.url || !PG?.url) {
+        throw new ApiError(500, "Tải tệp minh chứng lên đám mây thất bại. Vui lòng thử lại.");
+    }
+
     const teacherdetails = await Teacherdocs.create({
-        Phone,
+        Phone: phoneClean,
         Address,
         Experience,
         SecondarySchool,

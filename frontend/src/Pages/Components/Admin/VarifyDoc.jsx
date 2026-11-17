@@ -16,6 +16,11 @@ function VarifyDoc() {
   };
 
   const Approval = async (id, userType, approve, email) => {
+    if ((approve === 'rejected' || approve === 'reupload') && !value.trim()) {
+      toast.error('Vui lòng nhập ghi chú / lý do cụ thể khi từ chối hoặc yêu cầu nộp lại');
+      return;
+    }
+
     try {
       const payload = {
         Isapproved: approve,
@@ -25,6 +30,7 @@ function VarifyDoc() {
 
       const response = await fetch(`/api/admin/${adminID}/approve/${userType}/${id}`, {
         method: 'POST',
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -33,7 +39,8 @@ function VarifyDoc() {
         toast.success(`Đã cập nhật trạng thái hồ sơ: ${approve}`);
         navigate(`/admin/${adminID}`);
       } else {
-        toast.error('Cập nhật trạng thái thất bại');
+        const errData = await response.json().catch(() => ({}));
+        toast.error(errData.message || 'Cập nhật trạng thái thất bại');
       }
     } catch (error) {
       console.error(error.message);

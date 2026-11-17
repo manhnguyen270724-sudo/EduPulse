@@ -4,6 +4,8 @@ import { Notification } from "../models/notification.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import path from "path";
 
 /**
  * Lấy lịch sử tin nhắn của một lớp học
@@ -118,7 +120,55 @@ const sendClassroomMessage = asyncHandler(async (req, res) => {
   );
 });
 
+/**
+ * Tải tệp đính kèm trong phòng chat lớp học
+ */
+const uploadChatAttachment = asyncHandler(async (req, res) => {
+  const { classroomId } = req.params;
+  const currentUser = req.teacher || req.Student;
+
+  if (!currentUser) {
+    throw new ApiError(401, "Yêu cầu đăng nhập");
+  }
+
+  const classroom = await Classroom.findById(classroomId);
+  if (!classroom) {
+    throw new ApiError(404, "Không tìm thấy lớp học");
+  }
+
+  const localFilePath = req.file?.path;
+  if (!localFilePath) {
+    throw new ApiError(400, "Không có tệp nào được tải lên");
+  }
+
+  const originalName = req.file.originalname;
+  const ext = path.extname(originalName).toLowerCase();
+  const dangerousExts = [".exe", ".bat", ".cmd", ".sh", ".js", ".msi", ".vbs", ".scr", ".com"];
+  if (dangerousExts.includes(ext)) {
+    throw new ApiError(400, "Loại tệp này bị cấm vì lý do an toàn bảo mật.");
+  }
+
+  const uploaded = await uploadOnCloudinary(localFilePath, {
+    resource_type: "auto"
+  });
+
+  if (!uploaded || !uploaded.url) {
+    throw new ApiError(500, "Tải tệp đính kèm lên máy chủ thất bại.");
+  }
+
+  const attachment = {
+    name: originalName,
+    url: uploaded.secure_url || uploaded.url,
+    fileType: req.file.mimetype || "application/octet-stream"
+  };
+
+  return res.status(200).json(
+    new ApiResponse(200, attachment, "Tải tệp đính kèm thành công")
+  );
+});
+
 export {
   getClassroomMessages,
-  sendClassroomMessage
+  sendClassroomMessage,
+  uploadChatAttachment
 };

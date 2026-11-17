@@ -61,8 +61,8 @@ function Withdrawal({ onClose, TA }) {
 
   // Xử lý gửi yêu cầu rút tiền
   const handleWithdrawal = async () => {
-    if (!amount || Number(amount) <= 0) {
-      toast.error("Vui lòng nhập số tiền hợp lệ");
+    if (!amount || Number(amount) < 100000) {
+      toast.error("Số tiền rút tối thiểu là 100.000 VNĐ");
       return;
     }
     if (Number(amount) > availableBalance) {
@@ -71,6 +71,12 @@ function Withdrawal({ onClose, TA }) {
     }
     if (!bankName || !accName.trim() || !accNumber.trim()) {
       toast.error("Vui lòng điền đầy đủ thông tin tài khoản ngân hàng");
+      return;
+    }
+
+    const cleanAccNumber = accNumber.trim().replace(/\s/g, '');
+    if (!/^\d{6,20}$/.test(cleanAccNumber)) {
+      toast.error("Số tài khoản ngân hàng không hợp lệ (phải từ 6 đến 20 chữ số)");
       return;
     }
 

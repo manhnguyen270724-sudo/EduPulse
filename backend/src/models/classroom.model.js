@@ -74,7 +74,7 @@ const classroomSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["upcoming", "active", "completed", "cancelled"],
-    default: "active"
+    default: "upcoming"
   },
   description: {
     type: String,

@@ -55,6 +55,16 @@ function CourseCompletionModal({ course, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!feedbackContent.trim()) {
+      toast.error("Vui lòng nhập nhận xét / đánh giá chi tiết về khóa học");
+      return;
+    }
+
+    if (!teachingQualitySatisfaction || teachingQualitySatisfaction < 1 || teachingQualitySatisfaction > 5) {
+      toast.error("Vui lòng chọn mức độ hài lòng về chất lượng giảng dạy (1-5 sao)");
+      return;
+    }
+
     setSubmitting(true);
     try {
       // 1. Gửi form xác nhận kết thúc khóa học

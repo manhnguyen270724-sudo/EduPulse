@@ -44,7 +44,10 @@ function Contact({ isStandalone = false }) {
       });
 
       const response = await data.json();
-      setStatusMsg({ type: 'success', text: response.message || 'Tin nhắn của bạn đã được gửi thành công!' });
+      setStatusMsg({ 
+        type: 'success', 
+        text: 'Cảm ơn bạn! Chúng tôi đã tiếp nhận yêu cầu hỗ trợ và cam kết phản hồi trong vòng 24 giờ làm việc.' 
+      });
       setName('');
       setEmail('');
       setMsg('');

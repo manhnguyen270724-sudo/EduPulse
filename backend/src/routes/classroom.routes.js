@@ -6,6 +6,7 @@ import {
   getClassroomDetails,
   enrollStudentToClassroom,
   addClassroomSession,
+  cancelClassroomSession,
   getTeacherSchedule,
   getStudentSchedule,
   getCourseClassrooms
@@ -33,6 +34,9 @@ router.route("/:classroomId/enroll").post(authSTD, enrollStudentToClassroom);
 
 // Giảng viên thêm buổi học mới
 router.route("/:classroomId/sessions").post(authTeacher, addClassroomSession);
+
+// Giảng viên hủy một buổi học
+router.route("/:classroomId/sessions/:sessionId/cancel").patch(authTeacher, cancelClassroomSession);
 
 // Lịch dạy của giảng viên (tổng hợp các lớp)
 router.route("/schedule/teacher/:teacherId").get(authTeacher, getTeacherSchedule);

@@ -27,7 +27,28 @@ function TeacherCourses() {
         headers: { 'Content-Type': 'application/json' }
       });
       const data = await res.json();
-      setCourses(data.data || []);
+      const rawCourses = data.data || [];
+
+      // Fetch completion statistics for each course
+      const coursesWithStats = await Promise.all(
+        rawCourses.map(async (c) => {
+          try {
+            const statsRes = await fetch(`/api/course/${c._id}/completion-stats`, {
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (statsRes.ok) {
+              const statsData = await statsRes.json();
+              return { ...c, completionStats: statsData.data?.stats };
+            }
+          } catch (e) {
+            // ignore
+          }
+          return c;
+        })
+      );
+
+      setCourses(coursesWithStats);
     } catch (err) {
       console.error('Fetch teacher courses error:', err);
     } finally {
@@ -251,6 +272,24 @@ function TeacherCourses() {
                     <FaUsers style={{ color: 'var(--primary)' }} />
                     <span>Học viên: {enrolledCount} / {maxCount} học sinh</span>
                   </div>
+                  {course.completionStats && (
+                    <div className="tc-card-meta-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                      <div className="flex items-center justify-between w-full text-xs">
+                        <span className="text-slate-400 font-medium">Tỷ lệ xác nhận hoàn thành:</span>
+                        <span className={`font-bold ${course.completionStats.completionRate >= (enrolledCount < 3 ? 100 : 80) ? 'text-emerald-400' : 'text-amber-400'}`}>
+                          {course.completionStats.completionRate}% ({course.completionStats.confirmedCount}/{course.completionStats.totalStudents})
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            course.completionStats.completionRate >= (enrolledCount < 3 ? 100 : 80) ? 'bg-emerald-500' : 'bg-amber-500'
+                          }`}
+                          style={{ width: `${Math.min(100, course.completionStats.completionRate)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                   {course.schedule && course.schedule.length > 0 && (
                     <div className="tc-card-meta-item">
                       <FaCalendarAlt style={{ color: 'var(--warning)' }} />

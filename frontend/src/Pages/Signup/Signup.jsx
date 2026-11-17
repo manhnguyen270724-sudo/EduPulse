@@ -9,6 +9,7 @@ const Signup = () => {
   const [Lastname, setLastName] = useState("");
   const [Email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [userType, setUserType] = useState("student");
   const [err, setErr] = useState("");
@@ -39,6 +40,12 @@ const Signup = () => {
     if (!passwordRegex.test(Password)) {
       newErrors.password =
         "Mật khẩu phải tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&)";
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Vui lòng nhập lại mật khẩu xác nhận";
+    } else if (Password !== confirmPassword) {
+      newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -161,6 +168,19 @@ const Signup = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
               {errors.password && <div className="error-text">{errors.password}</div>}
+            </div>
+
+            {/* Confirm Password Field */}
+            <div className="form-group">
+              <label className="form-label">Xác Nhận Mật Khẩu</label>
+              <input
+                type="password"
+                className="auth-input"
+                placeholder="Nhập lại mật khẩu để xác thực"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              {errors.confirmPassword && <div className="error-text">{errors.confirmPassword}</div>}
             </div>
 
             {/* Error alerts */}

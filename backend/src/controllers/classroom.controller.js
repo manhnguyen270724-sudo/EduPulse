@@ -28,6 +28,15 @@ const createClassroom = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Vui lòng chọn khóa học và nhập tên lớp học");
   }
 
+  // Validate weeklySchedule
+  if (weeklySchedule && Array.isArray(weeklySchedule)) {
+    for (const item of weeklySchedule) {
+      if (item.dayOfWeek === undefined || item.dayOfWeek < 0 || item.dayOfWeek > 6 || !item.startTime || !item.endTime) {
+        throw new ApiError(400, "Lịch học tuần không hợp lệ. Vui lòng kiểm tra lại thứ trong tuần và giờ bắt đầu/kết thúc.");
+      }
+    }
+  }
+
   // Xác thực khóa học thuộc quyền sở hữu của giảng viên
   const foundCourse = await course.findOne({
     _id: courseId,
@@ -269,6 +278,33 @@ const addClassroomSession = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Lớp học không tồn tại hoặc bạn không có quyền chỉnh sửa");
   }
 
+  // Kiểm tra xung đột lịch với các buổi học khác của Giảng viên
+  const targetDateStr = new Date(date).toISOString().split('T')[0];
+  const teacherClasses = await Classroom.find({ teacher: teacher._id });
+  const hasConflict = teacherClasses.some(cls => 
+    (cls.sessions || []).some(ss => {
+      if (ss.status === 'cancelled') return false;
+      const ssDateStr = new Date(ss.date).toISOString().split('T')[0];
+      if (ssDateStr !== targetDateStr) return false;
+
+      const [startH, startM] = (startTime || "19:30").split(':').map(Number);
+      const [endH, endM] = (endTime || "21:00").split(':').map(Number);
+      const newStart = startH * 60 + startM;
+      const newEnd = endH * 60 + endM;
+
+      const [existStartH, existStartM] = (ss.startTime || "19:30").split(':').map(Number);
+      const [existEndH, existEndM] = (ss.endTime || "21:00").split(':').map(Number);
+      const existStart = existStartH * 60 + existStartM;
+      const existEnd = existEndH * 60 + existEndM;
+
+      return (newStart < existEnd && newEnd > existStart);
+    })
+  );
+
+  if (hasConflict) {
+    throw new ApiError(400, "Xung đột lịch: Thầy/Cô đã có một buổi học khác trong khung giờ này!");
+  }
+
   const newSession = {
     title: title.trim(),
     date: new Date(date),
@@ -422,6 +458,51 @@ const getCourseClassrooms = asyncHandler(async (req, res) => {
   );
 });
 
+/**
+ * Giảng viên hủy một buổi học
+ */
+const cancelClassroomSession = asyncHandler(async (req, res) => {
+  const teacher = req.teacher;
+  const { classroomId, sessionId } = req.params;
+  const { reason = "Giảng viên có việc đột xuất" } = req.body;
+
+  const classroom = await Classroom.findOne({
+    _id: classroomId,
+    teacher: teacher._id
+  });
+
+  if (!classroom) {
+    throw new ApiError(404, "Không tìm thấy lớp học hoặc bạn không có quyền");
+  }
+
+  const session = classroom.sessions.id(sessionId);
+  if (!session) {
+    throw new ApiError(404, "Không tìm thấy buổi học");
+  }
+
+  session.status = "cancelled";
+  session.notes = reason ? `Lý do hủy: ${reason}` : session.notes;
+  await classroom.save();
+
+  // Bắn thông báo cho học viên
+  if (classroom.students && classroom.students.length > 0) {
+    const notifications = classroom.students.map(stId => ({
+      recipient: stId,
+      recipientType: "student",
+      title: "Buổi học đã bị hủy",
+      message: `Buổi học "${session.title}" (ngày ${new Date(session.date).toLocaleDateString("vi-VN")}) của lớp "${classroom.className}" đã bị hủy. Lý do: ${reason}.`,
+      type: "class_reminder",
+      relatedClass: classroom._id,
+      link: `/Student/Dashboard/${stId}/Classes`
+    }));
+    await Notification.insertMany(notifications);
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, { session, classroom }, "Hủy buổi học thành công")
+  );
+});
+
 export {
   createClassroom,
   getTeacherClassrooms,
@@ -429,6 +510,7 @@ export {
   getClassroomDetails,
   enrollStudentToClassroom,
   addClassroomSession,
+  cancelClassroomSession,
   getTeacherSchedule,
   getStudentSchedule,
   getCourseClassrooms

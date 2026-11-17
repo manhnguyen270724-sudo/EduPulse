@@ -67,6 +67,14 @@ const courseSchema = new mongoose.Schema({
   },
 
   // === THÔNG TIN KHÓA HỌC ===
+  coverImage: {
+    type: String,
+    default: ''
+  },
+  adminNote: {
+    type: String,
+    default: ''
+  },
   fees: {
     type: Number,
     default: 0  // 0 = miễn phí (beta)

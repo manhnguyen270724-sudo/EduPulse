@@ -6,6 +6,7 @@ import { student, studentdocs } from "../models/student.model.js";
 import { Teacher, Teacherdocs } from "../models/teacher.model.js";
 import { contact } from "../models/contact.model.js";
 import { course } from "../models/course.model.js";
+import { Notification } from "../models/notification.model.js";
 import {Sendmail} from "../utils/Nodemailer.js"
 
 
@@ -381,27 +382,15 @@ const sendmessage = asyncHandler(async(req,res)=>{
 })
 
 const allmessages = asyncHandler(async(req,res)=>{
-    
-    const messages = await contact.find({
-        status:false,
-    }).sort({ _id: -1 });
-    
-    if(!messages){
-        return res
-        .status(200)
-        .json(new ApiResponse(200, {}, "no new messages"))
-    }
+    const messages = await contact.find({}).sort({ _id: -1 });
     
     return res
     .status(200)
-    .json(new ApiResponse(200, messages, "messages fetched"))
+    .json(new ApiResponse(200, messages || [], "messages fetched"))
 })
 
 const readMessage = asyncHandler(async(req,res)=>{
-
-    const messageID = req.body.messageID;
-
-    console.log(messageID);
+    const messageID = req.body.messageID || req.params.id;
 
     const isdone = await contact.findByIdAndUpdate({_id: messageID}, {$set:{status:true}}, {new:true})
 
@@ -413,6 +402,53 @@ const readMessage = asyncHandler(async(req,res)=>{
     .status(200)
     .json( new ApiResponse(200, isdone, "status updated successfully"))
 })
+
+const deleteMessage = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const deleted = await contact.findByIdAndDelete(id);
+    if (!deleted) {
+        throw new ApiError(404, "Không tìm thấy tin nhắn hoặc đã bị xóa");
+    }
+    return res.status(200).json(new ApiResponse(200, deleted, "Xóa tin nhắn thành công"));
+});
+
+const replySupportMessage = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { replyContent, email, name } = req.body;
+
+    if (!replyContent || !replyContent.trim()) {
+        throw new ApiError(400, "Nội dung phản hồi không được để trống");
+    }
+
+    const msg = await contact.findByIdAndUpdate(id, { $set: { status: true } }, { new: true });
+    if (!msg) {
+        throw new ApiError(404, "Không tìm thấy tin nhắn");
+    }
+
+    const recipientEmail = email || msg.email;
+    const recipientName = name || msg.name || "Quý khách";
+
+    if (recipientEmail) {
+        Sendmail(
+            recipientEmail,
+            "EduPulse - Phản hồi yêu cầu hỗ trợ",
+            `<html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <h2 style="color: #0284c7;">Xin chào ${recipientName},</h2>
+                    <p>Cảm ơn bạn đã liên hệ với Ban Quản Trị EduPulse. Chúng tôi xin phản hồi nội dung yêu cầu hỗ trợ của bạn như sau:</p>
+                    <div style="background-color: #f1f5f9; padding: 16px; border-left: 4px solid #0284c7; margin: 16px 0; border-radius: 4px;">
+                        <p style="margin: 0; font-weight: bold; color: #334155;">Nội dung phản hồi:</p>
+                        <p style="margin-top: 8px;">${replyContent.replace(/\n/g, '<br/>')}</p>
+                    </div>
+                    <p>Nếu bạn có thêm câu hỏi, vui lòng gửi phản hồi trực tiếp tới email này hoặc qua trang Liên hệ EduPulse.</p>
+                    <p>Trân trọng,<br/><strong>Đội ngũ Chăm sóc Học viên & Giảng viên EduPulse</strong></p>
+                </body>
+            </html>`
+        );
+    }
+
+    return res.status(200).json(new ApiResponse(200, msg, "Đã gửi email phản hồi thành công"));
+});
 
 const toapproveCourse = asyncHandler(async(req,res)=>{
     const loggedAdmin = req.Admin || (req.params.adminID ? await admin.findById(req.params.adminID) : null);
@@ -444,7 +480,7 @@ const approveCourse = asyncHandler(async(req,res)=>{
     if(toApprove === true || toApprove === 'true' || toApprove === 'approved'){
         const theCourse = await course.findByIdAndUpdate(
             courseID,
-            { $set: { isapproved: true, status: 'active' } },
+            { $set: { isapproved: true, status: 'active', adminNote: req.body.adminNote || 'Khóa học được phê duyệt xuất bản' } },
             { new: true }
         ).populate("enrolledteacher", "Email Firstname Lastname");
 
@@ -454,6 +490,21 @@ const approveCourse = asyncHandler(async(req,res)=>{
 
         const teacherEmail = req.body.email || theCourse.enrolledteacher?.Email;
         const teacherName = req.body.Firstname || theCourse.enrolledteacher?.Firstname || "Giảng viên";
+
+        if (theCourse.enrolledteacher?._id) {
+            try {
+                await Notification.create({
+                    recipient: theCourse.enrolledteacher._id,
+                    recipientType: "teacher",
+                    title: "Khóa học đã được phê duyệt!",
+                    message: `Khóa học "${theCourse.coursename}" của Thầy/Cô đã được Admin phê duyệt và xuất bản công khai.`,
+                    type: "course_approval",
+                    link: `/courses`
+                });
+            } catch (notifErr) {
+                console.warn("Could not create notification for teacher:", notifErr.message);
+            }
+        }
 
         if (teacherEmail) {
             Sendmail(teacherEmail, `EduPulse - Khóa học [${theCourse.coursename}] đã được phê duyệt`, 
@@ -474,7 +525,19 @@ const approveCourse = asyncHandler(async(req,res)=>{
         .json(new ApiResponse(200, theCourse, `Phê duyệt khóa học thành công`));
     }
     else{
-        const theCourse = await course.findByIdAndDelete(courseID).populate("enrolledteacher", "Email Firstname Lastname");
+        const rejectReason = req.body.remarks || req.body.adminNote || "Chưa đạt tiêu chuẩn kiểm duyệt nội dung của EduPulse";
+
+        const theCourse = await course.findByIdAndUpdate(
+            courseID,
+            {
+                $set: {
+                    isapproved: false,
+                    status: 'draft',
+                    adminNote: rejectReason
+                }
+            },
+            { new: true }
+        ).populate("enrolledteacher", "Email Firstname Lastname");
         
         if(!theCourse){
             throw new ApiError(404, "Khóa học không tồn tại");
@@ -483,6 +546,21 @@ const approveCourse = asyncHandler(async(req,res)=>{
         const teacherEmail = req.body.email || theCourse.enrolledteacher?.Email;
         const teacherName = req.body.Firstname || theCourse.enrolledteacher?.Firstname || "Giảng viên";
 
+        if (theCourse.enrolledteacher?._id) {
+            try {
+                await Notification.create({
+                    recipient: theCourse.enrolledteacher._id,
+                    recipientType: "teacher",
+                    title: "Yêu cầu mở khóa học chưa được phê duyệt",
+                    message: `Khóa học "${theCourse.coursename}" đã bị từ chối phê duyệt. Lý do: ${rejectReason}. Khóa học đã chuyển về bản nháp để Thầy/Cô có thể chỉnh sửa và nộp lại.`,
+                    type: "course_approval",
+                    link: `/Teacher/Dashboard/${theCourse.enrolledteacher._id}/Courses`
+                });
+            } catch (notifErr) {
+                console.warn("Could not create notification for teacher:", notifErr.message);
+            }
+        }
+
         if (teacherEmail) {
             Sendmail(teacherEmail, `EduPulse - Thông báo về yêu cầu mở khóa học [${theCourse.coursename}]`, 
                 `<html>
@@ -490,7 +568,8 @@ const approveCourse = asyncHandler(async(req,res)=>{
                     <h1 style="color: #e11d48; text-align: center;">Thông Báo Xét Duyệt Khóa Học</h1>
                     <p style="font-size: 16px;">Kính gửi Thầy/Cô ${teacherName},</p>
                     <p style="font-size: 16px;">Sau khi xem xét kỹ lưỡng, chúng tôi rất tiếc phải thông báo khóa học <strong>${theCourse.coursename}</strong> hiện chưa đáp ứng đầy đủ tiêu chí của nền tảng tại thời điểm này.</p>
-                    <p style="font-size: 16px;">Thầy/Cô có thể cập nhật thông tin và nộp lại yêu cầu mở khóa học mới.</p>
+                    <p style="font-size: 16px;"><strong>Lý do từ chối:</strong> ${rejectReason}</p>
+                    <p style="font-size: 16px;">Khóa học đã được chuyển về trạng thái bản nháp. Thầy/Cô có thể cập nhật thông tin và nộp lại yêu cầu mở khóa học mới.</p>
                     <p style="font-size: 16px;">Trân trọng,<br/><strong>Đội ngũ EduPulse</strong></p>
                     </body>
                 </html>`
@@ -499,11 +578,27 @@ const approveCourse = asyncHandler(async(req,res)=>{
 
         return res
         .status(200)
-        .json(new ApiResponse(200, {}, `Đã từ chối khóa học thành công`));
+        .json(new ApiResponse(200, theCourse, `Đã từ chối khóa học và lưu thành bản nháp`));
     }
     
 
    
 
 })
-export {adminSignUp, adminLogin, forApproval, approveStudent, approveTeacher, checkStudentDocuments, checkTeacherDocuments, adminLogout, sendmessage, allmessages,readMessage, toapproveCourse, approveCourse}
+export {
+    adminSignUp,
+    adminLogin,
+    forApproval,
+    approveStudent,
+    approveTeacher,
+    checkStudentDocuments,
+    checkTeacherDocuments,
+    adminLogout,
+    sendmessage,
+    allmessages,
+    readMessage,
+    deleteMessage,
+    replySupportMessage,
+    toapproveCourse,
+    approveCourse
+}

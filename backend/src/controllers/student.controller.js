@@ -4,7 +4,7 @@ import {student, studentdocs} from "../models/student.model.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import nodemailer from "nodemailer";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { Teacher } from "../models/teacher.model.js";
+import { Teacher, Teacherdocs } from "../models/teacher.model.js";
 import { Sendmail } from "../utils/Nodemailer.js";
 
 
@@ -129,22 +129,40 @@ const signup = asyncHandler(async (req, res) =>{
 })
 
 const mailVerified = asyncHandler(async(req,res)=>{
-        const id = req.query.id;
+    const id = req.query.id;
+    if (!id) {
+        throw new ApiError(400, "Mã xác thực không hợp lệ hoặc thiếu thông tin.");
+    }
 
-        const updatedInfo = await student.updateOne({ _id: id }, { $set: { Isverified: true } });
+    const std = await student.findById(id);
+    if (!std) {
+        throw new ApiError(404, "Không tìm thấy học viên hoặc liên kết xác thực không hợp lệ.");
+    }
 
-        if (updatedInfo.nModified === 0) {
-            throw new ApiError(404, "Student not found or already verified");
-        }
+    if (std.Isverified) {
         return res.send(`
-        <div style="text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif;">
             <img src="https://cdn-icons-png.flaticon.com/128/4436/4436481.png" alt="Verify Email Icon" style="width: 100px; height: 100px;">
-            <h1 style="font-size: 36px; font-weight: bold; padding: 20px;">Email Verified</h1>
-            <h4>Your email address was successfully verified.</h4>
-            <button style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; margin: 20px;" onclick="window.location.href = 'http://localhost:5173';">Go Back Home</button>
+            <h1 style="font-size: 32px; font-weight: bold; padding: 20px; color: #16a34a;">Email đã được xác thực</h1>
+            <h4>Tài khoản của bạn đã được kích hoạt trước đó. Bạn có thể đăng nhập ngay.</h4>
+            <button style="padding: 10px 20px; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 20px;" onclick="window.location.href = 'http://localhost:5173/login';">Về trang Đăng nhập</button>
         </div>
         `);
-} )
+    }
+
+    std.Isverified = true;
+    std.varifyToken = undefined;
+    await std.save({ validateBeforeSave: false });
+
+    return res.send(`
+    <div style="text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif;">
+        <img src="https://cdn-icons-png.flaticon.com/128/4436/4436481.png" alt="Verify Email Icon" style="width: 100px; height: 100px;">
+        <h1 style="font-size: 32px; font-weight: bold; padding: 20px; color: #16a34a;">Xác thực Email thành công!</h1>
+        <h4>Địa chỉ email của bạn đã được xác minh thành công. Chúc bạn có trải nghiệm tuyệt vời cùng EduPulse!</h4>
+        <button style="padding: 10px 20px; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 20px;" onclick="window.location.href = 'http://localhost:5173/login';">Về trang Đăng nhập</button>
+    </div>
+    `);
+});
 
 
 const login = asyncHandler(async(req,res) => {
@@ -167,6 +185,14 @@ const login = asyncHandler(async(req,res) => {
 
     if(!StdLogin.Isverified){
         throw new ApiError(401, "Email is not verified");
+    }
+
+    if (StdLogin.accountStatus === 'suspended') {
+        throw new ApiError(403, `Tài khoản của bạn đang bị tạm khóa. Lý do: ${StdLogin.statusReason || "Vi phạm chính sách nền tảng"}`);
+    }
+
+    if (StdLogin.accountStatus === 'banned') {
+        throw new ApiError(403, `Tài khoản của bạn đã bị cấm vĩnh viễn khỏi hệ thống. Lý do: ${StdLogin.statusReason || "Vi phạm nghiêm trọng điều khoản dịch vụ"}`);
     }
 
     const StdPassCheck = await StdLogin.isPasswordCorrect(Password)
@@ -284,14 +310,20 @@ const addStudentDetails = asyncHandler(async(req, res)=>{
 
     const {Phone, Address, Highesteducation, SecondarySchool, HigherSchool, SecondaryMarks, HigherMarks}  = req.body
 
-    if ([Phone, Address, Highesteducation, SecondarySchool, HigherSchool, SecondaryMarks, HigherMarks].some((field) => field?.trim() === "")) {
-        throw new ApiError(400, "All fields are required");
+    if ([Phone, Address, Highesteducation, SecondarySchool, HigherSchool, SecondaryMarks, HigherMarks].some((field) => String(field ?? "").trim() === "")) {
+        throw new ApiError(400, "Vui lòng điền đầy đủ tất cả các trường thông tin");
     }
 
-    const alreadyExist = await studentdocs.findOne({Phone})
+    const phoneClean = String(Phone).replace(/[^0-9]/g, '');
+    if (phoneClean.length < 9 || phoneClean.length > 11) {
+        throw new ApiError(400, "Số điện thoại không hợp lệ. Vui lòng nhập từ 9 đến 11 chữ số");
+    }
 
-    if(alreadyExist){
-        throw new ApiError(400, "phone number already exists")
+    const alreadyExistInStudent = await studentdocs.findOne({Phone: phoneClean});
+    const alreadyExistInTeacher = await Teacherdocs.findOne({Phone: phoneClean});
+
+    if(alreadyExistInStudent || alreadyExistInTeacher){
+        throw new ApiError(400, "Số điện thoại này đã được sử dụng trong hệ thống");
     }
 
     const AadhaarLocalPath = req.files?.Aadhaar?.[0]?.path;
@@ -301,24 +333,27 @@ const addStudentDetails = asyncHandler(async(req, res)=>{
     const HigherLocalPath = req.files?.Higher?.[0]?.path
 
     if(!AadhaarLocalPath){
-        throw new ApiError(400, "Aadhaar is required")
+        throw new ApiError(400, "Tệp CCCD / CMND (Aadhaar) là bắt buộc");
     }
 
     if(!SecondaryLocalPath){
-        throw new ApiError(400, "Secondary marksheet is required")
+        throw new ApiError(400, "Học bạ / Bằng THCS là bắt buộc");
     }
 
     if(!HigherLocalPath){
-        throw new ApiError(400, "Higher marksheet is required")
+        throw new ApiError(400, "Học bạ / Bằng THPT là bắt buộc");
     }
 
-    const Aadhaar = await uploadOnCloudinary(AadhaarLocalPath)
-    const Secondary = await uploadOnCloudinary(SecondaryLocalPath)
+    const Aadhaar = await uploadOnCloudinary(AadhaarLocalPath);
+    const Secondary = await uploadOnCloudinary(SecondaryLocalPath);
+    const Higher = await uploadOnCloudinary(HigherLocalPath);
 
-    const Higher = await uploadOnCloudinary(HigherLocalPath)
+    if (!Aadhaar?.url || !Secondary?.url || !Higher?.url) {
+        throw new ApiError(500, "Tải tệp minh chứng lên đám mây thất bại. Vui lòng kiểm tra lại định dạng tệp.");
+    }
 
     const studentdetails = await studentdocs.create({
-        Phone,
+        Phone: phoneClean,
         Address,
         Highesteducation,
         SecondarySchool,

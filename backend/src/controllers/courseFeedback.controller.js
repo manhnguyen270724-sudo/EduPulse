@@ -140,7 +140,8 @@ export const getCourseCompletionStats = asyncHandler(async (req, res) => {
     totalStudents > 0 ? Math.round((confirmedCount / totalStudents) * 100) : 100;
 
   // Điều kiện để được phép gửi yêu cầu nghiệm thu lên Admin: >= 80% (hoặc 100% nếu dưới 3 học viên)
-  const isEligibleForApproval = totalStudents === 0 || completionRate >= 80;
+  const requiredRate = totalStudents < 3 ? 100 : 80;
+  const isEligibleForApproval = totalStudents === 0 || completionRate >= requiredRate;
 
   return res.status(200).json(
     new ApiResponse(
@@ -192,12 +193,14 @@ export const requestCourseCompletionByTeacher = asyncHandler(async (req, res) =>
   const completionRate =
     totalStudents > 0 ? (confirmedCount / totalStudents) * 100 : 100;
 
-  if (totalStudents > 0 && completionRate < 80) {
+  const requiredRate = totalStudents < 3 ? 100 : 80;
+
+  if (totalStudents > 0 && completionRate < requiredRate) {
     throw new ApiError(
       400,
-      `Tỷ lệ học viên hoàn thành form xác nhận mới đạt ${Math.round(
+      `Tỷ lệ học viên xác nhận hoàn thành hiện đạt ${Math.round(
         completionRate
-      )}% (Yêu cầu tối thiểu 80%). Thầy/Cô hãy nhắc nhở học viên điền form xác nhận trước khi gửi yêu cầu.`
+      )}% (${confirmedCount}/${totalStudents} học viên). Yêu cầu tối thiểu là ${requiredRate}% (${totalStudents < 3 ? "100% đối với lớp dưới 3 học viên" : "80% đối với lớp từ 3 học viên trở lên"}). Thầy/Cô hãy nhắc nhở học viên điền form xác nhận trước khi gửi yêu cầu nghiệm thu.`
     );
   }
 

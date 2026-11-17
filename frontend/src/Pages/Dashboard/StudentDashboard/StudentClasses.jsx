@@ -20,6 +20,19 @@ function StudentClasses() {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState('');
 
+  const isSessionJoinable = (s) => {
+    if (s.status === 'cancelled') return false;
+    if (!s.date) return true;
+    const now = new Date();
+    const sessionDate = new Date(s.date);
+    if (s.startTime) {
+      const [h, m] = s.startTime.split(':').map(Number);
+      sessionDate.setHours(h || 0, m || 0, 0, 0);
+    }
+    const diffMinutes = (sessionDate - now) / (1000 * 60);
+    return diffMinutes <= 30 && diffMinutes >= -180;
+  };
+
   const fetchSchedule = async () => {
     try {
       // 1. Thử lấy lịch từ Classroom system mới
@@ -145,6 +158,7 @@ function StudentClasses() {
             <div className="tclass-list">
               {upcomingSessions.map((session, idx) => {
                 const is1on1 = session.classType === 'one-on-one';
+                const isJoinable = isSessionJoinable(session);
 
                 return (
                   <div key={idx} className="tclass-item">
@@ -181,8 +195,8 @@ function StudentClasses() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                      <span className="tclass-status-badge">
-                        {session.status === 'upcoming' ? 'Sắp diễn ra' : session.status}
+                      <span className={`tclass-status-badge ${session.status === 'cancelled' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : ''}`}>
+                        {session.status === 'cancelled' ? 'Đã hủy' : session.status === 'upcoming' ? 'Sắp diễn ra' : session.status}
                       </span>
 
                       <div className="flex items-center gap-2">
@@ -196,17 +210,27 @@ function StudentClasses() {
                           </NavLink>
                         )}
 
-                        {session.roomLink && (
-                          <a
-                            href={session.roomLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-sky-400 hover:underline flex items-center gap-1 font-medium bg-sky-500/10 px-2.5 py-1.5 rounded-lg border border-sky-500/20"
-                          >
-                            <FaVideo />
-                            <span>Vào Meet</span>
-                            <FaExternalLinkAlt style={{ fontSize: '0.65rem' }} />
-                          </a>
+                        {session.roomLink && session.status !== 'cancelled' && (
+                          isJoinable ? (
+                            <a
+                              href={session.roomLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-white bg-emerald-600 hover:bg-emerald-500 flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg shadow-sm transition-all"
+                            >
+                              <FaVideo />
+                              <span>Vào Meet</span>
+                              <FaExternalLinkAlt style={{ fontSize: '0.65rem' }} />
+                            </a>
+                          ) : (
+                            <span
+                              className="text-xs text-slate-400 bg-slate-800/60 px-2.5 py-1.5 rounded-lg border border-slate-700/40 flex items-center gap-1 cursor-not-allowed"
+                              title="Phòng học sẽ mở trước 30 phút so với giờ bắt đầu"
+                            >
+                              <FaVideo />
+                              <span>Chưa Đến Giờ</span>
+                            </span>
+                          )
                         )}
                       </div>
                     </div>

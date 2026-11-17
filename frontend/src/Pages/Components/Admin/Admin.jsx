@@ -75,6 +75,9 @@ const Admin = () => {
   const [pendingCourses, setPendingCourses] = useState([]);
   const [loadingCompletion, setLoadingCompletion] = useState(false);
   const [approvingCourseId, setApprovingCourseId] = useState(null);
+  const [feedbackModalCourse, setFeedbackModalCourse] = useState(null);
+  const [courseFeedbacks, setCourseFeedbacks] = useState([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
 
   // ── 2b. NEW COURSE REQUESTS (DUYỆT YÊU CẦU MỞ KHÓA HỌC MỚI) ──
   const [courseRequests, setCourseRequests] = useState([]);
@@ -309,15 +312,19 @@ const Admin = () => {
     }
   };
 
-  // Duyệt nghiệm thu khóa học đã hoàn thành -> Mở khóa tiền cho GV rút
-  const handleApproveCompletion = async (courseId) => {
-    if (
-      !window.confirm(
-        "Bạn có chắc chắn muốn PHÊ DUYỆT HOÀN THÀNH cho khóa học này? Tiền học phí sẽ được mở khóa vào ví để giảng viên rút tiền."
-      )
-    ) {
+  // Duyệt nghiệm thu khóa học đã hoàn thành -> Mở khóa tiền cho GV rút hoặc Từ chối
+  const handleApproveCompletion = async (courseId, action = "approve") => {
+    const adminNote = window.prompt(
+      action === "approve"
+        ? "Nhập ghi chú phê duyệt nghiệm thu (tùy chọn):"
+        : "Nhập lý do từ chối nghiệm thu hoàn thành khóa học (bắt buộc):"
+    );
+    if (adminNote === null) return;
+    if (action === "reject" && !adminNote.trim()) {
+      toast.error("Vui lòng nhập lý do từ chối nghiệm thu khóa học!");
       return;
     }
+
     setApprovingCourseId(courseId);
     try {
       const res = await fetch(
@@ -326,17 +333,88 @@ const Admin = () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action,
+            adminNote: adminNote.trim() || (action === "approve" ? "Đạt tiêu chuẩn nghiệm thu hoàn thành" : "")
+          })
         }
       );
       const resData = await res.json();
-      if (!res.ok) throw new Error(resData.message || "Phê duyệt thất bại");
-      toast.success("Đã phê duyệt nghiệm thu khóa học thành công!");
+      if (!res.ok) throw new Error(resData.message || "Xử lý nghiệm thu thất bại");
+      toast.success(action === "approve" ? "Đã phê duyệt nghiệm thu khóa học thành công!" : "Đã từ chối nghiệm thu khóa học!");
       fetchCompletionPending();
       fetchRevenue();
     } catch (err) {
       toast.error(err.message);
     } finally {
       setApprovingCourseId(null);
+    }
+  };
+
+  // Xem chi tiết phản hồi học viên của khóa học
+  const handleViewFeedbacks = async (c) => {
+    setFeedbackModalCourse(c);
+    setLoadingFeedbacks(true);
+    try {
+      const res = await fetch(`/api/course/${c._id}/completion-stats`, {
+        credentials: "include"
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCourseFeedbacks(data.data?.feedbacks || []);
+      } else {
+        toast.error("Không thể tải danh sách phản hồi của khóa học");
+      }
+    } catch (e) {
+      toast.error("Lỗi khi tải chi tiết phản hồi học viên");
+    } finally {
+      setLoadingFeedbacks(false);
+    }
+  };
+
+  // Xóa tin nhắn hỗ trợ
+  const handleDeleteMessage = async (msgId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa tin nhắn liên hệ này không?")) return;
+    try {
+      const res = await fetch(`/api/admin/message/${msgId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        toast.success("Đã xóa tin nhắn thành công!");
+        setAllMsg((prev) => prev.filter((m) => m._id !== msgId));
+      } else {
+        toast.error("Xóa tin nhắn thất bại");
+      }
+    } catch (e) {
+      toast.error("Lỗi kết nối khi xóa tin nhắn");
+    }
+  };
+
+  // Phản hồi tin nhắn hỗ trợ qua email
+  const handleReplyMessage = async (msg) => {
+    const replyContent = window.prompt(`Nhập nội dung email phản hồi gửi tới ${msg.email}:`);
+    if (!replyContent || !replyContent.trim()) return;
+
+    try {
+      const res = await fetch(`/api/admin/message/${msg._id}/reply`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          replyContent: replyContent.trim(),
+          email: msg.email,
+          name: msg.name
+        })
+      });
+      if (res.ok) {
+        toast.success("Đã gửi email phản hồi thành công!");
+        setAllMsg((prev) => prev.map((m) => (m._id === msg._id ? { ...m, status: true } : m)));
+      } else {
+        toast.error("Gửi phản hồi thất bại");
+      }
+    } catch (e) {
+      toast.error("Lỗi kết nối khi gửi phản hồi");
     }
   };
 
@@ -376,6 +454,10 @@ const Admin = () => {
   // Tạm dừng khóa học & Gửi email cảnh báo
   const handleSuspendCourse = async () => {
     if (!selectedCourseToSuspend) return;
+    if (!suspendReason.trim()) {
+      toast.error("Vui lòng nhập lý do cụ thể khi tạm dừng khóa học!");
+      return;
+    }
     try {
       const res = await fetch(
         `/api/admin/courses/${selectedCourseToSuspend._id}/suspend-warning`,
@@ -384,7 +466,7 @@ const Admin = () => {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            reason: suspendReason,
+            reason: suspendReason.trim(),
             action: "suspend",
           }),
         }
@@ -437,6 +519,10 @@ const Admin = () => {
   // Ban / Unban / Suspended User
   const handleToggleUserStatus = async () => {
     if (!statusModalUser) return;
+    if ((newStatusChoice === 'suspended' || newStatusChoice === 'banned') && !statusReason.trim()) {
+      toast.error("Vui lòng nhập lý do cụ thể khi tạm khóa hoặc cấm tài khoản người dùng!");
+      return;
+    }
     try {
       const res = await fetch(
         `/api/admin/users/${statusModalUser.role}/${statusModalUser._id}/status`,
@@ -446,7 +532,7 @@ const Admin = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             status: newStatusChoice,
-            reason: statusReason,
+            reason: statusReason.trim(),
           }),
         }
       );
@@ -982,70 +1068,103 @@ const Admin = () => {
                         <tr>
                           <th>Khóa Học</th>
                           <th>Giảng Viên</th>
-                          <th>Học Viên</th>
+                          <th>Tỷ Lệ Hoàn Thành</th>
                           <th>Số Tiền Ký Quỹ</th>
-                          <th>Đánh Giá Học Viên</th>
-                          <th>Thao Tác</th>
+                          <th>Đánh Giá & Nhận Xét</th>
+                          <th>Thao Tác Xử Lý</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {pendingCourses.map((c) => (
-                          <tr key={c._id}>
-                            <td>
-                              <div className="font-bold text-[var(--text-main)]">
-                                {c.courseName}
-                              </div>
-                              <div className="text-xs text-[var(--text-muted)]">
-                                ID: {c._id}
-                              </div>
-                            </td>
-                            <td>
-                              <div className="font-medium text-[var(--text-main)]">
-                                {c.teacherId?.Firstname} {c.teacherId?.Lastname}
-                              </div>
-                              <div className="text-xs text-[var(--text-muted)]">
-                                {c.teacherId?.Email}
-                              </div>
-                            </td>
-                            <td>
-                              <div className="font-medium text-[var(--text-main)]">
-                                {c.studentId?.Firstname} {c.studentId?.Lastname}
-                              </div>
-                              <div className="text-xs text-[var(--text-muted)]">
-                                {c.studentId?.Email}
-                              </div>
-                            </td>
-                            <td>
-                              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
-                                {(c.price || 0).toLocaleString("vi-VN")}đ
-                              </span>
-                            </td>
-                            <td>
-                              <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
-                                <FaStar />
-                                <span>{c.studentRating || 5}/5 sao</span>
-                              </div>
-                              <div className="text-xs text-[var(--text-muted)] italic max-w-xs truncate">
-                                "{c.studentFeedback || "Đã học đủ các buổi và hài lòng"}"
-                              </div>
-                            </td>
-                            <td>
-                              <button
-                                onClick={() => handleApproveCompletion(c._id)}
-                                disabled={approvingCourseId === c._id}
-                                className="ap-btn-primary"
-                                style={{ padding: "6px 14px", fontSize: "0.78rem" }}
-                              >
-                                {approvingCourseId === c._id ? (
-                                  <FaSpinner className="animate-spin mr-1" />
-                                ) : (
-                                  <FaCheckCircle className="mr-1" />
-                                )}
-                                Phê Duyệt Nghiệm Thu
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {pendingCourses.map((c) => {
+                          const rate = c.stats?.completionRate ?? (c.completionRate ?? 100);
+                          const total = c.stats?.totalEnrolled ?? (c.enrolledStudent?.length ?? 1);
+                          const confirmed = c.stats?.confirmedFeedbackCount ?? (c.confirmedCount ?? total);
+                          const isEligible = c.stats?.canApprove ?? (rate >= (total < 3 ? 100 : 80));
+
+                          return (
+                            <tr key={c._id}>
+                              <td>
+                                <div className="font-bold text-[var(--text-main)]">
+                                  {c.courseName || c.coursename || c.subject}
+                                </div>
+                                <div className="text-xs text-[var(--text-muted)]">
+                                  ID: {c._id}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="font-medium text-[var(--text-main)]">
+                                  {c.teacherId?.Firstname || c.enrolledteacher?.Firstname} {c.teacherId?.Lastname || c.enrolledteacher?.Lastname}
+                                </div>
+                                <div className="text-xs text-[var(--text-muted)]">
+                                  {c.teacherId?.Email || c.enrolledteacher?.Email}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-bold text-xs ${isEligible ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                      {rate}% ({confirmed}/{total} HV)
+                                    </span>
+                                  </div>
+                                  <div className="w-28 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full ${isEligible ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                                      style={{ width: `${Math.min(100, rate)}%` }}
+                                    />
+                                  </div>
+                                  <button
+                                    onClick={() => handleViewFeedbacks(c)}
+                                    className="text-[11px] text-sky-400 hover:underline block pt-0.5"
+                                  >
+                                    Xem phản hồi học viên
+                                  </button>
+                                </div>
+                              </td>
+                              <td>
+                                <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
+                                  {(c.price || c.fees || 0).toLocaleString("vi-VN")}đ
+                                </span>
+                              </td>
+                              <td>
+                                <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
+                                  <FaStar />
+                                  <span>{c.studentRating || c.ratingStats?.averageRating || 5}/5 sao</span>
+                                </div>
+                                <div className="text-xs text-[var(--text-muted)] italic max-w-xs truncate">
+                                  "{c.studentFeedback || "Đã học đủ các buổi và hài lòng"}"
+                                </div>
+                              </td>
+                              <td>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleApproveCompletion(c._id, "approve")}
+                                    disabled={approvingCourseId === c._id}
+                                    className="ap-btn-primary"
+                                    style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                                    title="Phê duyệt nghiệm thu và mở khóa rút tiền"
+                                  >
+                                    {approvingCourseId === c._id ? (
+                                      <FaSpinner className="animate-spin mr-1" />
+                                    ) : (
+                                      <FaCheckCircle className="mr-1" />
+                                    )}
+                                    Duyệt
+                                  </button>
+                                  <button
+                                    onClick={() => handleApproveCompletion(c._id, "reject")}
+                                    disabled={approvingCourseId === c._id}
+                                    className="ap-btn-secondary text-rose-500 hover:bg-rose-500/10"
+                                    style={{ padding: "6px 10px", fontSize: "0.78rem" }}
+                                    title="Từ chối nghiệm thu hoàn thành"
+                                  >
+                                    <FaTimesCircle className="mr-1" />
+                                    Từ Chối
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1659,18 +1778,57 @@ const Admin = () => {
                     {allmsg.map((msg, idx) => (
                       <div
                         key={idx}
-                        className="p-4 bg-[var(--bg-surface-secondary)] rounded-xl border border-[var(--card-border)]"
+                        className="p-4 bg-[var(--bg-surface-secondary)] rounded-xl border border-[var(--card-border)] space-y-3"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="font-bold text-[var(--text-main)]">
-                            {msg.name}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-[var(--text-main)]">
+                              {msg.name}
+                            </span>
+                            <span className="text-xs text-[var(--primary)] font-mono">
+                              {msg.email}
+                            </span>
                           </div>
-                          <span className="text-xs text-[var(--primary)] font-mono">
-                            {msg.email}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                              msg.status
+                                ? 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30'
+                                : 'bg-amber-500/15 text-amber-500 border border-amber-500/30'
+                            }`}>
+                              {msg.status ? '✓ Đã Phản Hồi' : '⏳ Chưa Xử Lý'}
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-sm text-[var(--text-main)] bg-[var(--card-bg)] p-3 rounded-lg border border-[var(--card-border)]">
+
+                        <div className="text-sm text-[var(--text-main)] bg-[var(--card-bg)] p-3 rounded-lg border border-[var(--card-border)] leading-relaxed">
                           {msg.message}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-xs text-[var(--text-muted)]">
+                            {msg.createdAt ? new Date(msg.createdAt).toLocaleString('vi-VN') : ''}
+                          </span>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleReplyMessage(msg)}
+                              className="ap-btn-primary"
+                              style={{ padding: "5px 12px", fontSize: "0.75rem" }}
+                              title="Gửi email phản hồi cho người dùng"
+                            >
+                              <FaEnvelope className="mr-1" />
+                              <span>Phản Hồi Email</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteMessage(msg._id)}
+                              className="ap-btn-secondary text-rose-500 hover:bg-rose-500/10"
+                              style={{ padding: "5px 10px", fontSize: "0.75rem" }}
+                              title="Xóa tin nhắn này"
+                            >
+                              <FaTimesCircle className="mr-1" />
+                              <span>Xóa</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1883,6 +2041,77 @@ const Admin = () => {
                 className="ap-btn-primary flex-1 justify-center"
               >
                 Lưu Thay Đổi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* =================================================================== */}
+      {/* MODAL 4: CHI TIẾT PHẢN HỒI HỌC VIÊN CỦA KHÓA HỌC */}
+      {/* =================================================================== */}
+      {feedbackModalCourse && (
+        <div className="ap-modal-backdrop">
+          <div className="ap-modal-card" style={{ maxWidth: 680, maxHeight: '85vh', overflowY: 'auto' }}>
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)] mb-4">
+              <div>
+                <h3 className="ap-modal-title">Phản Hồi Nghiệm Thu Khóa Học</h3>
+                <p className="ap-modal-desc font-semibold text-sky-400">
+                  {feedbackModalCourse.courseName || feedbackModalCourse.coursename || feedbackModalCourse.subject}
+                </p>
+              </div>
+              <button
+                onClick={() => setFeedbackModalCourse(null)}
+                className="text-[var(--text-muted)] hover:text-white p-1"
+              >
+                <FaTimesCircle size={18} />
+              </button>
+            </div>
+
+            {loadingFeedbacks ? (
+              <div className="py-8 text-center text-sm text-[var(--text-muted)] flex items-center justify-center gap-2">
+                <FaSpinner className="animate-spin" /> Đang tải danh sách phản hồi...
+              </div>
+            ) : courseFeedbacks.length === 0 ? (
+              <div className="py-8 text-center text-sm text-[var(--text-muted)]">
+                Chưa có học viên nào gửi biểu mẫu xác nhận hoàn thành cho khóa học này.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {courseFeedbacks.map((fb, idx) => (
+                  <div key={idx} className="p-3 bg-[var(--bg-surface-secondary)] rounded-xl border border-[var(--card-border)] space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[var(--text-main)]">
+                        {fb.studentId?.Firstname} {fb.studentId?.Lastname} ({fb.studentId?.Email})
+                      </span>
+                      <span className={`px-2 py-0.5 rounded font-bold ${fb.isConfirmedEndCourse ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-300'}`}>
+                        {fb.isConfirmedEndCourse ? '✓ Đã xác nhận kết thúc' : 'Chưa xác nhận'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-slate-300">
+                      <div>Chất lượng giảng dạy: <strong className="text-amber-400">{fb.teachingQualitySatisfaction || 5}/5 ★</strong></div>
+                      <div>Mức độ tham gia: <strong className="text-sky-400">{fb.attendanceSatisfaction || 5}/5 ★</strong></div>
+                    </div>
+                    {fb.feedbackContent && (
+                      <div className="p-2 bg-[var(--card-bg)] rounded border border-[var(--card-border)] text-slate-300">
+                        <span className="font-semibold text-slate-400">Nhận xét:</span> "{fb.feedbackContent}"
+                      </div>
+                    )}
+                    {fb.issuesReported && (
+                      <div className="p-2 bg-rose-500/10 rounded border border-rose-500/20 text-rose-300">
+                        <span className="font-semibold">Vấn đề phản ánh:</span> "{fb.issuesReported}"
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-4 pt-3 border-t border-[var(--card-border)] flex justify-end">
+              <button
+                onClick={() => setFeedbackModalCourse(null)}
+                className="ap-btn-secondary"
+              >
+                Đóng
               </button>
             </div>
           </div>

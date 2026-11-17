@@ -6,6 +6,12 @@ import './Popup.css';
 
 function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
   const [desc, setDesc] = useState('');
+  const [fees, setFees] = useState(500000);
+  const [coverImage, setCoverImage] = useState('');
+  const [syllabus, setSyllabus] = useState([
+    { chapter: 'Chương 1: Tổng quan và Khái niệm nền tảng', content: 'Giới thiệu về mục tiêu môn học và các nguyên lý cơ bản.' },
+    { chapter: 'Chương 2: Kiến thức chuyên sâu & Thực hành', content: 'Thực hành các dạng bài tập thực tiễn và bài học chuyên sâu.' }
+  ]);
   const [outcomes, setOutcomes] = useState(['']);
   const [prerequisites, setPrerequisites] = useState('');
   const [maxStudents, setMaxStudents] = useState(20);
@@ -63,6 +69,10 @@ function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
   const removeOutcome = (i) => setOutcomes(prev => prev.filter((_, idx) => idx !== i));
   const updateOutcome = (i, val) => setOutcomes(prev => prev.map((o, idx) => idx === i ? val : o));
 
+  const addSyllabusChapter = () => setSyllabus(prev => [...prev, { chapter: `Chương ${prev.length + 1}: `, content: '' }]);
+  const removeSyllabusChapter = (idx) => setSyllabus(prev => prev.filter((_, i) => i !== idx));
+  const updateSyllabusChapter = (idx, field, val) => setSyllabus(prev => prev.map((item, i) => i === idx ? { ...item, [field]: val } : item));
+
   const addCourse = async () => {
     const selectedDays = Object.keys(day)
       .filter(d => day[d])
@@ -97,11 +107,13 @@ function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
       educationLevel: educationLevel || 'university',
       grade: grade || '',
       subject: subject,
-      fees: 0,
+      fees: Number(fees) >= 0 ? Number(fees) : 0,
+      coverImage: coverImage.trim(),
       maxStudents: parseInt(maxStudents, 10),
       startDate: startDate || null,
       outcomes: outcomes.filter(o => o.trim()),
       prerequisites: prerequisites.trim(),
+      syllabus: syllabus.filter(s => s.chapter && s.chapter.trim()),
     };
 
     try {
@@ -160,6 +172,33 @@ function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
               onChange={e => setDesc(e.target.value)}
               rows={4}
             />
+          </div>
+
+          {/* 2-column row: Fees & Cover Image */}
+          <div className="popup-row-2">
+            <div className="popup-field">
+              <label className="edu-label">Học phí (VNĐ) <span className="popup-required">*</span></label>
+              <input
+                type="number"
+                className="edu-input"
+                value={fees}
+                onChange={e => setFees(e.target.value)}
+                min={0}
+                step={50000}
+                placeholder="500000"
+              />
+              <span className="text-xs text-[var(--text-muted)] mt-1 block">Nhập 0 nếu là khóa học miễn phí</span>
+            </div>
+            <div className="popup-field">
+              <label className="edu-label">URL Ảnh bìa khóa học (Tùy chọn)</label>
+              <input
+                type="url"
+                className="edu-input"
+                placeholder="https://images.unsplash.com/..."
+                value={coverImage}
+                onChange={e => setCoverImage(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* 2-column row */}
@@ -227,6 +266,49 @@ function Popup({ onClose, subject, subjectLabel, educationLevel, grade }) {
               onClick={addOutcome}
             >
               <FaPlus /> Thêm mục tiêu
+            </button>
+          </div>
+
+          {/* Đề cương giáo trình (Syllabus) */}
+          <div className="popup-field">
+            <label className="edu-label">Đề cương giáo trình chi tiết (Syllabus)</label>
+            <p className="popup-field-note">Phân chia nội dung học tập theo từng chương hoặc mô-đun bài học.</p>
+            {syllabus.map((syl, i) => (
+              <div key={i} className="mb-3 p-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <input
+                    type="text"
+                    className="edu-input font-medium"
+                    placeholder={`Tiêu đề chương (vd: Chương ${i + 1}: ...)`}
+                    value={syl.chapter}
+                    onChange={e => updateSyllabusChapter(i, 'chapter', e.target.value)}
+                  />
+                  {syllabus.length > 1 && (
+                    <button
+                      type="button"
+                      className="popup-remove-btn text-rose-500"
+                      onClick={() => removeSyllabusChapter(i)}
+                      title="Xóa chương này"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  className="edu-input text-sm"
+                  rows={2}
+                  placeholder="Tóm tắt nội dung chi tiết bài học..."
+                  value={syl.content}
+                  onChange={e => updateSyllabusChapter(i, 'content', e.target.value)}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              className="popup-add-outcome-btn"
+              onClick={addSyllabusChapter}
+            >
+              <FaPlus /> Thêm chương giáo trình
             </button>
           </div>
 
